@@ -279,12 +279,10 @@
                     const settings = docSnap.data();
                     areValuesHidden = settings.areValuesHidden || false;
                 } else {
-                    // If no settings exist, create with default
                     setDoc(settingsDocRef, { areValuesHidden: false });
                     areValuesHidden = false;
                 }
                 updateVisibilityButton();
-                // Re-render all components if data is already loaded
                 if (Object.keys(allData).length > 0) {
                     renderAllComponents(currentYear);
                 }
@@ -326,6 +324,12 @@
                 batch.set(doc(earningsCol, year), yearData);
             }
             await batch.commit();
+        }
+
+        // --- FIX: Added missing function ---
+        async function createNewYearData(year) {
+            const collectionPath = `earnings_modern/${userId}/years`;
+            await setDoc(doc(db, collectionPath, year), {});
         }
 
         function populateYearSelector() {
@@ -423,7 +427,6 @@
         async function toggleVisibility() {
             if (!userId) return;
             const settingsDocRef = doc(db, `user_settings/${userId}`);
-            // Set the new value in Firestore. The onSnapshot listener will handle the UI update.
             await setDoc(settingsDocRef, { areValuesHidden: !areValuesHidden }, { merge: true });
         }
 
@@ -507,16 +510,22 @@
         
         ui.addYearBtn.addEventListener('click', async () => {
             pushToHistory();
-            const newYear = (Math.max(...Object.keys(allData).map(Number)) + 1).toString();
+            const existingYears = Object.keys(allData).map(Number);
+            const newYear = (existingYears.length > 0 ? Math.max(...existingYears) + 1 : new Date().getFullYear()).toString();
+            
             if (allData[newYear]) return;
+            
             currentYear = newYear;
             await createNewYearData(newYear);
         });
 
         ui.deleteYearBtn.addEventListener('click', async () => {
-            pushToHistory();
             const yearToDelete = ui.yearSelector.value;
-            if (Object.keys(allData).length <= 1) return;
+            if (Object.keys(allData).length <= 1) {
+                console.log("Cannot delete the last year.");
+                return;
+            }
+            pushToHistory();
             const collectionPath = `earnings_modern/${userId}/years`;
             await deleteDoc(doc(db, collectionPath, yearToDelete));
         });
