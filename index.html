@@ -112,10 +112,30 @@
         <!-- Summary Cards -->
         <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
 
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div class="main-card lg:col-span-3">
+                <div class="p-6">
+                    <div id="loader"></div>
+                    <table class="w-full border-collapse hidden" id="earnings-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                        <tfoot></tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="main-card lg:col-span-2">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold text-gray-100">Comparativa Anual</h2>
+                    <div class="relative h-80 mt-4"><canvas id="comparisonChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Currency Converter -->
-        <div class="main-card mb-6">
+        <div class="main-card mt-6">
             <div class="p-6">
-                <h2 class="text-xl font-bold text-gray-100 mb-4">Conversor de Divisas (Base: USD)</h2>
+                <h2 class="text-xl font-bold text-gray-100 mb-4">Conversor de Divisas</h2>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div class="md:col-span-1">
                         <label for="usd-amount" class="block text-sm font-medium text-gray-400">Monto en USD</label>
@@ -139,25 +159,6 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div class="main-card lg:col-span-3">
-                <div class="p-6">
-                    <div id="loader"></div>
-                    <table class="w-full border-collapse hidden" id="earnings-table">
-                        <thead></thead>
-                        <tbody></tbody>
-                        <tfoot></tfoot>
-                    </table>
-                </div>
-            </div>
-            <div class="main-card lg:col-span-2">
-                <div class="p-6">
-                    <h2 class="text-xl font-bold text-gray-100">Comparativa Anual</h2>
-                    <div class="relative h-80 mt-4"><canvas id="comparisonChart"></canvas></div>
-                </div>
-            </div>
-        </div>
         <div id="user-info" class="mt-6 text-center text-xs text-gray-500"></div>
     </div>
 
