@@ -83,11 +83,17 @@
     <div id="app-container" class="max-w-6xl mx-auto hidden">
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-            <div>
-                <h1 class="text-3xl font-extrabold text-gray-100">Dashboard Intercambio de Divisas</h1>
-                <p class="text-gray-400 mt-1">Análisis de rendimiento financiero en tiempo real.</p>
+            <div class="flex items-center gap-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-400" fill="currentColor" viewBox="0 0 32 32">
+                    <path d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zM12.438 8h6.526c1.333 0 2.526.544 3.395 1.412s1.412 2.061 1.412 3.395c0 1.333-.544 2.526-1.412 3.395s-2.061 1.412-3.395 1.412h-2.965v5.386h-3.561V8zm3.561 8.211h2.386c.649 0 1.228-.246 1.649-.667s.667-.982.667-1.649c0-.649-.246-1.228-.667-1.649s-.982-.667-1.649-.667h-2.386v4.632z"/>
+                </svg>
+                <div>
+                    <h1 class="text-3xl font-extrabold text-gray-100">Dashboard Intercambio de Divisas</h1>
+                    <p class="text-gray-400 mt-1">Análisis de rendimiento financiero en tiempo real.</p>
+                </div>
             </div>
             <div class="flex items-center gap-2 mt-4 sm:mt-0">
+                <select id="currency-selector" class="p-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"></select>
                 <select id="year-selector" class="p-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"></select>
                 <button id="add-year-btn" title="Añadir nuevo año" class="p-2 bg-green-500 text-white rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-gray-800">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -155,6 +161,7 @@
         let unsubscribe;
         let allData = {};
         let currentYear;
+        let currentCurrency = '$';
         let comparisonChart;
 
         const ui = {
@@ -169,6 +176,7 @@
             loader: document.getElementById('loader'),
             earningsTable: document.getElementById('earnings-table'),
             yearSelector: document.getElementById('year-selector'),
+            currencySelector: document.getElementById('currency-selector'),
             addYearBtn: document.getElementById('add-year-btn'),
             deleteYearBtn: document.getElementById('delete-year-btn'),
             chartCanvas: document.getElementById('comparisonChart').getContext('2d'),
@@ -213,6 +221,7 @@
         
         // App Logic
         async function initApp() {
+            loadCurrencyPreference();
             if (unsubscribe) unsubscribe();
             const collectionPath = `earnings_modern/${userId}/years`;
             const earningsCol = collection(db, collectionPath);
@@ -261,6 +270,19 @@
             const years = Object.keys(allData).sort((a, b) => b - a);
             ui.yearSelector.innerHTML = years.map(year => `<option value="${year}">${year}</option>`).join('');
         }
+        
+        function loadCurrencyPreference() {
+            const savedCurrency = localStorage.getItem(`currency_${userId}`);
+            if(savedCurrency) {
+                currentCurrency = savedCurrency;
+            }
+            ui.currencySelector.innerHTML = `
+                <option value="$">USD ($)</option>
+                <option value="€">EUR (€)</option>
+                <option value="CLP$">CLP ($)</option>
+            `;
+            ui.currencySelector.value = currentCurrency;
+        }
 
         function renderAllComponents(year) {
             const yearData = allData[year] || {};
@@ -298,7 +320,8 @@
 
         function formatCurrency(value) {
             const numberValue = Number(value);
-            return isNaN(numberValue) ? '$ 0.00' : `$ ${numberValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+            const formatted = isNaN(numberValue) ? '0.00' : numberValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return `${currentCurrency} ${formatted}`;
         }
 
         function renderChart() {
@@ -322,6 +345,11 @@
         }
 
         ui.yearSelector.addEventListener('change', (e) => { currentYear = e.target.value; renderAllComponents(currentYear); });
+        ui.currencySelector.addEventListener('change', (e) => {
+            currentCurrency = e.target.value;
+            localStorage.setItem(`currency_${userId}`, currentCurrency);
+            renderAllComponents(currentYear);
+        });
         ui.addYearBtn.addEventListener('click', async () => {
             const newYear = (Math.max(...Object.keys(allData).map(Number)) + 1).toString();
             if (allData[newYear]) return;
