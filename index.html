@@ -277,10 +277,10 @@
             unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const settings = docSnap.data();
-                    areValuesHidden = settings.areValuesHidden || false;
+                    areValuesHidden = settings.areValuesHidden === true;
                 } else {
-                    setDoc(settingsDocRef, { areValuesHidden: false });
                     areValuesHidden = false;
+                    setDoc(settingsDocRef, { areValuesHidden: false });
                 }
                 updateVisibilityButton();
                 if (Object.keys(allData).length > 0) {
@@ -325,8 +325,7 @@
             }
             await batch.commit();
         }
-
-        // --- FIX: Added missing function ---
+        
         async function createNewYearData(year) {
             const collectionPath = `earnings_modern/${userId}/years`;
             await setDoc(doc(db, collectionPath, year), {});
@@ -382,6 +381,7 @@
         }
 
         function renderChart() {
+            if (!currentYear) return;
             const previousYear = (currentYear - 1).toString();
             const currentYearData = allData[currentYear] || {};
             const previousYearData = allData[previousYear] || {};
