@@ -65,7 +65,7 @@
     </style>
 </head>
 <body class="p-4 sm:p-6">
-    <div class="max-w-6xl mx-auto">
+    <div id="app-content" class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
             <div>
@@ -136,7 +136,7 @@
 
         // Valida que la configuración de Firebase no sea la de ejemplo
         if (firebaseConfig.apiKey === "TU_API_KEY") {
-            document.body.innerHTML = '<div class="text-white text-center p-8">Error: La configuración de Firebase no es válida. Por favor, sigue las instrucciones para obtener y pegar tus propias claves en el archivo HTML.</div>';
+            document.getElementById('app-content').innerHTML = '<div class="text-white text-center p-8"><h1>Error de Configuración</h1><p>La configuración de Firebase no es válida. Por favor, abre el archivo HTML, busca la variable `firebaseConfig` y reemplaza los valores de ejemplo con tus propias claves de proyecto de Firebase.</p></div>';
             throw new Error("Configuración de Firebase no válida.");
         }
 
@@ -189,9 +189,7 @@
             
             unsubscribe = onSnapshot(query(earningsCol), async (snapshot) => {
                 allData = {};
-                snapshot.forEach(doc => {
-                    allData[doc.id] = doc.data();
-                });
+                snapshot.forEach(doc => { allData[doc.id] = doc.data(); });
 
                 if (snapshot.empty) {
                     await importInitialData(earningsCol);
