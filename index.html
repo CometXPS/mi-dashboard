@@ -63,8 +63,11 @@
             0% { background-color: rgba(52, 211, 153, 0.5); }
             100% { background-color: transparent; }
         }
+        #notification, #confirmation-modal {
+            transition: opacity 0.3s ease-in-out;
+        }
         #notification {
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
     </style>
 </head>
@@ -178,7 +181,7 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
         <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm">
             <h3 id="modal-title" class="text-lg font-bold text-white">Confirmar Eliminación</h3>
             <p id="modal-body" class="text-gray-300 mt-2">¿Estás seguro de que quieres eliminar este año? Esta acción no se puede deshacer.</p>
@@ -272,7 +275,7 @@
         }
 
         function showConfirmationModal(onConfirm) {
-            ui.modal.classList.remove('hidden');
+            ui.modal.classList.remove('opacity-0', 'pointer-events-none');
             
             const confirmHandler = () => {
                 onConfirm();
@@ -284,7 +287,7 @@
             };
 
             const hideModal = () => {
-                ui.modal.classList.add('hidden');
+                ui.modal.classList.add('opacity-0', 'pointer-events-none');
                 ui.modalConfirmBtn.removeEventListener('click', confirmHandler);
                 ui.modalCancelBtn.removeEventListener('click', cancelHandler);
             };
