@@ -191,7 +191,6 @@
 
         let userId = null;
         let unsubscribeData;
-        let unsubscribeSettings;
         let allData = {};
         let currentYear;
         let comparisonChart;
@@ -240,7 +239,6 @@
             } else {
                 userId = null;
                 if(unsubscribeData) unsubscribeData();
-                if(unsubscribeSettings) unsubscribeSettings();
                 historyStack = [];
                 updateUndoButtonState();
                 ui.authContainer.classList.remove('hidden');
@@ -269,22 +267,9 @@
         
         // App Logic
         async function initApp() {
+            updateVisibilityButton();
             if (unsubscribeData) unsubscribeData();
-            if (unsubscribeSettings) unsubscribeSettings();
-
-            // Listener for user settings (e.g., visibility)
-            const settingsDocRef = doc(db, `user_settings/${userId}`);
-            unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
-                const newVisibilityState = docSnap.exists() && docSnap.data().areValuesHidden === true;
-                if (areValuesHidden !== newVisibilityState) {
-                    areValuesHidden = newVisibilityState;
-                    updateVisibilityButton();
-                    if (Object.keys(allData).length > 0) {
-                        renderAllComponents(currentYear);
-                    }
-                }
-            });
-
+            
             // Listener for earnings data
             const collectionPath = `earnings_modern/${userId}/years`;
             const earningsCol = collection(db, collectionPath);
@@ -325,8 +310,6 @@
                 months.forEach(month => { yearData[month] = initialUserData[year][month] || 0; });
                 batch.set(doc(earningsCol, year), yearData);
             }
-            // Set initial visibility setting
-            await setDoc(doc(db, `user_settings/${userId}`), { areValuesHidden: false });
             await batch.commit();
         }
         
@@ -427,17 +410,11 @@
             });
         }
         
-        // Visibility Toggle Logic
-        async function toggleVisibility() {
-            if (!userId) return;
-            const newVisibilityState = !areValuesHidden;
-            const settingsDocRef = doc(db, `user_settings/${userId}`);
-            try {
-                // The onSnapshot listener will handle the UI update automatically.
-                await setDoc(settingsDocRef, { areValuesHidden: newVisibilityState }, { merge: true });
-            } catch (error) {
-                console.error("Error syncing visibility state:", error);
-            }
+        // Visibility Toggle Logic (Local Only)
+        function toggleVisibility() {
+            areValuesHidden = !areValuesHidden;
+            updateVisibilityButton();
+            renderAllComponents(currentYear);
         }
 
         function updateVisibilityButton() {
