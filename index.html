@@ -275,16 +275,13 @@
             // Listener for user settings (e.g., visibility)
             const settingsDocRef = doc(db, `user_settings/${userId}`);
             unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const settings = docSnap.data();
-                    areValuesHidden = settings.areValuesHidden === true;
-                } else {
-                    areValuesHidden = false;
-                    setDoc(settingsDocRef, { areValuesHidden: false });
-                }
-                updateVisibilityButton();
-                if (Object.keys(allData).length > 0) {
-                    renderAllComponents(currentYear);
+                const newVisibilityState = docSnap.exists() && docSnap.data().areValuesHidden === true;
+                if (newVisibilityState !== areValuesHidden) {
+                    areValuesHidden = newVisibilityState;
+                    updateVisibilityButton();
+                    if (Object.keys(allData).length > 0) {
+                        renderAllComponents(currentYear);
+                    }
                 }
             });
 
@@ -323,6 +320,8 @@
                 months.forEach(month => { yearData[month] = initialUserData[year][month] || 0; });
                 batch.set(doc(earningsCol, year), yearData);
             }
+            // Set initial visibility setting
+            await setDoc(doc(db, `user_settings/${userId}`), { areValuesHidden: false });
             await batch.commit();
         }
         
@@ -426,9 +425,9 @@
         // Visibility Toggle Logic
         async function toggleVisibility() {
             if (!userId) return;
-            const newVisibilityState = !areValuesHidden;
+            // Update the state in Firestore. The onSnapshot listener will handle the UI update.
             const settingsDocRef = doc(db, `user_settings/${userId}`);
-            await setDoc(settingsDocRef, { areValuesHidden: newVisibilityState }, { merge: true });
+            await setDoc(settingsDocRef, { areValuesHidden: !areValuesHidden }, { merge: true });
         }
 
         function updateVisibilityButton() {
