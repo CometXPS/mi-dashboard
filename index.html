@@ -382,7 +382,7 @@
 
         function renderChart() {
             if (!currentYear) return;
-            const previousYear = (currentYear - 1).toString();
+            const previousYear = (parseInt(currentYear) - 1).toString();
             const currentYearData = allData[currentYear] || {};
             const previousYearData = allData[previousYear] || {};
             const currentYearValues = months.map(month => currentYearData[month] || 0);
@@ -426,8 +426,9 @@
         // Visibility Toggle Logic
         async function toggleVisibility() {
             if (!userId) return;
+            const newVisibilityState = !areValuesHidden;
             const settingsDocRef = doc(db, `user_settings/${userId}`);
-            await setDoc(settingsDocRef, { areValuesHidden: !areValuesHidden }, { merge: true });
+            await setDoc(settingsDocRef, { areValuesHidden: newVisibilityState }, { merge: true });
         }
 
         function updateVisibilityButton() {
