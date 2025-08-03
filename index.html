@@ -210,7 +210,7 @@
 
         // --- Constants ---
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
-        const FIRESTORE_SETTINGS_COLLECTION = 'user_settings';
+        const LOCAL_STORAGE_VISIBILITY_KEY = 'dashboardAreValuesHidden';
 
         const initialUserData = {
             "2024": { "Noviembre": 1528.9, "Diciembre": 1250 },
@@ -219,7 +219,6 @@
 
         let userId = null;
         let unsubscribeData;
-        let unsubscribeSettings;
         let allData = {};
         let currentYear;
         let comparisonChart;
@@ -304,7 +303,6 @@
             } else {
                 userId = null;
                 if(unsubscribeData) unsubscribeData();
-                if(unsubscribeSettings) unsubscribeSettings();
                 historyStack = [];
                 updateUndoButtonState();
                 ui.authContainer.classList.remove('hidden');
@@ -332,22 +330,13 @@
         
         // --- App Initialization & Data Handling ---
         async function initApp() {
+            // Load visibility state from localStorage
+            const savedVisibility = localStorage.getItem(LOCAL_STORAGE_VISIBILITY_KEY);
+            areValuesHidden = savedVisibility === 'true';
+            updateVisibilityButton();
+
             if (unsubscribeData) unsubscribeData();
-            if (unsubscribeSettings) unsubscribeSettings();
-
-            // Listener for user settings
-            const settingsDocRef = doc(db, `${FIRESTORE_SETTINGS_COLLECTION}/${userId}`);
-            unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
-                const newVisibilityState = docSnap.exists() && docSnap.data().areValuesHidden === true;
-                if (areValuesHidden !== newVisibilityState) {
-                    areValuesHidden = newVisibilityState;
-                    updateVisibilityButton();
-                    if (Object.keys(allData).length > 0) {
-                        renderAllComponents(currentYear);
-                    }
-                }
-            });
-
+            
             // Listener for earnings data
             const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
             const earningsCol = collection(db, collectionPath);
@@ -374,7 +363,6 @@
                     months.forEach(month => { yearData[month] = initialUserData[year][month] || 0; });
                     batch.set(doc(earningsCol, year), yearData);
                 }
-                await setDoc(doc(db, `${FIRESTORE_SETTINGS_COLLECTION}/${userId}`), { areValuesHidden: false });
                 await batch.commit();
             } catch (error) {
                 console.error("Error importing initial data:", error);
@@ -498,16 +486,11 @@
         // --- Event Handlers & Actions ---
         
         // Visibility Toggle Logic
-        async function toggleVisibility() {
-            if (!userId) return;
-            const newVisibilityState = !areValuesHidden;
-            const settingsDocRef = doc(db, `${FIRESTORE_SETTINGS_COLLECTION}/${userId}`);
-            try {
-                await setDoc(settingsDocRef, { areValuesHidden: newVisibilityState }, { merge: true });
-            } catch (error) {
-                console.error("Error syncing visibility state:", error);
-                showNotification("Error al cambiar la visibilidad.");
-            }
+        function toggleVisibility() {
+            areValuesHidden = !areValuesHidden;
+            localStorage.setItem(LOCAL_STORAGE_VISIBILITY_KEY, areValuesHidden);
+            updateVisibilityButton();
+            renderAllComponents(currentYear);
         }
 
         function updateVisibilityButton() {
