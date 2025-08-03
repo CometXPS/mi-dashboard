@@ -275,12 +275,10 @@
             // Listener for user settings (e.g., visibility)
             const settingsDocRef = doc(db, `user_settings/${userId}`);
             unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
-                // Always trust the database as the source of truth.
                 const newVisibilityState = docSnap.exists() && docSnap.data().areValuesHidden === true;
                 if (areValuesHidden !== newVisibilityState) {
                     areValuesHidden = newVisibilityState;
                     updateVisibilityButton();
-                    // Re-render only if data is already present to avoid errors on initial load
                     if (Object.keys(allData).length > 0) {
                         renderAllComponents(currentYear);
                     }
@@ -433,22 +431,12 @@
         async function toggleVisibility() {
             if (!userId) return;
             const newVisibilityState = !areValuesHidden;
-            
-            // Optimistic UI update for instant feedback
-            areValuesHidden = newVisibilityState;
-            updateVisibilityButton();
-            renderAllComponents(currentYear);
-            
-            // Sync with Firestore in the background
             const settingsDocRef = doc(db, `user_settings/${userId}`);
             try {
+                // The onSnapshot listener will handle the UI update automatically.
                 await setDoc(settingsDocRef, { areValuesHidden: newVisibilityState }, { merge: true });
             } catch (error) {
                 console.error("Error syncing visibility state:", error);
-                // Revert UI change if Firestore update fails
-                areValuesHidden = !newVisibilityState;
-                updateVisibilityButton();
-                renderAllComponents(currentYear);
             }
         }
 
