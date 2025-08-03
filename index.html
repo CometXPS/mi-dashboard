@@ -521,25 +521,43 @@
             const month = cell.dataset.month;
             const currentValue = (allData[currentYear] || {})[month] || 0;
             cell.classList.add('editing');
-            cell.innerHTML = `<input type="number" value="${currentValue}" step="0.01" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3">`;
+            
+            // Use type="text" to allow '+' and '-' prefixes for additive operations.
+            // Use inputmode="decimal" for a better keyboard on mobile devices.
+            cell.innerHTML = `<input type="text" inputmode="decimal" value="${currentValue}" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3">`;
             const input = cell.querySelector('input');
             input.focus();
             input.select();
+
             const saveChanges = async () => {
-                const newValue = parseFloat(input.value) || 0;
+                const inputText = input.value.trim().replace(',', '.');
+                let newValue;
+
+                // If input starts with '+' or '-', treat it as an addition/subtraction to the current value.
+                if ((inputText.startsWith('+') || inputText.startsWith('-')) && !isNaN(parseFloat(inputText))) {
+                    const valueToAdd = parseFloat(inputText) || 0;
+                    newValue = currentValue + valueToAdd;
+                } else {
+                    // Otherwise, treat it as a complete replacement of the value.
+                    newValue = parseFloat(inputText) || 0;
+                }
+
                 cell.classList.remove('editing');
                 cell.innerHTML = formatCurrency(newValue, '$');
                 
                 if (currentValue !== newValue) {
                     pushToHistory();
                     const collectionPath = `earnings_modern/${userId}/years`;
-                    await setDoc(doc(db, collectionPath, currentYear), { ...allData[currentYear], [month]: newValue });
+                    // Use { merge: true } to only update the specific month's field, which is more efficient.
+                    await setDoc(doc(db, collectionPath, currentYear), { [month]: newValue }, { merge: true });
                 }
             };
+
             input.addEventListener('blur', saveChanges);
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') input.blur();
-                else if (e.key === 'Escape') {
+                if (e.key === 'Enter') {
+                    input.blur();
+                } else if (e.key === 'Escape') {
                     cell.classList.remove('editing');
                     cell.innerHTML = formatCurrency(currentValue, '$');
                 }
