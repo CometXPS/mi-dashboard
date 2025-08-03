@@ -214,6 +214,7 @@
         // --- Constants ---
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
         const LOCAL_STORAGE_VISIBILITY_KEY = 'dashboardAreValuesHidden';
+        const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
         const initialUserData = {
             "2024": { "Noviembre": 1528.9, "Diciembre": 1250 },
@@ -228,6 +229,7 @@
         let historyStack = [];
         let areValuesHidden = false;
         let debounceTimer;
+        let inactivityTimer;
 
         const icons = {
             eyeOpen: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`,
@@ -296,12 +298,34 @@
             ui.modalCancelBtn.addEventListener('click', cancelHandler);
         }
 
-        // --- Auth ---
+        // --- Auth & Inactivity ---
+        const userActivityEvents = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
+
+        const logoutAfterInactivity = () => {
+            showNotification("Cerrando sesión por inactividad.", false);
+            signOut(auth);
+        };
+
+        const resetInactivityTimer = () => {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(logoutAfterInactivity, INACTIVITY_TIMEOUT);
+        };
+
+        const setupActivityListeners = () => {
+            userActivityEvents.forEach(event => window.addEventListener(event, resetInactivityTimer));
+        };
+        
+        const clearActivityListeners = () => {
+            userActivityEvents.forEach(event => window.removeEventListener(event, resetInactivityTimer));
+        };
+
         onAuthStateChanged(auth, user => {
             if (user) {
                 userId = user.uid;
                 ui.authContainer.classList.add('hidden');
                 ui.appContainer.classList.remove('hidden');
+                setupActivityListeners();
+                resetInactivityTimer();
                 initApp();
             } else {
                 userId = null;
@@ -310,6 +334,8 @@
                 updateUndoButtonState();
                 ui.authContainer.classList.remove('hidden');
                 ui.appContainer.classList.add('hidden');
+                clearTimeout(inactivityTimer);
+                clearActivityListeners();
             }
         });
 
