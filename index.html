@@ -190,7 +190,8 @@
         };
 
         let userId = null;
-        let unsubscribe;
+        let unsubscribeData;
+        let unsubscribeSettings;
         let allData = {};
         let currentYear;
         let comparisonChart;
@@ -238,7 +239,8 @@
                 initApp();
             } else {
                 userId = null;
-                if(unsubscribe) unsubscribe();
+                if(unsubscribeData) unsubscribeData();
+                if(unsubscribeSettings) unsubscribeSettings();
                 historyStack = [];
                 updateUndoButtonState();
                 ui.authContainer.classList.remove('hidden');
@@ -267,12 +269,31 @@
         
         // App Logic
         async function initApp() {
-            updateVisibilityButton();
-            if (unsubscribe) unsubscribe();
+            if (unsubscribeData) unsubscribeData();
+            if (unsubscribeSettings) unsubscribeSettings();
+
+            // Listener for user settings (e.g., visibility)
+            const settingsDocRef = doc(db, `user_settings/${userId}`);
+            unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const settings = docSnap.data();
+                    areValuesHidden = settings.areValuesHidden || false;
+                } else {
+                    // If no settings exist, create with default
+                    setDoc(settingsDocRef, { areValuesHidden: false });
+                    areValuesHidden = false;
+                }
+                updateVisibilityButton();
+                // Re-render all components if data is already loaded
+                if (Object.keys(allData).length > 0) {
+                    renderAllComponents(currentYear);
+                }
+            });
+
+            // Listener for earnings data
             const collectionPath = `earnings_modern/${userId}/years`;
             const earningsCol = collection(db, collectionPath);
-            
-            unsubscribe = onSnapshot(query(earningsCol), async (snapshot) => {
+            unsubscribeData = onSnapshot(query(earningsCol), async (snapshot) => {
                 allData = {};
                 snapshot.forEach(doc => { allData[doc.id] = doc.data(); });
 
@@ -307,18 +328,13 @@
             await batch.commit();
         }
 
-        async function createNewYearData(year) {
-            const collectionPath = `earnings_modern/${userId}/years`;
-            await setDoc(doc(db, collectionPath, year), {});
-        }
-
         function populateYearSelector() {
             const years = Object.keys(allData).sort((a, b) => b - a);
             ui.yearSelector.innerHTML = years.map(year => `<option value="${year}">${year}</option>`).join('');
         }
         
         function renderAllComponents(year) {
-            if (!allData || Object.keys(allData).length === 0) return;
+            if (!allData || Object.keys(allData).length === 0 || !year) return;
             const yearData = allData[year] || {};
             ui.tableHead.innerHTML = '<tr><th class="p-3 text-left font-semibold text-gray-400 border-b border-gray-700">Mes</th><th class="p-3 text-right font-semibold text-gray-400 border-b border-gray-700">Ganancias (USD)</th></tr>';
             ui.tableBody.innerHTML = '';
@@ -404,18 +420,11 @@
         }
         
         // Visibility Toggle Logic
-        function toggleVisibility() {
-            areValuesHidden = !areValuesHidden;
-            updateVisibilityButton();
-            renderAllComponents(currentYear);
-            // Manually update converter if it has values
-            if (ui.eurResult.textContent !== '€ 0.00') {
-                const amount = parseFloat(ui.usdAmountInput.value);
-                if (!isNaN(amount)) {
-                     // Re-run conversion logic to update display
-                     convertCurrency(true);
-                }
-            }
+        async function toggleVisibility() {
+            if (!userId) return;
+            const settingsDocRef = doc(db, `user_settings/${userId}`);
+            // Set the new value in Firestore. The onSnapshot listener will handle the UI update.
+            await setDoc(settingsDocRef, { areValuesHidden: !areValuesHidden }, { merge: true });
         }
 
         function updateVisibilityButton() {
@@ -522,8 +531,6 @@
             const currentValue = (allData[currentYear] || {})[month] || 0;
             cell.classList.add('editing');
             
-            // Use type="text" to allow '+' and '-' prefixes for additive operations.
-            // Use inputmode="decimal" for a better keyboard on mobile devices.
             cell.innerHTML = `<input type="text" inputmode="decimal" value="${currentValue}" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3">`;
             const input = cell.querySelector('input');
             input.focus();
@@ -533,12 +540,10 @@
                 const inputText = input.value.trim().replace(',', '.');
                 let newValue;
 
-                // If input starts with '+' or '-', treat it as an addition/subtraction to the current value.
                 if ((inputText.startsWith('+') || inputText.startsWith('-')) && !isNaN(parseFloat(inputText))) {
                     const valueToAdd = parseFloat(inputText) || 0;
                     newValue = currentValue + valueToAdd;
                 } else {
-                    // Otherwise, treat it as a complete replacement of the value.
                     newValue = parseFloat(inputText) || 0;
                 }
 
@@ -548,7 +553,6 @@
                 if (currentValue !== newValue) {
                     pushToHistory();
                     const collectionPath = `earnings_modern/${userId}/years`;
-                    // Use { merge: true } to only update the specific month's field, which is more efficient.
                     await setDoc(doc(db, collectionPath, currentYear), { [month]: newValue }, { merge: true });
                 }
             };
