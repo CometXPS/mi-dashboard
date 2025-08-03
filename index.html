@@ -485,6 +485,12 @@
             const formatted = isNaN(numberValue) ? '0.00' : numberValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             return `${currencySymbol} ${formatted}`;
         }
+        
+        function formatConverterCurrency(value, currencySymbol) {
+            const numberValue = Number(value);
+            const formatted = isNaN(numberValue) ? '0.00' : numberValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return `${currencySymbol} ${formatted}`;
+        }
 
         // --- Event Handlers & Actions ---
         
@@ -539,8 +545,8 @@
         async function convertCurrency() {
             const amount = parseFloat(ui.usdAmountInput.value);
             if(isNaN(amount) || amount <= 0) {
-                ui.eurResult.textContent = formatCurrency(0, '€');
-                ui.clpResult.textContent = formatCurrency(0, '$');
+                ui.eurResult.textContent = formatConverterCurrency(0, '€');
+                ui.clpResult.textContent = formatConverterCurrency(0, '$');
                 return;
             }
 
@@ -553,8 +559,8 @@
                 const eurAmount = amount * rates.EUR;
                 const clpAmount = amount * rates.CLP;
 
-                ui.eurResult.textContent = formatCurrency(eurAmount, '€');
-                ui.clpResult.textContent = formatCurrency(clpAmount, '$');
+                ui.eurResult.textContent = formatConverterCurrency(eurAmount, '€');
+                ui.clpResult.textContent = formatConverterCurrency(clpAmount, '$');
                 
                 const date = new Date(data.time_last_update_utc);
                 ui.converterStatus.textContent = `Tasa de cambio actualizada el ${date.toLocaleDateString()}`;
