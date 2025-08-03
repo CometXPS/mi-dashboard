@@ -43,7 +43,7 @@
             background-color: #374151;
             color: #f9fafb;
         }
-        #loader {
+        #loader, #ai-loader {
             border: 4px solid #374151;
             border-top: 4px solid #34d399;
             border-radius: 50%;
@@ -55,6 +55,21 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        .gemini-analysis-content h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #34d399;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .gemini-analysis-content p {
+            margin-bottom: 1rem;
+        }
+        .gemini-analysis-content ul {
+            list-style-position: inside;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -99,6 +114,19 @@
         </div>
         <!-- Summary Cards -->
         <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
+        
+        <!-- Gemini Analysis Card -->
+        <div id="gemini-analysis-card" class="main-card mb-6 hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-100">✨ Análisis de Rendimiento con IA</h2>
+                    <button id="close-gemini-card" class="text-gray-400 hover:text-white">&times;</button>
+                </div>
+                <div id="ai-loader" class="hidden my-4"></div>
+                <div id="gemini-analysis-content" class="mt-4 text-gray-300"></div>
+            </div>
+        </div>
+
         <!-- Main Content -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div class="main-card lg:col-span-3">
@@ -166,7 +194,11 @@
             deleteYearBtn: document.getElementById('delete-year-btn'),
             chartCanvas: document.getElementById('comparisonChart').getContext('2d'),
             summaryContainer: document.getElementById('summary-container'),
-            userInfo: document.getElementById('user-info')
+            userInfo: document.getElementById('user-info'),
+            geminiAnalysisCard: document.getElementById('gemini-analysis-card'),
+            closeGeminiCardBtn: document.getElementById('close-gemini-card'),
+            aiLoader: document.getElementById('ai-loader'),
+            geminiAnalysisContent: document.getElementById('gemini-analysis-content')
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         let isLogin = true;
@@ -241,7 +273,7 @@
             ui.deleteYearBtn.disabled = years.length <= 1;
             populateYearSelector();
             if (!years.includes(currentYear)) {
-                currentYear = years.length > 0 ? Math.max(...years.map(Number)).toString() : new Date().getFullYear().toString();
+                currentYear = years.length > 0 ? Math.max(...Object.keys(allData).map(Number)).toString() : new Date().getFullYear().toString();
             }
             ui.yearSelector.value = currentYear;
             renderAllComponents(currentYear);
@@ -275,10 +307,10 @@
             ui.tableBody.innerHTML = '';
             months.forEach(month => {
                 const amount = yearData[month] || 0;
-                ui.tableBody.innerHTML += `<tr class="border-b border-gray-700 last:border-b-0"><td class="p-3">${month}</td><td class="p-3 text-right data-cell" data-month="${month}">$ ${formatCurrency(amount)}</td></tr>`;
+                ui.tableBody.innerHTML += `<tr class="border-b border-gray-700 last:border-b-0"><td class="p-3">${month}</td><td class="p-3 text-right data-cell" data-month="${month}">${formatCurrency(amount)}</td></tr>`;
             });
             const total = Object.values(yearData).reduce((sum, amount) => sum + parseFloat(amount), 0);
-            ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-3 font-bold">Total Anual</td><td class="p-3 text-right text-lg font-bold">$ ${formatCurrency(total)}</td></tr>`;
+            ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-3 font-bold">Total Anual</td><td class="p-3 text-right text-lg font-bold">${formatCurrency(total)}</td></tr>`;
             updateSummaryCards(year);
             renderChart();
         }
@@ -297,10 +329,12 @@
                 }
             }
             ui.summaryContainer.innerHTML = `
-                <div class="summary-card"><p class="text-sm text-gray-400">Ganancia Total</p><p class="text-3xl font-bold text-gray-100 mt-1">$ ${formatCurrency(total)}</p></div>
-                <div class="summary-card"><p class="text-sm text-gray-400">Promedio Mensual</p><p class="text-3xl font-bold text-gray-100 mt-1">$ ${formatCurrency(avg)}</p></div>
-                <div class="summary-card"><p class="text-sm text-gray-400">Mejor Mes</p><p class="text-3xl font-bold text-gray-100 mt-1">${bestMonth}</p><p class="text-sm text-green-400">${bestAmount > 0 ? `$ ${formatCurrency(bestAmount)}` : ''}</p></div>
+                <div class="summary-card"><p class="text-sm text-gray-400">Ganancia Total</p><p class="text-3xl font-bold text-gray-100 mt-1">${formatCurrency(total)}</p></div>
+                <div class="summary-card"><p class="text-sm text-gray-400">Promedio Mensual</p><p class="text-3xl font-bold text-gray-100 mt-1">${formatCurrency(avg)}</p></div>
+                <div class="summary-card relative"><p class="text-sm text-gray-400">Mejor Mes</p><p class="text-3xl font-bold text-gray-100 mt-1">${bestMonth}</p><p class="text-sm text-green-400">${bestAmount > 0 ? formatCurrency(bestAmount) : ''}</p>
+                <button id="analyze-btn" title="Analizar Rendimiento con IA" class="absolute top-4 right-4 p-2 bg-gray-600 text-white rounded-full hover:bg-green-500 focus:outline-none">✨</button></div>
             `;
+            document.getElementById('analyze-btn').addEventListener('click', getFinancialAnalysis);
         }
 
         function formatCurrency(value) {
@@ -327,6 +361,53 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: '#9ca3af' } }, x: { ticks: { color: '#9ca3af' } } }, plugins: { legend: { labels: { color: '#d1d5db' } } } }
             });
         }
+
+        // Gemini API Function
+        async function getFinancialAnalysis() {
+            ui.geminiAnalysisCard.classList.remove('hidden');
+            ui.aiLoader.classList.remove('hidden');
+            ui.geminiAnalysisContent.innerHTML = '';
+
+            const yearData = allData[currentYear];
+            const prompt = `Eres un asesor financiero para un pequeño negocio de intercambio de divisas en Chile. Analiza los siguientes datos de ganancias mensuales para el año ${currentYear}: ${JSON.stringify(yearData)}. Basado en estos números, proporciona un breve resumen del rendimiento, identifica los 2-3 meses más notables (tanto altos como bajos) y ofrece una recomendación estratégica simple y accionable para mejorar los resultados. Formatea tu respuesta usando títulos como '### Resumen', '### Meses Clave', y '### Recomendación Estratégica'.`;
+            
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const result = await response.json();
+                let text = result.candidates[0].content.parts[0].text;
+                
+                // Basic Markdown to HTML conversion
+                text = text.replace(/### (.*?)\n/g, '<h3>$1</h3>');
+                text = text.replace(/\* (.*?)\n/g, '<li>$1</li>');
+                text = text.replace(/\n/g, '<br>');
+
+                ui.geminiAnalysisContent.innerHTML = text;
+
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                ui.geminiAnalysisContent.innerHTML = '<p class="text-red-400">No se pudo obtener el análisis. Inténtalo de nuevo más tarde.</p>';
+            } finally {
+                ui.aiLoader.classList.add('hidden');
+            }
+        }
+
+        ui.closeGeminiCardBtn.addEventListener('click', () => {
+            ui.geminiAnalysisCard.classList.add('hidden');
+        });
 
         ui.yearSelector.addEventListener('change', (e) => { currentYear = e.target.value; renderAllComponents(currentYear); });
         ui.addYearBtn.addEventListener('click', async () => {
@@ -357,7 +438,7 @@
             const saveChanges = async () => {
                 const newValue = parseFloat(input.value) || 0;
                 cell.classList.remove('editing');
-                cell.innerHTML = `$ ${formatCurrency(newValue)}`;
+                cell.innerHTML = `${formatCurrency(newValue)}`;
                 const collectionPath = `earnings_modern/${userId}/years`;
                 await setDoc(doc(db, collectionPath, currentYear), { ...allData[currentYear], [month]: newValue });
             };
@@ -366,7 +447,7 @@
                 if (e.key === 'Enter') input.blur();
                 else if (e.key === 'Escape') {
                     cell.classList.remove('editing');
-                    cell.innerHTML = `$ ${formatCurrency(currentValue)}`;
+                    cell.innerHTML = `${formatCurrency(currentValue)}`;
                 }
             });
         }
