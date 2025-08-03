@@ -275,10 +275,12 @@
             // Listener for user settings (e.g., visibility)
             const settingsDocRef = doc(db, `user_settings/${userId}`);
             unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
+                // Always trust the database as the source of truth.
                 const newVisibilityState = docSnap.exists() && docSnap.data().areValuesHidden === true;
-                if (newVisibilityState !== areValuesHidden) {
+                if (areValuesHidden !== newVisibilityState) {
                     areValuesHidden = newVisibilityState;
                     updateVisibilityButton();
+                    // Re-render only if data is already present to avoid errors on initial load
                     if (Object.keys(allData).length > 0) {
                         renderAllComponents(currentYear);
                     }
@@ -297,6 +299,8 @@
                 } else {
                     updateFullUI();
                 }
+            }, error => {
+                console.error("Error fetching earnings data: ", error);
             });
         }
 
@@ -304,8 +308,11 @@
             const years = Object.keys(allData);
             ui.deleteYearBtn.disabled = years.length <= 1;
             populateYearSelector();
-            if (!years.includes(currentYear)) {
+            const lastSelectedYear = currentYear;
+            if (!years.includes(lastSelectedYear)) {
                 currentYear = years.length > 0 ? Math.max(...Object.keys(allData).map(Number)).toString() : new Date().getFullYear().toString();
+            } else {
+                currentYear = lastSelectedYear;
             }
             ui.yearSelector.value = currentYear;
             renderAllComponents(currentYear);
@@ -425,19 +432,21 @@
         // Visibility Toggle Logic
         async function toggleVisibility() {
             if (!userId) return;
+            const newVisibilityState = !areValuesHidden;
+            
             // Optimistic UI update for instant feedback
-            areValuesHidden = !areValuesHidden;
+            areValuesHidden = newVisibilityState;
             updateVisibilityButton();
             renderAllComponents(currentYear);
             
             // Sync with Firestore in the background
             const settingsDocRef = doc(db, `user_settings/${userId}`);
             try {
-                await setDoc(settingsDocRef, { areValuesHidden: areValuesHidden }, { merge: true });
+                await setDoc(settingsDocRef, { areValuesHidden: newVisibilityState }, { merge: true });
             } catch (error) {
                 console.error("Error syncing visibility state:", error);
-                // Optionally, revert UI change if Firestore update fails
-                areValuesHidden = !areValuesHidden;
+                // Revert UI change if Firestore update fails
+                areValuesHidden = !newVisibilityState;
                 updateVisibilityButton();
                 renderAllComponents(currentYear);
             }
