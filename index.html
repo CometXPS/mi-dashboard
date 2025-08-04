@@ -233,8 +233,8 @@
         </div>
 
         <div id="tools-tab" class="tab-content">
-            <div id="tools-grid" class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-                <div class="main-card lg:col-span-3" data-id="converter-card">
+            <div id="tools-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                <div class="main-card" data-id="converter-card">
                     <div class="p-6">
                         <h2 class="text-xl font-bold mb-4">Conversor de Divisas</h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -254,6 +254,23 @@
                             </div>
                         </div>
                          <p id="converter-status" class="text-xs text-secondary mt-2 text-right"></p>
+                    </div>
+                </div>
+                <div class="main-card" data-id="paypal-card">
+                    <div class="p-6">
+                        <h2 class="text-xl font-bold mb-4">Calculadora PayPal</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="paypal-receive" class="block text-sm font-medium">Para recibir:</label>
+                                <input type="number" id="paypal-receive" placeholder="Monto a recibir" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+                                <p class="text-sm text-secondary mt-1">Debes solicitar: <span id="paypal-request-result" class="font-bold text-primary">$ 0.00</span></p>
+                            </div>
+                            <div>
+                                <label for="paypal-send" class="block text-sm font-medium">Si te envían:</label>
+                                <input type="number" id="paypal-send" placeholder="Monto enviado" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+                                <p class="text-sm text-secondary mt-1">Recibirás: <span id="paypal-receive-result" class="font-bold text-primary">$ 0.00</span></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="main-card lg:col-span-2" data-id="history-card">
@@ -407,6 +424,10 @@
             tabs: document.querySelectorAll('.tab-btn'),
             mainContentGrid: document.getElementById('main-content-grid'),
             toolsGrid: document.getElementById('tools-grid'),
+            paypalReceiveInput: document.getElementById('paypal-receive'),
+            paypalSendInput: document.getElementById('paypal-send'),
+            paypalRequestResult: document.getElementById('paypal-request-result'),
+            paypalReceiveResult: document.getElementById('paypal-receive-result'),
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -820,6 +841,39 @@
             }, 500);
         });
 
+        function calculatePaypalFees(source) {
+            const commissionRate = 0.054;
+            const fixedFee = 0.30;
+            
+            if (source === 'receive') {
+                const amount = parseFloat(ui.paypalReceiveInput.value);
+                if (isNaN(amount) || amount <= 0) {
+                    ui.paypalRequestResult.textContent = formatCurrency(0, '$');
+                    return;
+                }
+                const amountToRequest = (amount + fixedFee) / (1 - commissionRate);
+                ui.paypalRequestResult.textContent = formatCurrency(amountToRequest, '$');
+            } else if (source === 'send') {
+                const amount = parseFloat(ui.paypalSendInput.value);
+                if (isNaN(amount) || amount <= 0) {
+                    ui.paypalReceiveResult.textContent = formatCurrency(0, '$');
+                    return;
+                }
+                const amountToReceive = amount * (1 - commissionRate) - fixedFee;
+                ui.paypalReceiveResult.textContent = formatCurrency(amountToReceive > 0 ? amountToReceive : 0, '$');
+            }
+        }
+
+        ui.paypalReceiveInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => calculatePaypalFees('receive'), 300);
+        });
+
+        ui.paypalSendInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => calculatePaypalFees('send'), 300);
+        });
+
         ui.yearSelector.addEventListener('change', (e) => { currentYear = e.target.value; renderAllComponents(currentYear); });
         
         async function createNewYearData(year) {
@@ -1070,4 +1124,4 @@
         }
     </script>
 </body>
-</html>
+</htm
