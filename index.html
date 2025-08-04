@@ -158,6 +158,10 @@
                  <button id="delete-year-btn" title="Borrar año seleccionado" class="p-2 bg-danger text-white rounded-md shadow-sm disabled:opacity-50 hover:opacity-90">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                  </button>
+                 <button id="undo-btn" title="Deshacer último cambio" class="p-2 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600 disabled:opacity-50">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 10v4a1 1 0 001 1h3l1.5 1.5a1 1 0 001.414 0L11 15h3a1 1 0 001-1v-4M3 10V7a1 1 0 011-1h12a1 1 0 011 1v3" /></svg>
+                 </button>
+                 <button id="toggle-visibility-btn" title="Ocultar/Mostrar valores" class="p-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600"></button>
                  <button id="logout-btn" title="Cerrar Sesión" class="p-2 bg-gray-600 text-white rounded-md shadow-sm hover:opacity-90">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                  </button>
@@ -303,6 +307,8 @@
         const icons = {
             sun: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`,
             moon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`,
+            eyeOpen: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`,
+            eyeClosed: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
         };
 
         const ui = {
@@ -319,6 +325,8 @@
             yearSelector: document.getElementById('year-selector'),
             addYearBtn: document.getElementById('add-year-btn'),
             deleteYearBtn: document.getElementById('delete-year-btn'),
+            undoBtn: document.getElementById('undo-btn'),
+            toggleVisibilityBtn: document.getElementById('toggle-visibility-btn'),
             chartCanvas: document.getElementById('comparisonChart').getContext('2d'),
             doughnutChartCanvas: document.getElementById('doughnutChart').getContext('2d'),
             summaryContainer: document.getElementById('summary-container'),
@@ -412,6 +420,7 @@
                 if(unsubscribeData) unsubscribeData();
                 if(unsubscribeHistory) unsubscribeHistory();
                 historyStack = [];
+                updateUndoButtonState();
                 ui.authContainer.classList.remove('hidden');
                 ui.appContainer.classList.add('hidden');
                 clearTimeout(inactivityTimer);
@@ -734,6 +743,7 @@
         }
         
         ui.addYearBtn.addEventListener('click', async () => {
+            pushToHistory();
             const existingYears = Object.keys(allData).map(Number);
             const newYear = (existingYears.length > 0 ? Math.max(...existingYears) + 1 : new Date().getFullYear()).toString();
             
@@ -749,6 +759,7 @@
                     showNotification("No se puede eliminar el último año.");
                     return;
                 }
+                pushToHistory();
                 const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                 try {
                     await deleteDoc(doc(db, collectionPath, ui.yearSelector.value));
@@ -783,7 +794,7 @@
         });
 
         function makeCellEditable(cell) {
-            if (cell.classList.contains('editing')) return;
+            if (cell.classList.contains('editing') || areValuesHidden) return;
             const month = cell.dataset.month;
             const currentValue = (allData[currentYear] || {})[month] || 0;
             cell.classList.add('editing');
@@ -807,6 +818,7 @@
                 cell.innerHTML = formatCurrency(newValue, '$');
                 
                 if (currentValue !== newValue) {
+                    pushToHistory();
                     const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                     const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
                     try {
@@ -838,7 +850,7 @@
                 }
             });
         }
-
+        
         // --- Preferences & UI ---
         function applyTheme(theme) {
             document.body.classList.toggle('light-mode', theme === 'light');
@@ -869,7 +881,55 @@
             
             const isCompact = localStorage.getItem('dashboardCompactView') === 'true';
             applyCompactView(isCompact);
+
+            areValuesHidden = localStorage.getItem('dashboardAreValuesHidden') === 'true';
+            updateVisibilityButton();
         }
+
+        function toggleVisibility() {
+            areValuesHidden = !areValuesHidden;
+            localStorage.setItem('dashboardAreValuesHidden', areValuesHidden);
+            updateVisibilityButton();
+            renderAllComponents(currentYear);
+        }
+
+        function updateVisibilityButton() {
+            ui.toggleVisibilityBtn.innerHTML = areValuesHidden ? icons.eyeClosed : icons.eyeOpen;
+        }
+
+        ui.toggleVisibilityBtn.addEventListener('click', toggleVisibility);
+
+        function pushToHistory() {
+            historyStack.push(JSON.parse(JSON.stringify(allData)));
+            updateUndoButtonState();
+        }
+
+        function updateUndoButtonState() {
+            ui.undoBtn.disabled = historyStack.length === 0;
+        }
+
+        async function undoLastChange() {
+            if (historyStack.length === 0) return;
+            const lastState = historyStack.pop();
+            const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
+            const earningsCol = collection(db, collectionPath);
+            try {
+                const batch = writeBatch(db);
+                Object.keys(allData).forEach(year => {
+                    if (!lastState[year]) batch.delete(doc(earningsCol, year));
+                });
+                for (const year in lastState) {
+                    batch.set(doc(earningsCol, year), lastState[year]);
+                }
+                await batch.commit();
+            } catch (error) {
+                console.error("Error undoing change:", error);
+                showNotification("Error al deshacer el cambio.");
+            }
+            updateUndoButtonState();
+        }
+
+        ui.undoBtn.addEventListener('click', undoLastChange);
 
         ui.themeToggleBtn.addEventListener('click', () => {
             const isLight = document.body.classList.contains('light-mode');
