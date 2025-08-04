@@ -356,6 +356,7 @@
         // --- Constants & State ---
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
         const FIRESTORE_HISTORY_COLLECTION = 'history';
+        const FIRESTORE_UNDO_HISTORY_COLLECTION = 'undo_history';
         const INACTIVITY_TIMEOUT = 10 * 60 * 1000;
 
         const initialUserData = {
@@ -364,11 +365,10 @@
         };
 
         let userId = null;
-        let unsubscribeData, unsubscribeHistory;
+        let unsubscribeData, unsubscribeHistory, unsubscribeUndoHistory;
         let allData = {};
         let currentYear;
         let comparisonChart, doughnutChart;
-        let historyStack = [];
         let areValuesHidden = false;
         let debounceTimer;
         let inactivityTimer;
@@ -512,8 +512,7 @@
                 userId = null;
                 if(unsubscribeData) unsubscribeData();
                 if(unsubscribeHistory) unsubscribeHistory();
-                historyStack = [];
-                updateUndoButtonState();
+                if(unsubscribeUndoHistory) unsubscribeUndoHistory();
                 ui.authContainer.classList.remove('hidden');
                 ui.appContainer.classList.add('hidden');
                 clearTimeout(inactivityTimer);
@@ -545,6 +544,7 @@
             
             if (unsubscribeData) unsubscribeData();
             if (unsubscribeHistory) unsubscribeHistory();
+            if (unsubscribeUndoHistory) unsubscribeUndoHistory();
             
             const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
             const earningsCol = collection(db, earningsCollectionPath);
@@ -569,6 +569,11 @@
             }, error => {
                 console.error("Error fetching history data: ", error);
                 showNotification("Error al cargar el historial.");
+            });
+            
+            const undoHistoryCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_UNDO_HISTORY_COLLECTION}`;
+            unsubscribeUndoHistory = onSnapshot(query(collection(db, undoHistoryCollectionPath)), (snapshot) => {
+                ui.undoBtn.disabled = snapshot.empty;
             });
         }
 
@@ -792,26 +797,20 @@
             ui.yearSelector.innerHTML = years.map(year => `<option value="${year}">${year}</option>`).join('');
         }
         
-        function formatCurrency(value, currencySymbol) {
-            if (areValuesHidden) return `${currencySymbol} ****`;
+        function formatCurrency(value, currencySymbol, forceVisible = false) {
+            if (areValuesHidden && !forceVisible) return `${currencySymbol} ****`;
             const numberValue = Number(value);
             const formatted = isNaN(numberValue) ? '0.00' : numberValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             return `${currencySymbol} ${formatted}`;
         }
         
-        function formatConverterCurrency(value, currencySymbol) {
-            const numberValue = Number(value);
-            const formatted = isNaN(numberValue) ? '0.00' : numberValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            return `${currencySymbol} ${formatted}`;
-        }
-
         // --- Event Handlers & Actions ---
         
         async function convertCurrency() {
             const amount = parseFloat(ui.usdAmountInput.value);
             if(isNaN(amount) || amount <= 0) {
-                ui.eurResult.textContent = formatConverterCurrency(0, '€');
-                ui.clpResult.textContent = formatConverterCurrency(0, '$');
+                ui.eurResult.textContent = formatCurrency(0, '€', true);
+                ui.clpResult.textContent = formatCurrency(0, '$', true);
                 return;
             }
 
@@ -824,8 +823,8 @@
                 const eurAmount = amount * rates.EUR;
                 const clpAmount = amount * rates.CLP;
 
-                ui.eurResult.textContent = formatConverterCurrency(eurAmount, '€');
-                ui.clpResult.textContent = formatConverterCurrency(clpAmount, '$');
+                ui.eurResult.textContent = formatCurrency(eurAmount, '€', true);
+                ui.clpResult.textContent = formatCurrency(clpAmount, '$', true);
                 
                 const date = new Date(data.time_last_update_utc);
                 ui.converterStatus.textContent = `Tasa de cambio actualizada el ${date.toLocaleDateString()}`;
@@ -850,19 +849,19 @@
             if (source === 'receive') {
                 const amount = parseFloat(ui.paypalReceiveInput.value);
                 if (isNaN(amount) || amount <= 0) {
-                    ui.paypalRequestResult.textContent = formatConverterCurrency(0, '$');
+                    ui.paypalRequestResult.textContent = formatCurrency(0, '$', true);
                     return;
                 }
                 const amountToRequest = (amount + fixedFee) / (1 - commissionRate);
-                ui.paypalRequestResult.textContent = formatConverterCurrency(amountToRequest, '$');
+                ui.paypalRequestResult.textContent = formatCurrency(amountToRequest, '$', true);
             } else if (source === 'send') {
                 const amount = parseFloat(ui.paypalSendInput.value);
                 if (isNaN(amount) || amount <= 0) {
-                    ui.paypalReceiveResult.textContent = formatConverterCurrency(0, '$');
+                    ui.paypalReceiveResult.textContent = formatCurrency(0, '$', true);
                     return;
                 }
                 const amountToReceive = amount * (1 - commissionRate) - fixedFee;
-                ui.paypalReceiveResult.textContent = formatConverterCurrency(amountToReceive > 0 ? amountToReceive : 0, '$');
+                ui.paypalReceiveResult.textContent = formatCurrency(amountToReceive > 0 ? amountToReceive : 0, '$', true);
             }
         }
 
@@ -879,6 +878,7 @@
         ui.yearSelector.addEventListener('change', (e) => { currentYear = e.target.value; renderAllComponents(currentYear); });
         
         async function createNewYearData(year) {
+            await pushToHistory();
             const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
             const initialYearData = months.reduce((acc, month) => ({...acc, [month]: 0}), {});
             try {
@@ -890,7 +890,6 @@
         }
         
         ui.addYearBtn.addEventListener('click', async () => {
-            pushToHistory();
             const existingYears = Object.keys(allData).map(Number);
             const newYear = (existingYears.length > 0 ? Math.max(...existingYears) + 1 : new Date().getFullYear()).toString();
             
@@ -906,7 +905,7 @@
                     showNotification("No se puede eliminar el último año.");
                     return;
                 }
-                pushToHistory();
+                await pushToHistory();
                 const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                 try {
                     await deleteDoc(doc(db, collectionPath, ui.yearSelector.value));
@@ -940,7 +939,7 @@
             if (e.target.classList.contains('data-cell')) makeCellEditable(e.target);
         });
 
-        function makeCellEditable(cell) {
+        async function makeCellEditable(cell) {
             if (cell.classList.contains('editing') || areValuesHidden) return;
             const month = cell.dataset.month;
             const currentValue = (allData[currentYear] || {})[month] || 0;
@@ -965,7 +964,7 @@
                 cell.innerHTML = formatCurrency(newValue, '$');
                 
                 if (currentValue !== newValue) {
-                    pushToHistory();
+                    await pushToHistory();
                     const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                     const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
                     try {
@@ -1046,34 +1045,61 @@
 
         ui.toggleVisibilityBtn.addEventListener('click', toggleVisibility);
 
-        function pushToHistory() {
-            historyStack.push(JSON.parse(JSON.stringify(allData)));
-            updateUndoButtonState();
-        }
-
-        function updateUndoButtonState() {
-            ui.undoBtn.disabled = historyStack.length === 0;
+        async function pushToHistory() {
+            const undoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_UNDO_HISTORY_COLLECTION}`);
+            await addDoc(undoHistoryCol, {
+                timestamp: serverTimestamp(),
+                data: JSON.stringify(allData)
+            });
         }
 
         async function undoLastChange() {
-            if (historyStack.length === 0) return;
-            const lastState = historyStack.pop();
-            const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
-            const earningsCol = collection(db, collectionPath);
+            const undoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_UNDO_HISTORY_COLLECTION}`);
+            const q = query(undoHistoryCol, orderBy('timestamp', 'desc'), limit(1));
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                showNotification("No hay más acciones que deshacer.");
+                return;
+            }
+
+            const lastStateDoc = snapshot.docs[0];
+            const lastState = JSON.parse(lastStateDoc.data().data);
+            
+            const earningsCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`);
+            const historyCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`);
+            
             try {
                 const batch = writeBatch(db);
+                
+                // Delete years that don't exist in the last state
                 Object.keys(allData).forEach(year => {
-                    if (!lastState[year]) batch.delete(doc(earningsCol, year));
+                    if (!lastState[year]) {
+                        batch.delete(doc(earningsCol, year));
+                    }
                 });
+
+                // Restore data from the last state
                 for (const year in lastState) {
                     batch.set(doc(earningsCol, year), lastState[year]);
                 }
+                
+                // Delete the undo history entry
+                batch.delete(lastStateDoc.ref);
+
+                // Delete the corresponding entry from the user-facing history
+                const lastHistoryQuery = query(historyCol, orderBy('timestamp', 'desc'), limit(1));
+                const lastHistorySnapshot = await getDocs(lastHistoryQuery);
+                if(!lastHistorySnapshot.empty) {
+                    batch.delete(lastHistorySnapshot.docs[0].ref);
+                }
+
                 await batch.commit();
+                showNotification("Último cambio deshecho.", false);
             } catch (error) {
                 console.error("Error undoing change:", error);
                 showNotification("Error al deshacer el cambio.");
             }
-            updateUndoButtonState();
         }
 
         ui.undoBtn.addEventListener('click', undoLastChange);
