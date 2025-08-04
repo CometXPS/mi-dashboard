@@ -179,7 +179,14 @@
             </div>
             <div class="main-card lg:col-span-2">
                 <div class="p-6">
-                     <h2 class="text-xl font-bold text-gray-100 mb-4">Historial de Cambios</h2>
+                     <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-100">Historial de Cambios</h2>
+                        <button id="clear-history-btn" title="Limpiar historial" class="p-2 text-gray-400 hover:text-white hover:bg-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                     </div>
                      <div id="history-loader"></div>
                      <div id="history-log-container" class="max-h-60 overflow-y-auto"></div>
                 </div>
@@ -193,11 +200,11 @@
     <!-- Confirmation Modal -->
     <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
         <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm">
-            <h3 id="modal-title" class="text-lg font-bold text-white">Confirmar Eliminación</h3>
-            <p id="modal-body" class="text-gray-300 mt-2">¿Estás seguro de que quieres eliminar este año? Esta acción no se puede deshacer.</p>
+            <h3 id="modal-title" class="text-lg font-bold text-white"></h3>
+            <p id="modal-body" class="text-gray-300 mt-2"></p>
             <div class="mt-6 flex justify-end gap-4">
                 <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancelar</button>
-                <button id="modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Eliminar</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Confirmar</button>
             </div>
         </div>
     </div>
@@ -215,7 +222,7 @@
         import { firebaseConfig } from './config.js'; 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, addDoc, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -271,12 +278,15 @@
             clpResult: document.getElementById('clp-result'),
             converterStatus: document.getElementById('converter-status'),
             modal: document.getElementById('confirmation-modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalBody: document.getElementById('modal-body'),
             modalConfirmBtn: document.getElementById('modal-confirm-btn'),
             modalCancelBtn: document.getElementById('modal-cancel-btn'),
             notification: document.getElementById('notification'),
             notificationMessage: document.getElementById('notification-message'),
             historyLoader: document.getElementById('history-loader'),
             historyLogContainer: document.getElementById('history-log-container'),
+            clearHistoryBtn: document.getElementById('clear-history-btn'),
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -289,7 +299,9 @@
             }, 3000);
         }
 
-        function showConfirmationModal(onConfirm) {
+        function showConfirmationModal(title, body, onConfirm) {
+            ui.modalTitle.textContent = title;
+            ui.modalBody.textContent = body;
             ui.modal.classList.remove('opacity-0', 'pointer-events-none');
             
             const confirmHandler = () => {
@@ -422,7 +434,30 @@
             }
         }
         
-        // --- Rendering ---
+        // --- Rendering & Animations ---
+        function animateCountUp(element, end) {
+            let start = parseFloat(element.dataset.currentValue) || 0;
+            element.dataset.currentValue = end;
+            const duration = 1000;
+            const frameRate = 60;
+            const totalFrames = Math.round(duration / (1000 / frameRate));
+            let currentFrame = 0;
+
+            const counter = () => {
+                currentFrame++;
+                const progress = currentFrame / totalFrames;
+                const currentValue = start + (end - start) * progress;
+                element.innerHTML = formatCurrency(currentValue, '$');
+
+                if (currentFrame < totalFrames) {
+                    requestAnimationFrame(counter);
+                } else {
+                    element.innerHTML = formatCurrency(end, '$');
+                }
+            };
+            requestAnimationFrame(counter);
+        }
+
         function renderAllComponents(year) {
             if (!allData || Object.keys(allData).length === 0 || !year) return;
             renderTable(year);
@@ -456,10 +491,13 @@
                 }
             }
             ui.summaryContainer.innerHTML = `
-                <div class="summary-card"><p class="text-sm text-gray-400">Promedio Mensual</p><p class="text-3xl font-bold text-gray-100 mt-1">${formatCurrency(avg, '$')}</p></div>
-                <div class="summary-card"><p class="text-sm text-gray-400">Mejor Mes</p><p class="text-3xl font-bold text-gray-100 mt-1">${bestMonth}</p><p class="text-sm text-green-400">${bestAmount > 0 ? formatCurrency(bestAmount, '$') : ''}</p></div>
-                <div class="summary-card"><p class="text-sm text-gray-400">Ganancia Total</p><p class="text-3xl font-bold text-gray-100 mt-1">${formatCurrency(total, '$')}</p></div>
+                <div class="summary-card"><p class="text-base font-medium text-gray-400">Promedio Mensual</p><p id="avg-value" class="text-4xl font-bold text-gray-100 mt-1"></p></div>
+                <div class="summary-card"><p class="text-base font-medium text-gray-400">Mejor Mes</p><p class="text-4xl font-bold text-gray-100 mt-1">${bestMonth}</p><p class="text-lg text-green-400">${bestAmount > 0 ? formatCurrency(bestAmount, '$') : ''}</p></div>
+                <div class="summary-card"><p class="text-base font-medium text-gray-400">Ganancia Total</p><p id="total-value" class="text-4xl font-bold text-gray-100 mt-1"></p></div>
             `;
+            
+            animateCountUp(document.getElementById('avg-value'), avg);
+            animateCountUp(document.getElementById('total-value'), total);
         }
 
         function renderChart(year) {
@@ -683,21 +721,50 @@
         });
 
         ui.deleteYearBtn.addEventListener('click', () => {
-            showConfirmationModal(async () => {
-                const yearToDelete = ui.yearSelector.value;
-                if (Object.keys(allData).length <= 1) {
-                    showNotification("No se puede eliminar el último año.");
-                    return;
+            showConfirmationModal(
+                'Confirmar Eliminación',
+                `¿Estás seguro de que quieres eliminar el año ${ui.yearSelector.value}? Esta acción no se puede deshacer.`,
+                async () => {
+                    const yearToDelete = ui.yearSelector.value;
+                    if (Object.keys(allData).length <= 1) {
+                        showNotification("No se puede eliminar el último año.");
+                        return;
+                    }
+                    pushToHistory();
+                    const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
+                    try {
+                        await deleteDoc(doc(db, collectionPath, yearToDelete));
+                    } catch (error) {
+                        console.error("Error deleting year:", error);
+                        showNotification("No se pudo eliminar el año.");
+                    }
                 }
-                pushToHistory();
-                const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
-                try {
-                    await deleteDoc(doc(db, collectionPath, yearToDelete));
-                } catch (error) {
-                    console.error("Error deleting year:", error);
-                    showNotification("No se pudo eliminar el año.");
-                }
-            });
+            );
+        });
+        
+        async function clearHistory() {
+            const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
+            const historyCol = collection(db, historyCollectionPath);
+            try {
+                const snapshot = await getDocs(historyCol);
+                const batch = writeBatch(db);
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                showNotification("Historial borrado con éxito.", false);
+            } catch (error) {
+                console.error("Error clearing history:", error);
+                showNotification("No se pudo borrar el historial.");
+            }
+        }
+
+        ui.clearHistoryBtn.addEventListener('click', () => {
+            showConfirmationModal(
+                'Confirmar Borrado de Historial',
+                '¿Estás seguro de que quieres borrar todo el historial de cambios? Esta acción es irreversible.',
+                clearHistory
+            );
         });
 
         ui.tableBody.addEventListener('click', (e) => {
