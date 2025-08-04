@@ -17,6 +17,7 @@
             --accent-color: #34d399;
             --accent-color-rgb: 52, 211, 153;
             --danger-color: #ef4444;
+            --success-color: #34d399;
         }
 
         .light-mode {
@@ -116,6 +117,25 @@
             --tw-ring-color: var(--accent-color);
             border-color: var(--accent-color);
         }
+        .trend-up { color: var(--success-color); }
+        .trend-down { color: var(--danger-color); }
+        
+        @keyframes shrink-width {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        .timer-animate {
+            animation: shrink-width 4s linear forwards;
+        }
+        
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            animation: fade-in-up 0.5s ease-out forwards;
+            opacity: 0;
+        }
     </style>
 </head>
 <body class="p-4 sm:p-6">
@@ -150,7 +170,7 @@
                     <p class="text-secondary mt-1">Análisis de rendimiento financiero en tiempo real.</p>
                 </div>
             </div>
-            <div class="flex items-center flex-shrink-0 gap-2 mt-4 sm:mt-0">
+            <div class="flex items-center justify-end flex-wrap gap-2 mt-4 sm:mt-0">
                  <select id="year-selector" class="p-2 bg-secondary border border-color rounded-md shadow-sm"></select>
                  <button id="add-year-btn" title="Añadir nuevo año" class="p-2 bg-accent text-white rounded-md shadow-sm hover:opacity-90">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
@@ -169,7 +189,7 @@
         </div>
 
         <!-- Settings Bar -->
-        <div class="flex justify-between items-center mb-4 p-2 bg-secondary rounded-md border border-color">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-4 p-2 bg-secondary rounded-md border border-color">
             <div class="flex gap-2">
                 <button class="tab-btn active px-4 py-2 rounded-md text-sm font-medium" data-tab="analysis">Análisis Anual</button>
                 <button class="tab-btn px-4 py-2 rounded-md text-sm font-medium" data-tab="tools">Herramientas</button>
@@ -271,7 +291,11 @@
 
     <!-- Notification Toast -->
     <div id="notification" class="fixed bottom-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-20 opacity-0">
-        <p id="notification-message"></p>
+         <div class="flex items-center justify-between">
+            <p id="notification-message"></p>
+            <button id="notification-close-btn" class="ml-4 text-xl leading-none">&times;</button>
+        </div>
+        <div class="absolute bottom-0 left-0 h-1 bg-white/50" id="notification-timer"></div>
     </div>
 
     <script type="module">
@@ -303,6 +327,7 @@
         let areValuesHidden = false;
         let debounceTimer;
         let inactivityTimer;
+        let notificationTimeout;
 
         const icons = {
             sun: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`,
@@ -342,6 +367,8 @@
             modalCancelBtn: document.getElementById('modal-cancel-btn'),
             notification: document.getElementById('notification'),
             notificationMessage: document.getElementById('notification-message'),
+            notificationCloseBtn: document.getElementById('notification-close-btn'),
+            notificationTimer: document.getElementById('notification-timer'),
             historyLoader: document.getElementById('history-loader'),
             historyLogContainer: document.getElementById('history-log-container'),
             clearHistoryBtn: document.getElementById('clear-history-btn'),
@@ -354,12 +381,24 @@
 
         // --- Notifications & Modal ---
         function showNotification(message, isError = true) {
+            clearTimeout(notificationTimeout);
             ui.notificationMessage.textContent = message;
-            ui.notification.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
-            setTimeout(() => {
-                ui.notification.className = ui.notification.className.replace('translate-y-0 opacity-100', 'translate-y-20 opacity-0');
-            }, 3000);
+            ui.notification.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 overflow-hidden ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            ui.notificationTimer.classList.remove('timer-animate');
+            void ui.notificationTimer.offsetWidth; // Trigger reflow
+            ui.notificationTimer.classList.add('timer-animate');
+
+            notificationTimeout = setTimeout(() => {
+                hideNotification();
+            }, 4000);
         }
+        
+        function hideNotification() {
+            ui.notification.className = ui.notification.className.replace('translate-y-0 opacity-100', 'translate-y-20 opacity-0');
+            clearTimeout(notificationTimeout);
+        }
+        
+        ui.notificationCloseBtn.addEventListener('click', hideNotification);
 
         function showConfirmationModal(title, body, onConfirm) {
             ui.modalTitle.textContent = title;
@@ -551,10 +590,19 @@
                     bestMonth = month;
                 }
             }
+            
+            const prevYearData = allData[(parseInt(year) - 1).toString()] || {};
+            const prevValues = Object.values(prevYearData).filter(v => v > 0);
+            const prevTotal = prevValues.reduce((s, a) => s + a, 0);
+            const prevAvg = prevValues.length > 0 ? prevTotal / prevValues.length : 0;
+
+            const totalTrend = total > prevTotal ? 'up' : 'down';
+            const avgTrend = avg > prevAvg ? 'up' : 'down';
+            
             ui.summaryContainer.innerHTML = `
-                <div class="summary-card"><p class="text-base font-medium text-secondary">Promedio Mensual</p><p id="avg-value" class="text-4xl font-bold mt-1"></p></div>
+                <div class="summary-card"><p class="text-base font-medium text-secondary">Promedio Mensual</p><div class="flex items-baseline"><p id="avg-value" class="text-4xl font-bold mt-1"></p><span class="ml-2 trend-${avgTrend}">${avg > 0 && prevAvg > 0 ? (avgTrend === 'up' ? '▲' : '▼') : ''}</span></div></div>
                 <div class="summary-card"><p class="text-base font-medium text-secondary">Mejor Mes</p><p class="text-4xl font-bold mt-1">${bestMonth}</p><p class="text-lg text-accent">${bestAmount > 0 ? formatCurrency(bestAmount, '$') : ''}</p></div>
-                <div class="summary-card"><p class="text-base font-medium text-secondary">Ganancia Total</p><p id="total-value" class="text-4xl font-bold mt-1"></p></div>
+                <div class="summary-card"><p class="text-base font-medium text-secondary">Ganancia Total</p><div class="flex items-baseline"><p id="total-value" class="text-4xl font-bold mt-1"></p><span class="ml-2 trend-${totalTrend}">${total > 0 && prevTotal > 0 ? (totalTrend === 'up' ? '▲' : '▼') : ''}</span></div></div>
             `;
             
             animateCountUp(document.getElementById('avg-value'), avg);
@@ -671,6 +719,11 @@
             renderAllComponents(currentYear);
             ui.loader.style.display = 'none';
             ui.earningsTable.classList.remove('hidden');
+
+            document.querySelectorAll('.summary-card, .main-card').forEach((el, i) => {
+                el.style.animationDelay = `${i * 50}ms`;
+                el.classList.add('fade-in-up');
+            });
         }
 
         function populateYearSelector() {
