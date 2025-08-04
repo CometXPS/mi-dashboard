@@ -8,44 +8,65 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --border-color: #374151;
+            --text-primary: #d1d5db;
+            --text-secondary: #9ca3af;
+            --accent-color: #34d399;
+            --accent-color-rgb: 52, 211, 153;
+            --danger-color: #ef4444;
+        }
+
+        .light-mode {
+            --bg-primary: #f9fafb;
+            --bg-secondary: #ffffff;
+            --border-color: #e5e7eb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #111827;
-            color: #d1d5db;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
         }
         .main-card {
-            background-color: #1f2937;
+            background-color: var(--bg-secondary);
             border-radius: 0.75rem;
-            border: 1px solid #374151;
+            border: 1px solid var(--border-color);
             overflow: hidden;
+            transition: background-color 0.3s, border-color 0.3s;
         }
         .summary-card {
-            background-color: #1f2937;
-            border: 1px solid #374151;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: 0.75rem;
             padding: 1.5rem;
             transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
         }
         .summary-card:hover {
             transform: translateY(-4px);
-            border-color: #34d399;
+            border-color: var(--accent-color);
         }
         .data-cell:hover {
-            background-color: #374151;
+            background-color: var(--border-color);
         }
         .total-row td {
-            background-color: rgba(16, 185, 129, 0.1);
+            background-color: rgba(var(--accent-color-rgb), 0.1);
             font-weight: 700;
-            color: #34d399;
+            color: var(--accent-color);
         }
         .editing input {
-            border: 2px solid #34d399;
-            background-color: #374151;
-            color: #f9fafb;
+            border: 2px solid var(--accent-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
         }
         #loader, #history-loader {
-            border: 4px solid #374151;
-            border-top: 4px solid #34d399;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--accent-color);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -57,10 +78,10 @@
             100% { transform: rotate(360deg); }
         }
         .saved-feedback {
-            animation: flash-green 0.7s ease-out;
+            animation: flash-accent 0.7s ease-out;
         }
-        @keyframes flash-green {
-            0% { background-color: rgba(52, 211, 153, 0.5); }
+        @keyframes flash-accent {
+            0% { background-color: rgba(var(--accent-color-rgb), 0.5); }
             100% { background-color: transparent; }
         }
         #notification, #confirmation-modal {
@@ -69,6 +90,18 @@
         #notification {
              transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
+        .tab-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .compact-mode .p-6 { padding: 1rem; }
+        .compact-mode .mb-6 { margin-bottom: 1rem; }
+        .compact-mode .gap-6 { gap: 1rem; }
+        .compact-mode .text-3xl { font-size: 1.5rem; }
+        .compact-mode .text-4xl { font-size: 1.875rem; }
     </style>
 </head>
 <body class="p-4 sm:p-6">
@@ -76,16 +109,16 @@
     <!-- Auth Container -->
     <div id="auth-container" class="max-w-md mx-auto">
         <div class="main-card p-8">
-            <h2 id="auth-title" class="text-2xl font-bold text-center text-white mb-6">Iniciar Sesión</h2>
+            <h2 id="auth-title" class="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
             <div id="auth-error" class="text-red-400 text-center mb-4 hidden"></div>
             <form id="auth-form">
                 <div class="mb-4">
                     <label for="email" class="block text-sm font-medium text-gray-400">Correo Electrónico</label>
-                    <input type="email" id="email" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    <input type="email" id="email" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500">
                 </div>
                 <div class="mb-6">
                     <label for="password" class="block text-sm font-medium text-gray-400">Contraseña</label>
-                    <input type="password" id="password" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    <input type="password" id="password" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500">
                 </div>
                 <button type="submit" id="submit-btn" class="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-gray-800">Acceder</button>
             </form>
@@ -99,112 +132,125 @@
             <div class="flex items-center gap-4">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" onerror="this.onerror=null;this.src='https://placehold.co/40x40/1f2937/ffffff?text=B';" alt="Logo de Bitcoin" class="h-10 w-10">
                 <div>
-                    <h1 class="text-3xl font-extrabold text-gray-100">Dashboard Intercambio de Divisas</h1>
-                    <p class="text-gray-400 mt-1">Análisis de rendimiento financiero en tiempo real.</p>
+                    <h1 class="text-3xl font-extrabold">Dashboard Intercambio de Divisas</h1>
+                    <p class="text-secondary mt-1">Análisis de rendimiento financiero en tiempo real.</p>
                 </div>
             </div>
             <div class="flex items-center flex-shrink-0 gap-2 mt-4 sm:mt-0">
-                <select id="year-selector" class="p-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"></select>
-                <button id="add-year-btn" title="Añadir nuevo año" class="p-2 bg-green-500 text-white rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-gray-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                </button>
-                <button id="delete-year-btn" title="Borrar año seleccionado" class="p-2 bg-red-600 text-white rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                </button>
-                <button id="undo-btn" title="Deshacer último cambio" class="p-2 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 10v4a1 1 0 001 1h3l1.5 1.5a1 1 0 001.414 0L11 15h3a1 1 0 001-1v-4M3 10V7a1 1 0 011-1h12a1 1 0 011 1v3" />
-                    </svg>
-                </button>
-                <button id="toggle-visibility-btn" title="Ocultar/Mostrar valores" class="p-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-800">
-                    <!-- El ícono cambiará con JS -->
-                </button>
-                <button id="logout-btn" title="Cerrar Sesión" class="p-2 bg-gray-600 text-white rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-gray-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                </button>
+                 <select id="year-selector" class="p-2 bg-secondary border border-color text-primary rounded-md shadow-sm"></select>
+                 <button id="add-year-btn" title="Añadir nuevo año" class="p-2 bg-accent text-white rounded-md shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                 </button>
+                 <button id="delete-year-btn" title="Borrar año seleccionado" class="p-2 bg-danger text-white rounded-md shadow-sm disabled:opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                 </button>
+                 <button id="logout-btn" title="Cerrar Sesión" class="p-2 bg-gray-600 text-white rounded-md shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                 </button>
             </div>
         </div>
-        <!-- Summary Cards -->
-        <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
 
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div class="main-card lg:col-span-3">
-                <div class="p-6">
-                    <div id="loader"></div>
-                    <table class="w-full border-collapse hidden" id="earnings-table">
-                        <thead></thead>
-                        <tbody></tbody>
-                        <tfoot></tfoot>
-                    </table>
-                </div>
+        <!-- Settings Bar -->
+        <div class="flex justify-between items-center mb-4 p-2 bg-secondary rounded-md border border-color">
+            <!-- Tabs -->
+            <div class="flex gap-2">
+                <button class="tab-btn active px-4 py-2 rounded-md text-sm font-medium" data-tab="analysis">Análisis Anual</button>
+                <button class="tab-btn px-4 py-2 rounded-md text-sm font-medium" data-tab="tools">Herramientas</button>
             </div>
-            <div class="main-card lg:col-span-2">
-                <div class="p-6">
-                    <h2 class="text-xl font-bold text-gray-100">Comparativa Anual</h2>
-                    <div class="relative h-80 mt-4"><canvas id="comparisonChart"></canvas></div>
+
+            <!-- Display Options -->
+            <div class="flex items-center gap-3">
+                <div id="color-picker" class="flex gap-1">
+                    <button data-color="#34d399" class="h-5 w-5 bg-green-400 rounded-full border-2 border-transparent"></button>
+                    <button data-color="#60a5fa" class="h-5 w-5 bg-blue-400 rounded-full border-2 border-transparent"></button>
+                    <button data-color="#c084fc" class="h-5 w-5 bg-purple-400 rounded-full border-2 border-transparent"></button>
                 </div>
+                <button id="theme-toggle-btn" title="Cambiar Tema" class="p-2 rounded-md bg-primary">
+                    <!-- Icon will be set by JS -->
+                </button>
+                <button id="compact-view-btn" title="Vista Compacta" class="p-2 rounded-md bg-primary">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5" /></svg>
+                </button>
             </div>
         </div>
-        
-        <!-- Currency Converter & History -->
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6 items-start">
-            <div class="main-card lg:col-span-3">
-                <div class="p-6">
-                    <h2 class="text-xl font-bold text-gray-100 mb-4">Conversor de Divisas</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div class="md:col-span-1">
-                            <label for="usd-amount" class="block text-sm font-medium text-gray-400">Monto en USD</label>
-                            <input type="number" id="usd-amount" placeholder="Ej: 1500.50" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-green-500 focus:border-green-500">
-                        </div>
-                        <div class="md:col-span-2 grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm text-gray-400">Resultado en EUR</p>
-                                <p id="eur-result" class="text-2xl font-bold text-gray-100 mt-1">€ 0.00</p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-400">Resultado en CLP</p>
-                                <p id="clp-result" class="text-2xl font-bold text-gray-100 mt-1">$ 0</p>
-                            </div>
-                        </div>
+
+        <!-- Tab Content -->
+        <div id="analysis-tab" class="tab-content active">
+            <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div class="main-card lg:col-span-3">
+                    <div class="p-6">
+                        <div id="loader"></div>
+                        <table class="w-full border-collapse hidden" id="earnings-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                            <tfoot></tfoot>
+                        </table>
                     </div>
-                     <p id="converter-status" class="text-xs text-gray-500 mt-2 text-right"></p>
                 </div>
-            </div>
-            <div class="main-card lg:col-span-2">
-                <div class="p-6">
-                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-100">Historial de Cambios</h2>
-                        <button id="clear-history-btn" title="Limpiar historial" class="p-2 text-gray-400 hover:text-white hover:bg-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                     </div>
-                     <div id="history-loader"></div>
-                     <div id="history-log-container" class="max-h-60 overflow-y-auto"></div>
+                <div class="main-card lg:col-span-2 grid grid-rows-2 gap-6">
+                     <div class="p-6">
+                        <h2 class="text-xl font-bold">Comparativa Anual</h2>
+                        <div class="relative h-full mt-4"><canvas id="comparisonChart"></canvas></div>
+                    </div>
+                     <div class="p-6">
+                        <h2 class="text-xl font-bold">Distribución Anual</h2>
+                        <div class="relative h-full mt-4"><canvas id="doughnutChart"></canvas></div>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <div id="tools-tab" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+                <div class="main-card lg:col-span-3">
+                    <div class="p-6">
+                        <h2 class="text-xl font-bold mb-4">Conversor de Divisas</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div class="md:col-span-1">
+                                <label for="usd-amount" class="block text-sm font-medium">Monto en USD</label>
+                                <input type="number" id="usd-amount" placeholder="Ej: 1500.50" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none">
+                            </div>
+                            <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm text-secondary">Resultado en EUR</p>
+                                    <p id="eur-result" class="text-2xl font-bold mt-1">€ 0.00</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-secondary">Resultado en CLP</p>
+                                    <p id="clp-result" class="text-2xl font-bold mt-1">$ 0</p>
+                                </div>
+                            </div>
+                        </div>
+                         <p id="converter-status" class="text-xs text-secondary mt-2 text-right"></p>
+                    </div>
+                </div>
+                <div class="main-card lg:col-span-2">
+                    <div class="p-6">
+                         <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Historial de Cambios</h2>
+                            <button id="clear-history-btn" title="Limpiar historial" class="p-2 text-secondary hover:text-primary hover:bg-danger rounded-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                         </div>
+                         <div id="history-loader"></div>
+                         <div id="history-log-container" class="max-h-60 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div id="user-info" class="mt-6 text-center text-xs text-gray-500"></div>
+        <div id="user-info" class="mt-6 text-center text-xs text-secondary"></div>
     </div>
 
     <!-- Confirmation Modal -->
     <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm">
-            <h3 id="modal-title" class="text-lg font-bold text-white"></h3>
-            <p id="modal-body" class="text-gray-300 mt-2"></p>
+        <div class="main-card p-6 w-full max-w-sm">
+            <h3 id="modal-title" class="text-lg font-bold"></h3>
+            <p id="modal-body" class="text-secondary mt-2"></p>
             <div class="mt-6 flex justify-end gap-4">
-                <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancelar</button>
-                <button id="modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Confirmar</button>
+                <button id="modal-cancel-btn" class="px-4 py-2 bg-secondary rounded-md hover:opacity-80">Cancelar</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-danger text-white rounded-md hover:opacity-80">Confirmar</button>
             </div>
         </div>
     </div>
@@ -215,10 +261,6 @@
     </div>
 
     <script type="module">
-        // ADVERTENCIA: La vista previa en este entorno no funcionará porque
-        // no se puede encontrar el archivo 'config.js'. Este código está
-        // preparado para funcionar en un entorno de despliegue donde el
-        // archivo 'config.js' sí exista.
         import { firebaseConfig } from './config.js'; 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -231,8 +273,7 @@
         // --- Constants & State ---
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
         const FIRESTORE_HISTORY_COLLECTION = 'history';
-        const LOCAL_STORAGE_VISIBILITY_KEY = 'dashboardAreValuesHidden';
-        const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+        const INACTIVITY_TIMEOUT = 10 * 60 * 1000;
 
         const initialUserData = {
             "2024": { "Noviembre": 1528.9, "Diciembre": 1250 },
@@ -243,15 +284,15 @@
         let unsubscribeData, unsubscribeHistory;
         let allData = {};
         let currentYear;
-        let comparisonChart;
+        let comparisonChart, doughnutChart;
         let historyStack = [];
         let areValuesHidden = false;
         let debounceTimer;
         let inactivityTimer;
 
         const icons = {
-            eyeOpen: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`,
-            eyeClosed: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
+            sun: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`,
+            moon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`,
         };
 
         const ui = {
@@ -271,6 +312,7 @@
             undoBtn: document.getElementById('undo-btn'),
             toggleVisibilityBtn: document.getElementById('toggle-visibility-btn'),
             chartCanvas: document.getElementById('comparisonChart').getContext('2d'),
+            doughnutChartCanvas: document.getElementById('doughnutChart').getContext('2d'),
             summaryContainer: document.getElementById('summary-container'),
             userInfo: document.getElementById('user-info'),
             usdAmountInput: document.getElementById('usd-amount'),
@@ -287,6 +329,10 @@
             historyLoader: document.getElementById('history-loader'),
             historyLogContainer: document.getElementById('history-log-container'),
             clearHistoryBtn: document.getElementById('clear-history-btn'),
+            themeToggleBtn: document.getElementById('theme-toggle-btn'),
+            compactViewBtn: document.getElementById('compact-view-btn'),
+            colorPicker: document.getElementById('color-picker'),
+            tabs: document.querySelectorAll('.tab-btn'),
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -386,9 +432,7 @@
         
         // --- App Initialization & Data Handling ---
         async function initApp() {
-            const savedVisibility = localStorage.getItem(LOCAL_STORAGE_VISIBILITY_KEY);
-            areValuesHidden = savedVisibility === 'true';
-            updateVisibilityButton();
+            loadPreferences();
 
             if (unsubscribeData) unsubscribeData();
             if (unsubscribeHistory) unsubscribeHistory();
@@ -463,15 +507,16 @@
             renderTable(year);
             renderSummaryCards(year);
             renderChart(year);
+            renderDoughnutChart(year);
         }
 
         function renderTable(year) {
             const yearData = allData[year] || {};
-            ui.tableHead.innerHTML = '<tr><th class="p-3 text-left font-semibold text-gray-400 border-b border-gray-700">Mes</th><th class="p-3 text-right font-semibold text-gray-400 border-b border-gray-700">Ganancias (USD)</th></tr>';
+            ui.tableHead.innerHTML = '<tr><th class="p-3 text-left font-semibold text-secondary border-b border-color">Mes</th><th class="p-3 text-right font-semibold text-secondary border-b border-color">Ganancias (USD)</th></tr>';
             ui.tableBody.innerHTML = '';
             months.forEach(month => {
                 const amount = yearData[month] || 0;
-                ui.tableBody.innerHTML += `<tr class="border-b border-gray-700 last:border-b-0"><td class="p-3">${month}</td><td class="p-3 text-right data-cell" data-month="${month}">${formatCurrency(amount, '$')}</td></tr>`;
+                ui.tableBody.innerHTML += `<tr class="border-b border-color last:border-b-0"><td class="p-3">${month}</td><td class="p-3 text-right data-cell" data-month="${month}">${formatCurrency(amount, '$')}</td></tr>`;
             });
             const total = Object.values(yearData).reduce((sum, amount) => sum + parseFloat(amount), 0);
             ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-3 font-bold">Total Anual</td><td class="p-3 text-right text-lg font-bold">${formatCurrency(total, '$')}</td></tr>`;
@@ -491,9 +536,9 @@
                 }
             }
             ui.summaryContainer.innerHTML = `
-                <div class="summary-card"><p class="text-base font-medium text-gray-400">Promedio Mensual</p><p id="avg-value" class="text-4xl font-bold text-gray-100 mt-1"></p></div>
-                <div class="summary-card"><p class="text-base font-medium text-gray-400">Mejor Mes</p><p class="text-4xl font-bold text-gray-100 mt-1">${bestMonth}</p><p class="text-lg text-green-400">${bestAmount > 0 ? formatCurrency(bestAmount, '$') : ''}</p></div>
-                <div class="summary-card"><p class="text-base font-medium text-gray-400">Ganancia Total</p><p id="total-value" class="text-4xl font-bold text-gray-100 mt-1"></p></div>
+                <div class="summary-card"><p class="text-base font-medium text-secondary">Promedio Mensual</p><p id="avg-value" class="text-4xl font-bold mt-1"></p></div>
+                <div class="summary-card"><p class="text-base font-medium text-secondary">Mejor Mes</p><p class="text-4xl font-bold mt-1">${bestMonth}</p><p class="text-lg text-accent">${bestAmount > 0 ? formatCurrency(bestAmount, '$') : ''}</p></div>
+                <div class="summary-card"><p class="text-base font-medium text-secondary">Ganancia Total</p><p id="total-value" class="text-4xl font-bold mt-1"></p></div>
             `;
             
             animateCountUp(document.getElementById('avg-value'), avg);
@@ -514,31 +559,50 @@
                     labels: months.map(m => m.substring(0,3)),
                     datasets: [
                         { label: previousYear, data: previousYearValues, borderColor: '#4b5563', tension: 0.4 },
-                        { label: currentYear, data: currentYearValues, borderColor: '#34d399', backgroundColor: 'rgba(52, 211, 153, 0.1)', fill: true, tension: 0.4 }
+                        { label: currentYear, data: currentYearValues, borderColor: 'var(--accent-color)', backgroundColor: 'rgba(var(--accent-color-rgb), 0.1)', fill: true, tension: 0.4 }
                     ]
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
                     scales: { 
-                        y: { 
-                            beginAtZero: true, 
-                            ticks: { 
-                                color: '#9ca3af',
-                                callback: (value) => areValuesHidden ? '' : formatCurrency(value, '$')
-                            } 
-                        }, 
-                        x: { ticks: { color: '#9ca3af' } } 
+                        y: { beginAtZero: true, ticks: { color: 'var(--text-secondary)' } }, 
+                        x: { ticks: { color: 'var(--text-secondary)' } } 
                     }, 
                     plugins: { 
-                        legend: { labels: { color: '#d1d5db' } },
-                        tooltip: {
-                            enabled: !areValuesHidden,
-                            callbacks: {
-                                label: (context) => `${context.dataset.label}: ${formatCurrency(context.parsed.y, '$')}`
-                            }
-                        }
+                        legend: { labels: { color: 'var(--text-primary)' } },
+                        tooltip: { enabled: !areValuesHidden }
                     } 
+                }
+            });
+        }
+
+        function renderDoughnutChart(year) {
+            const yearData = allData[year] || {};
+            const labels = months.filter(month => yearData[month] > 0);
+            const data = labels.map(month => yearData[month]);
+
+            if (doughnutChart) doughnutChart.destroy();
+            doughnutChart = new Chart(ui.doughnutChartCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#34d399', '#60a5fa', '#c084fc', '#f87171', '#fbbf24', '#a3e635', '#2dd4bf', '#818cf8', '#f472b6', '#fb923c', '#facc15', '#4ade80'],
+                        borderColor: 'var(--bg-secondary)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: 'var(--text-primary)' }
+                        },
+                        tooltip: { enabled: !areValuesHidden }
+                    }
                 }
             });
         }
@@ -547,28 +611,21 @@
             ui.historyLoader.style.display = 'none';
             const container = ui.historyLogContainer;
             if (!logs || logs.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-4">No hay historial de cambios.</p>';
+                container.innerHTML = '<p class="text-secondary text-center py-4">No hay historial de cambios.</p>';
                 return;
             }
 
             container.innerHTML = logs.map(log => {
                 const data = log.data();
-                if (!data.timestamp) return ''; // Skip if timestamp is missing
+                if (!data.timestamp) return '';
                 const date = data.timestamp.toDate();
-                const formattedDate = date.toLocaleString('es-CL', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                });
+                const formattedDate = date.toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
                 return `
-                    <div class="border-b border-gray-700 p-3 text-sm last:border-b-0">
-                        <p class="font-semibold text-gray-300">
-                            <span class="text-green-400">${data.month} ${data.year}</span> modificado
-                        </p>
-                        <p class="text-gray-400">
-                            ${formatCurrency(data.oldValue, '$')} → ${formatCurrency(data.newValue, '$')}
-                        </p>
-                        <p class="text-xs text-gray-500 text-right">${formattedDate}</p>
+                    <div class="border-b border-color p-3 text-sm last:border-b-0">
+                        <p class="font-semibold"><span class="text-accent">${data.month} ${data.year}</span> modificado</p>
+                        <p class="text-secondary">${formatCurrency(data.oldValue, '$')} → ${formatCurrency(data.newValue, '$')}</p>
+                        <p class="text-xs text-secondary text-right">${formattedDate}</p>
                     </div>
                 `;
             }).join('');
@@ -596,9 +653,7 @@
         }
         
         function formatCurrency(value, currencySymbol) {
-            if (areValuesHidden) {
-                return `${currencySymbol} ****`;
-            }
+            if (areValuesHidden) return `${currencySymbol} ****`;
             const numberValue = Number(value);
             const formatted = isNaN(numberValue) ? '0.00' : numberValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             return `${currencySymbol} ${formatted}`;
@@ -614,13 +669,8 @@
         
         function toggleVisibility() {
             areValuesHidden = !areValuesHidden;
-            localStorage.setItem(LOCAL_STORAGE_VISIBILITY_KEY, areValuesHidden);
-            updateVisibilityButton();
+            localStorage.setItem('dashboardAreValuesHidden', areValuesHidden);
             renderAllComponents(currentYear);
-        }
-
-        function updateVisibilityButton() {
-            ui.toggleVisibilityBtn.innerHTML = areValuesHidden ? icons.eyeClosed : icons.eyeOpen;
         }
 
         ui.toggleVisibilityBtn.addEventListener('click', toggleVisibility);
@@ -690,17 +740,14 @@
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 convertCurrency();
-            }, 500); // 500ms delay
+            }, 500);
         });
 
         ui.yearSelector.addEventListener('change', (e) => { currentYear = e.target.value; renderAllComponents(currentYear); });
         
         async function createNewYearData(year) {
             const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
-            const initialYearData = months.reduce((acc, month) => {
-                acc[month] = 0;
-                return acc;
-            }, {});
+            const initialYearData = months.reduce((acc, month) => ({...acc, [month]: 0}), {});
             try {
                 await setDoc(doc(db, collectionPath, year), initialYearData);
             } catch (error) {
@@ -721,25 +768,20 @@
         });
 
         ui.deleteYearBtn.addEventListener('click', () => {
-            showConfirmationModal(
-                'Confirmar Eliminación',
-                `¿Estás seguro de que quieres eliminar el año ${ui.yearSelector.value}? Esta acción no se puede deshacer.`,
-                async () => {
-                    const yearToDelete = ui.yearSelector.value;
-                    if (Object.keys(allData).length <= 1) {
-                        showNotification("No se puede eliminar el último año.");
-                        return;
-                    }
-                    pushToHistory();
-                    const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
-                    try {
-                        await deleteDoc(doc(db, collectionPath, yearToDelete));
-                    } catch (error) {
-                        console.error("Error deleting year:", error);
-                        showNotification("No se pudo eliminar el año.");
-                    }
+            showConfirmationModal('Confirmar Eliminación', `¿Estás seguro de que quieres eliminar el año ${ui.yearSelector.value}?`, async () => {
+                if (Object.keys(allData).length <= 1) {
+                    showNotification("No se puede eliminar el último año.");
+                    return;
                 }
-            );
+                pushToHistory();
+                const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
+                try {
+                    await deleteDoc(doc(db, collectionPath, ui.yearSelector.value));
+                } catch (error) {
+                    console.error("Error deleting year:", error);
+                    showNotification("No se pudo eliminar el año.");
+                }
+            });
         });
         
         async function clearHistory() {
@@ -748,9 +790,7 @@
             try {
                 const snapshot = await getDocs(historyCol);
                 const batch = writeBatch(db);
-                snapshot.docs.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
                 showNotification("Historial borrado con éxito.", false);
             } catch (error) {
@@ -760,11 +800,7 @@
         }
 
         ui.clearHistoryBtn.addEventListener('click', () => {
-            showConfirmationModal(
-                'Confirmar Borrado de Historial',
-                '¿Estás seguro de que quieres borrar todo el historial de cambios? Esta acción es irreversible.',
-                clearHistory
-            );
+            showConfirmationModal('Confirmar Borrado', '¿Estás seguro de que quieres borrar todo el historial?', clearHistory);
         });
 
         ui.tableBody.addEventListener('click', (e) => {
@@ -787,8 +823,7 @@
                 let newValue;
 
                 if ((inputText.startsWith('+') || inputText.startsWith('-')) && !isNaN(parseFloat(inputText))) {
-                    const valueToAdd = parseFloat(inputText) || 0;
-                    newValue = currentValue + valueToAdd;
+                    newValue = currentValue + (parseFloat(inputText) || 0);
                 } else {
                     newValue = parseFloat(inputText) || 0;
                 }
@@ -801,9 +836,7 @@
                     const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                     const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
                     try {
-                        // Update earnings
                         await setDoc(doc(db, earningsCollectionPath, currentYear), { [month]: newValue }, { merge: true });
-                        // Log the change
                         await addDoc(collection(db, historyCollectionPath), {
                             timestamp: serverTimestamp(),
                             year: currentYear,
@@ -817,21 +850,85 @@
                     } catch (error) {
                         console.error("Error saving data:", error);
                         showNotification("No se pudo guardar el cambio.");
-                        cell.innerHTML = formatCurrency(currentValue, '$'); // Revert on error
+                        cell.innerHTML = formatCurrency(currentValue, '$');
                     }
                 }
             };
 
             input.addEventListener('blur', saveChanges);
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    input.blur();
-                } else if (e.key === 'Escape') {
+                if (e.key === 'Enter') input.blur();
+                else if (e.key === 'Escape') {
                     cell.classList.remove('editing');
                     cell.innerHTML = formatCurrency(currentValue, '$');
                 }
             });
         }
+
+        // --- Preferences & UI ---
+        function applyTheme(theme) {
+            document.body.classList.toggle('light-mode', theme === 'light');
+            ui.themeToggleBtn.innerHTML = theme === 'light' ? icons.moon : icons.sun;
+        }
+
+        function applyAccentColor(color) {
+            const root = document.documentElement;
+            root.style.setProperty('--accent-color', color);
+            const rgb = color.match(/\w\w/g).map(x => parseInt(x, 16));
+            root.style.setProperty('--accent-color-rgb', rgb.join(', '));
+            
+            ui.colorPicker.querySelectorAll('button').forEach(btn => {
+                btn.style.borderColor = btn.dataset.color === color ? color : 'transparent';
+            });
+        }
+        
+        function applyCompactView(isCompact) {
+            document.body.classList.toggle('compact-mode', isCompact);
+        }
+
+        function loadPreferences() {
+            const theme = localStorage.getItem('dashboardTheme') || 'dark';
+            applyTheme(theme);
+            
+            const accentColor = localStorage.getItem('dashboardAccentColor') || '#34d399';
+            applyAccentColor(accentColor);
+            
+            const isCompact = localStorage.getItem('dashboardCompactView') === 'true';
+            applyCompactView(isCompact);
+            
+            areValuesHidden = localStorage.getItem('dashboardAreValuesHidden') === 'true';
+        }
+
+        ui.themeToggleBtn.addEventListener('click', () => {
+            const isLight = document.body.classList.contains('light-mode');
+            const newTheme = isLight ? 'dark' : 'light';
+            localStorage.setItem('dashboardTheme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        ui.compactViewBtn.addEventListener('click', () => {
+            const isCompact = document.body.classList.toggle('compact-mode');
+            localStorage.setItem('dashboardCompactView', isCompact);
+        });
+
+        ui.colorPicker.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const color = e.target.dataset.color;
+                localStorage.setItem('dashboardAccentColor', color);
+                applyAccentColor(color);
+                renderAllComponents(currentYear); // Re-render charts with new color
+            }
+        });
+
+        ui.tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                ui.tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
     </script>
 </body>
 </html>
