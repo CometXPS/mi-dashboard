@@ -209,7 +209,7 @@
         <div id="analysis-tab" class="tab-content active">
             <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
             <div id="main-content-grid" class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                <div class="main-card lg:col-span-3" data-id="earnings-table-card">
+                <div class="main-card lg:col-span-3">
                     <div class="p-6">
                         <div id="loader"></div>
                         <table class="w-full border-collapse hidden" id="earnings-table">
@@ -219,7 +219,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="main-card lg:col-span-2" data-id="charts-card">
+                <div class="main-card lg:col-span-2">
                      <div class="p-6 border-b border-color">
                         <h2 class="text-xl font-bold">Comparativa Anual</h2>
                         <div class="relative mt-4 h-64"><canvas id="comparisonChart"></canvas></div>
@@ -234,46 +234,48 @@
 
         <div id="tools-tab" class="tab-content">
             <div id="tools-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                <div class="main-card" data-id="converter-card">
-                    <div class="p-6">
-                        <h2 class="text-xl font-bold mb-4">Conversor de Divisas</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                            <div class="md:col-span-1">
-                                <label for="usd-amount" class="block text-sm font-medium">Monto en USD</label>
-                                <input type="number" id="usd-amount" placeholder="Ej: 1500.50" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+                <div class="space-y-6">
+                    <div class="main-card">
+                        <div class="p-6">
+                            <h2 class="text-xl font-bold mb-4">Conversor de Divisas</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                <div class="md:col-span-1">
+                                    <label for="usd-amount" class="block text-sm font-medium">Monto en USD</label>
+                                    <input type="number" id="usd-amount" placeholder="Ej: 1500.50" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+                                </div>
+                                <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-sm text-secondary">Resultado en EUR</p>
+                                        <p id="eur-result" class="text-2xl font-bold mt-1">€ 0.00</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-secondary">Resultado en CLP</p>
+                                        <p id="clp-result" class="text-2xl font-bold mt-1">$ 0</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                             <p id="converter-status" class="text-xs text-secondary mt-2 text-right"></p>
+                        </div>
+                    </div>
+                    <div class="main-card">
+                        <div class="p-6">
+                            <h2 class="text-xl font-bold mb-4">Calculadora PayPal</h2>
+                            <div class="space-y-4">
                                 <div>
-                                    <p class="text-sm text-secondary">Resultado en EUR</p>
-                                    <p id="eur-result" class="text-2xl font-bold mt-1">€ 0.00</p>
+                                    <label for="paypal-receive" class="block text-sm font-medium">Para recibir:</label>
+                                    <input type="number" id="paypal-receive" placeholder="Monto a recibir" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+                                    <p class="text-sm text-secondary mt-1">Debes solicitar: <span id="paypal-request-result" class="font-bold text-primary">$ 0.00</span></p>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-secondary">Resultado en CLP</p>
-                                    <p id="clp-result" class="text-2xl font-bold mt-1">$ 0</p>
+                                    <label for="paypal-send" class="block text-sm font-medium">Si te envían:</label>
+                                    <input type="number" id="paypal-send" placeholder="Monto enviado" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+                                    <p class="text-sm text-secondary mt-1">Recibirás: <span id="paypal-receive-result" class="font-bold text-primary">$ 0.00</span></p>
                                 </div>
                             </div>
                         </div>
-                         <p id="converter-status" class="text-xs text-secondary mt-2 text-right"></p>
                     </div>
                 </div>
-                <div class="main-card" data-id="paypal-card">
-                    <div class="p-6">
-                        <h2 class="text-xl font-bold mb-4">Calculadora PayPal</h2>
-                        <div class="space-y-4">
-                            <div>
-                                <label for="paypal-receive" class="block text-sm font-medium">Para recibir:</label>
-                                <input type="number" id="paypal-receive" placeholder="Monto a recibir" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
-                                <p class="text-sm text-secondary mt-1">Debes solicitar: <span id="paypal-request-result" class="font-bold text-primary">$ 0.00</span></p>
-                            </div>
-                            <div>
-                                <label for="paypal-send" class="block text-sm font-medium">Si te envían:</label>
-                                <input type="number" id="paypal-send" placeholder="Monto enviado" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
-                                <p class="text-sm text-secondary mt-1">Recibirás: <span id="paypal-receive-result" class="font-bold text-primary">$ 0.00</span></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="main-card lg:col-span-2" data-id="history-card">
+                <div class="main-card">
                     <div class="p-6">
                          <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-bold">Historial de Cambios</h2>
@@ -282,7 +284,7 @@
                             </button>
                          </div>
                          <div id="history-loader"></div>
-                         <div id="history-log-container" class="max-h-60 overflow-y-auto"></div>
+                         <div id="history-log-container" class="max-h-96 overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
@@ -1124,4 +1126,4 @@
         }
     </script>
 </body>
-</htm
+</html>
