@@ -456,9 +456,9 @@
                 }
             }
             ui.summaryContainer.innerHTML = `
-                <div class="summary-card"><p class="text-sm text-gray-400">Ganancia Total</p><p class="text-3xl font-bold text-gray-100 mt-1">${formatCurrency(total, '$')}</p></div>
                 <div class="summary-card"><p class="text-sm text-gray-400">Promedio Mensual</p><p class="text-3xl font-bold text-gray-100 mt-1">${formatCurrency(avg, '$')}</p></div>
                 <div class="summary-card"><p class="text-sm text-gray-400">Mejor Mes</p><p class="text-3xl font-bold text-gray-100 mt-1">${bestMonth}</p><p class="text-sm text-green-400">${bestAmount > 0 ? formatCurrency(bestAmount, '$') : ''}</p></div>
+                <div class="summary-card"><p class="text-sm text-gray-400">Ganancia Total</p><p class="text-3xl font-bold text-gray-100 mt-1">${formatCurrency(total, '$')}</p></div>
             `;
         }
 
