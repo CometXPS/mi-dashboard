@@ -102,6 +102,20 @@
         .compact-mode .gap-6 { gap: 1rem; }
         .compact-mode .text-3xl { font-size: 1.5rem; }
         .compact-mode .text-4xl { font-size: 1.875rem; }
+        
+        /* Custom classes for dynamic colors */
+        .bg-accent { background-color: var(--accent-color); }
+        .bg-danger { background-color: var(--danger-color); }
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .text-accent { color: var(--accent-color); }
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .border-color { border-color: var(--border-color); }
+        .focus-accent:focus {
+            --tw-ring-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
     </style>
 </head>
 <body class="p-4 sm:p-6">
@@ -113,14 +127,14 @@
             <div id="auth-error" class="text-red-400 text-center mb-4 hidden"></div>
             <form id="auth-form">
                 <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-400">Correo Electrónico</label>
-                    <input type="email" id="email" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    <label for="email" class="block text-sm font-medium text-secondary">Correo Electrónico</label>
+                    <input type="email" id="email" required class="mt-1 block w-full bg-primary border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
                 </div>
                 <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-gray-400">Contraseña</label>
-                    <input type="password" id="password" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    <label for="password" class="block text-sm font-medium text-secondary">Contraseña</label>
+                    <input type="password" id="password" required class="mt-1 block w-full bg-primary border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
                 </div>
-                <button type="submit" id="submit-btn" class="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-gray-800">Acceder</button>
+                <button type="submit" id="submit-btn" class="w-full bg-accent text-white py-2 px-4 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus-accent">Acceder</button>
             </form>
         </div>
     </div>
@@ -137,14 +151,14 @@
                 </div>
             </div>
             <div class="flex items-center flex-shrink-0 gap-2 mt-4 sm:mt-0">
-                 <select id="year-selector" class="p-2 bg-secondary border border-color text-primary rounded-md shadow-sm"></select>
-                 <button id="add-year-btn" title="Añadir nuevo año" class="p-2 bg-accent text-white rounded-md shadow-sm">
+                 <select id="year-selector" class="p-2 bg-secondary border border-color rounded-md shadow-sm"></select>
+                 <button id="add-year-btn" title="Añadir nuevo año" class="p-2 bg-accent text-white rounded-md shadow-sm hover:opacity-90">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                  </button>
-                 <button id="delete-year-btn" title="Borrar año seleccionado" class="p-2 bg-danger text-white rounded-md shadow-sm disabled:opacity-50">
+                 <button id="delete-year-btn" title="Borrar año seleccionado" class="p-2 bg-danger text-white rounded-md shadow-sm disabled:opacity-50 hover:opacity-90">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                  </button>
-                 <button id="logout-btn" title="Cerrar Sesión" class="p-2 bg-gray-600 text-white rounded-md shadow-sm">
+                 <button id="logout-btn" title="Cerrar Sesión" class="p-2 bg-gray-600 text-white rounded-md shadow-sm hover:opacity-90">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                  </button>
             </div>
@@ -152,22 +166,18 @@
 
         <!-- Settings Bar -->
         <div class="flex justify-between items-center mb-4 p-2 bg-secondary rounded-md border border-color">
-            <!-- Tabs -->
             <div class="flex gap-2">
                 <button class="tab-btn active px-4 py-2 rounded-md text-sm font-medium" data-tab="analysis">Análisis Anual</button>
                 <button class="tab-btn px-4 py-2 rounded-md text-sm font-medium" data-tab="tools">Herramientas</button>
             </div>
 
-            <!-- Display Options -->
             <div class="flex items-center gap-3">
                 <div id="color-picker" class="flex gap-1">
                     <button data-color="#34d399" class="h-5 w-5 bg-green-400 rounded-full border-2 border-transparent"></button>
                     <button data-color="#60a5fa" class="h-5 w-5 bg-blue-400 rounded-full border-2 border-transparent"></button>
                     <button data-color="#c084fc" class="h-5 w-5 bg-purple-400 rounded-full border-2 border-transparent"></button>
                 </div>
-                <button id="theme-toggle-btn" title="Cambiar Tema" class="p-2 rounded-md bg-primary">
-                    <!-- Icon will be set by JS -->
-                </button>
+                <button id="theme-toggle-btn" title="Cambiar Tema" class="p-2 rounded-md bg-primary"></button>
                 <button id="compact-view-btn" title="Vista Compacta" class="p-2 rounded-md bg-primary">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5" /></svg>
                 </button>
@@ -188,14 +198,14 @@
                         </table>
                     </div>
                 </div>
-                <div class="main-card lg:col-span-2 grid grid-rows-2 gap-6">
-                     <div class="p-6">
+                <div class="main-card lg:col-span-2 grid grid-rows-2 gap-0">
+                     <div class="p-6 border-b border-color">
                         <h2 class="text-xl font-bold">Comparativa Anual</h2>
-                        <div class="relative h-full mt-4"><canvas id="comparisonChart"></canvas></div>
+                        <div class="relative h-full mt-4 min-h-[150px]"><canvas id="comparisonChart"></canvas></div>
                     </div>
                      <div class="p-6">
                         <h2 class="text-xl font-bold">Distribución Anual</h2>
-                        <div class="relative h-full mt-4"><canvas id="doughnutChart"></canvas></div>
+                        <div class="relative h-full mt-4 min-h-[150px]"><canvas id="doughnutChart"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -209,7 +219,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                             <div class="md:col-span-1">
                                 <label for="usd-amount" class="block text-sm font-medium">Monto en USD</label>
-                                <input type="number" id="usd-amount" placeholder="Ej: 1500.50" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none">
+                                <input type="number" id="usd-amount" placeholder="Ej: 1500.50" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
                             </div>
                             <div class="md:col-span-2 grid grid-cols-2 gap-4">
                                 <div>
@@ -309,8 +319,6 @@
             yearSelector: document.getElementById('year-selector'),
             addYearBtn: document.getElementById('add-year-btn'),
             deleteYearBtn: document.getElementById('delete-year-btn'),
-            undoBtn: document.getElementById('undo-btn'),
-            toggleVisibilityBtn: document.getElementById('toggle-visibility-btn'),
             chartCanvas: document.getElementById('comparisonChart').getContext('2d'),
             doughnutChartCanvas: document.getElementById('doughnutChart').getContext('2d'),
             summaryContainer: document.getElementById('summary-container'),
@@ -404,7 +412,6 @@
                 if(unsubscribeData) unsubscribeData();
                 if(unsubscribeHistory) unsubscribeHistory();
                 historyStack = [];
-                updateUndoButtonState();
                 ui.authContainer.classList.remove('hidden');
                 ui.appContainer.classList.add('hidden');
                 clearTimeout(inactivityTimer);
@@ -482,7 +489,7 @@
         function animateCountUp(element, end) {
             let start = parseFloat(element.dataset.currentValue) || 0;
             element.dataset.currentValue = end;
-            const duration = 1000;
+            const duration = 700;
             const frameRate = 60;
             const totalFrames = Math.round(duration / (1000 / frameRate));
             let currentFrame = 0;
@@ -558,7 +565,7 @@
                 data: {
                     labels: months.map(m => m.substring(0,3)),
                     datasets: [
-                        { label: previousYear, data: previousYearValues, borderColor: '#4b5563', tension: 0.4 },
+                        { label: previousYear, data: previousYearValues, borderColor: 'var(--text-secondary)', tension: 0.4 },
                         { label: currentYear, data: currentYearValues, borderColor: 'var(--accent-color)', backgroundColor: 'rgba(var(--accent-color-rgb), 0.1)', fill: true, tension: 0.4 }
                     ]
                 },
@@ -667,46 +674,6 @@
 
         // --- Event Handlers & Actions ---
         
-        function toggleVisibility() {
-            areValuesHidden = !areValuesHidden;
-            localStorage.setItem('dashboardAreValuesHidden', areValuesHidden);
-            renderAllComponents(currentYear);
-        }
-
-        ui.toggleVisibilityBtn.addEventListener('click', toggleVisibility);
-
-        function pushToHistory() {
-            historyStack.push(JSON.parse(JSON.stringify(allData)));
-            updateUndoButtonState();
-        }
-
-        function updateUndoButtonState() {
-            ui.undoBtn.disabled = historyStack.length === 0;
-        }
-
-        async function undoLastChange() {
-            if (historyStack.length === 0) return;
-            const lastState = historyStack.pop();
-            const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
-            const earningsCol = collection(db, collectionPath);
-            try {
-                const batch = writeBatch(db);
-                Object.keys(allData).forEach(year => {
-                    if (!lastState[year]) batch.delete(doc(earningsCol, year));
-                });
-                for (const year in lastState) {
-                    batch.set(doc(earningsCol, year), lastState[year]);
-                }
-                await batch.commit();
-            } catch (error) {
-                console.error("Error undoing change:", error);
-                showNotification("Error al deshacer el cambio.");
-            }
-            updateUndoButtonState();
-        }
-
-        ui.undoBtn.addEventListener('click', undoLastChange);
-        
         async function convertCurrency() {
             const amount = parseFloat(ui.usdAmountInput.value);
             if(isNaN(amount) || amount <= 0) {
@@ -757,7 +724,6 @@
         }
         
         ui.addYearBtn.addEventListener('click', async () => {
-            pushToHistory();
             const existingYears = Object.keys(allData).map(Number);
             const newYear = (existingYears.length > 0 ? Math.max(...existingYears) + 1 : new Date().getFullYear()).toString();
             
@@ -773,7 +739,6 @@
                     showNotification("No se puede eliminar el último año.");
                     return;
                 }
-                pushToHistory();
                 const collectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                 try {
                     await deleteDoc(doc(db, collectionPath, ui.yearSelector.value));
@@ -808,7 +773,7 @@
         });
 
         function makeCellEditable(cell) {
-            if (cell.classList.contains('editing') || areValuesHidden) return;
+            if (cell.classList.contains('editing')) return;
             const month = cell.dataset.month;
             const currentValue = (allData[currentYear] || {})[month] || 0;
             cell.classList.add('editing');
@@ -832,7 +797,6 @@
                 cell.innerHTML = formatCurrency(newValue, '$');
                 
                 if (currentValue !== newValue) {
-                    pushToHistory();
                     const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                     const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
                     try {
@@ -895,8 +859,6 @@
             
             const isCompact = localStorage.getItem('dashboardCompactView') === 'true';
             applyCompactView(isCompact);
-            
-            areValuesHidden = localStorage.getItem('dashboardAreValuesHidden') === 'true';
         }
 
         ui.themeToggleBtn.addEventListener('click', () => {
@@ -916,7 +878,7 @@
                 const color = e.target.dataset.color;
                 localStorage.setItem('dashboardAccentColor', color);
                 applyAccentColor(color);
-                renderAllComponents(currentYear); // Re-render charts with new color
+                renderAllComponents(currentYear);
             }
         });
 
