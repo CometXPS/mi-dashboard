@@ -513,6 +513,11 @@
                 if(unsubscribeData) unsubscribeData();
                 if(unsubscribeHistory) unsubscribeHistory();
                 if(unsubscribeUndoHistory) unsubscribeUndoHistory();
+                
+                ui.authForm.reset();
+                ui.authError.textContent = '';
+                ui.authError.classList.add('hidden');
+
                 ui.authContainer.classList.remove('hidden');
                 ui.appContainer.classList.add('hidden');
                 clearTimeout(inactivityTimer);
