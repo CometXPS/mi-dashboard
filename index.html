@@ -850,19 +850,19 @@
             if (source === 'receive') {
                 const amount = parseFloat(ui.paypalReceiveInput.value);
                 if (isNaN(amount) || amount <= 0) {
-                    ui.paypalRequestResult.textContent = formatCurrency(0, '$');
+                    ui.paypalRequestResult.textContent = formatConverterCurrency(0, '$');
                     return;
                 }
                 const amountToRequest = (amount + fixedFee) / (1 - commissionRate);
-                ui.paypalRequestResult.textContent = formatCurrency(amountToRequest, '$');
+                ui.paypalRequestResult.textContent = formatConverterCurrency(amountToRequest, '$');
             } else if (source === 'send') {
                 const amount = parseFloat(ui.paypalSendInput.value);
                 if (isNaN(amount) || amount <= 0) {
-                    ui.paypalReceiveResult.textContent = formatCurrency(0, '$');
+                    ui.paypalReceiveResult.textContent = formatConverterCurrency(0, '$');
                     return;
                 }
                 const amountToReceive = amount * (1 - commissionRate) - fixedFee;
-                ui.paypalReceiveResult.textContent = formatCurrency(amountToReceive > 0 ? amountToReceive : 0, '$');
+                ui.paypalReceiveResult.textContent = formatConverterCurrency(amountToReceive > 0 ? amountToReceive : 0, '$');
             }
         }
 
