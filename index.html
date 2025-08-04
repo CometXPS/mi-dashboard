@@ -554,6 +554,12 @@
 
         function renderChart(year) {
             if (!year) return;
+            const style = getComputedStyle(document.body);
+            const textColorPrimary = style.getPropertyValue('--text-primary').trim();
+            const textColorSecondary = style.getPropertyValue('--text-secondary').trim();
+            const accentColor = style.getPropertyValue('--accent-color').trim();
+            const accentColorRgb = style.getPropertyValue('--accent-color-rgb').trim();
+
             const previousYear = (parseInt(year) - 1).toString();
             const currentYearData = allData[year] || {};
             const previousYearData = allData[previousYear] || {};
@@ -565,19 +571,19 @@
                 data: {
                     labels: months.map(m => m.substring(0,3)),
                     datasets: [
-                        { label: previousYear, data: previousYearValues, borderColor: 'var(--text-secondary)', tension: 0.4 },
-                        { label: currentYear, data: currentYearValues, borderColor: 'var(--accent-color)', backgroundColor: 'rgba(var(--accent-color-rgb), 0.1)', fill: true, tension: 0.4 }
+                        { label: previousYear, data: previousYearValues, borderColor: textColorSecondary, tension: 0.4 },
+                        { label: currentYear, data: currentYearValues, borderColor: accentColor, backgroundColor: `rgba(${accentColorRgb}, 0.1)`, fill: true, tension: 0.4 }
                     ]
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
                     scales: { 
-                        y: { beginAtZero: true, ticks: { color: 'var(--text-secondary)' } }, 
-                        x: { ticks: { color: 'var(--text-secondary)' } } 
+                        y: { beginAtZero: true, ticks: { color: textColorSecondary } }, 
+                        x: { ticks: { color: textColorSecondary } } 
                     }, 
                     plugins: { 
-                        legend: { labels: { color: 'var(--text-primary)' } },
+                        legend: { labels: { color: textColorPrimary } },
                         tooltip: { enabled: !areValuesHidden }
                     } 
                 }
@@ -585,6 +591,10 @@
         }
 
         function renderDoughnutChart(year) {
+            const style = getComputedStyle(document.body);
+            const textColorPrimary = style.getPropertyValue('--text-primary').trim();
+            const bgColorSecondary = style.getPropertyValue('--bg-secondary').trim();
+            
             const yearData = allData[year] || {};
             const labels = months.filter(month => yearData[month] > 0);
             const data = labels.map(month => yearData[month]);
@@ -597,7 +607,7 @@
                     datasets: [{
                         data: data,
                         backgroundColor: ['#34d399', '#60a5fa', '#c084fc', '#f87171', '#fbbf24', '#a3e635', '#2dd4bf', '#818cf8', '#f472b6', '#fb923c', '#facc15', '#4ade80'],
-                        borderColor: 'var(--bg-secondary)',
+                        borderColor: bgColorSecondary,
                     }]
                 },
                 options: {
@@ -606,7 +616,7 @@
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: { color: 'var(--text-primary)' }
+                            labels: { color: textColorPrimary }
                         },
                         tooltip: { enabled: !areValuesHidden }
                     }
@@ -866,6 +876,7 @@
             const newTheme = isLight ? 'dark' : 'light';
             localStorage.setItem('dashboardTheme', newTheme);
             applyTheme(newTheme);
+            renderAllComponents(currentYear); // Re-render charts with new theme
         });
 
         ui.compactViewBtn.addEventListener('click', () => {
