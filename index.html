@@ -6,6 +6,7 @@
     <title>Dashboard Intercambio de Divisas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -85,7 +86,7 @@
             0% { background-color: rgba(var(--accent-color-rgb), 0.5); }
             100% { background-color: transparent; }
         }
-        #notification, #confirmation-modal {
+        #notification, .modal {
             transition: opacity 0.3s ease-in-out;
         }
         #notification {
@@ -104,7 +105,6 @@
         .compact-mode .text-3xl { font-size: 1.5rem; }
         .compact-mode .text-4xl { font-size: 1.875rem; }
         
-        /* Custom classes for dynamic colors */
         .bg-accent { background-color: var(--accent-color); }
         .bg-danger { background-color: var(--danger-color); }
         .bg-primary { background-color: var(--bg-primary); }
@@ -135,6 +135,14 @@
         .fade-in-up {
             animation: fade-in-up 0.5s ease-out forwards;
             opacity: 0;
+        }
+        .sortable-ghost {
+            opacity: 0.4;
+            background: var(--border-color);
+        }
+        .table-row-highlight {
+            background-color: rgba(var(--accent-color-rgb), 0.2);
+            transition: background-color 0.3s;
         }
     </style>
 </head>
@@ -196,14 +204,8 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <div id="color-picker" class="flex gap-1">
-                    <button data-color="#34d399" class="h-5 w-5 bg-green-400 rounded-full border-2 border-transparent"></button>
-                    <button data-color="#60a5fa" class="h-5 w-5 bg-blue-400 rounded-full border-2 border-transparent"></button>
-                    <button data-color="#c084fc" class="h-5 w-5 bg-purple-400 rounded-full border-2 border-transparent"></button>
-                </div>
-                <button id="theme-toggle-btn" title="Cambiar Tema" class="p-2 rounded-md bg-primary"></button>
-                <button id="compact-view-btn" title="Vista Compacta" class="p-2 rounded-md bg-primary">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5" /></svg>
+                <button id="settings-btn" title="Configuración" class="p-2 rounded-md bg-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </button>
             </div>
         </div>
@@ -211,8 +213,8 @@
         <!-- Tab Content -->
         <div id="analysis-tab" class="tab-content active">
             <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                <div class="main-card lg:col-span-3">
+            <div id="main-content-grid" class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div class="main-card lg:col-span-3" data-id="earnings-table-card">
                     <div class="p-6">
                         <div id="loader"></div>
                         <table class="w-full border-collapse hidden" id="earnings-table">
@@ -222,7 +224,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="main-card lg:col-span-2">
+                <div class="main-card lg:col-span-2" data-id="charts-card">
                      <div class="p-6 border-b border-color">
                         <h2 class="text-xl font-bold">Comparativa Anual</h2>
                         <div class="relative mt-4 h-64"><canvas id="comparisonChart"></canvas></div>
@@ -236,8 +238,8 @@
         </div>
 
         <div id="tools-tab" class="tab-content">
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-                <div class="main-card lg:col-span-3">
+            <div id="tools-grid" class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+                <div class="main-card lg:col-span-3" data-id="converter-card">
                     <div class="p-6">
                         <h2 class="text-xl font-bold mb-4">Conversor de Divisas</h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -259,7 +261,7 @@
                          <p id="converter-status" class="text-xs text-secondary mt-2 text-right"></p>
                     </div>
                 </div>
-                <div class="main-card lg:col-span-2">
+                <div class="main-card lg:col-span-2" data-id="history-card">
                     <div class="p-6">
                          <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-bold">Historial de Cambios</h2>
@@ -277,14 +279,43 @@
         <div id="user-info" class="mt-6 text-center text-xs text-secondary"></div>
     </div>
 
-    <!-- Confirmation Modal -->
-    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+    <!-- Modals -->
+    <div id="confirmation-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
         <div class="main-card p-6 w-full max-w-sm">
             <h3 id="modal-title" class="text-lg font-bold"></h3>
             <p id="modal-body" class="text-secondary mt-2"></p>
             <div class="mt-6 flex justify-end gap-4">
                 <button id="modal-cancel-btn" class="px-4 py-2 bg-secondary rounded-md hover:opacity-80">Cancelar</button>
                 <button id="modal-confirm-btn" class="px-4 py-2 bg-danger text-white rounded-md hover:opacity-80">Confirmar</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="settings-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div class="main-card p-6 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Configuración</h3>
+                <button id="settings-close-btn" class="text-secondary hover:text-primary">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium">Tema</label>
+                    <button id="theme-toggle-btn" title="Cambiar Tema" class="p-2 rounded-md bg-primary"></button>
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium">Color de Acento</label>
+                    <div id="color-picker" class="flex gap-1">
+                        <button data-color="#34d399" class="h-6 w-6 bg-green-400 rounded-full border-2 border-transparent"></button>
+                        <button data-color="#60a5fa" class="h-6 w-6 bg-blue-400 rounded-full border-2 border-transparent"></button>
+                        <button data-color="#c084fc" class="h-6 w-6 bg-purple-400 rounded-full border-2 border-transparent"></button>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium">Vista Compacta</label>
+                    <button id="compact-view-btn" title="Vista Compacta" class="p-2 rounded-md bg-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5" /></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -360,11 +391,14 @@
             eurResult: document.getElementById('eur-result'),
             clpResult: document.getElementById('clp-result'),
             converterStatus: document.getElementById('converter-status'),
-            modal: document.getElementById('confirmation-modal'),
+            confirmationModal: document.getElementById('confirmation-modal'),
             modalTitle: document.getElementById('modal-title'),
             modalBody: document.getElementById('modal-body'),
             modalConfirmBtn: document.getElementById('modal-confirm-btn'),
             modalCancelBtn: document.getElementById('modal-cancel-btn'),
+            settingsModal: document.getElementById('settings-modal'),
+            settingsBtn: document.getElementById('settings-btn'),
+            settingsCloseBtn: document.getElementById('settings-close-btn'),
             notification: document.getElementById('notification'),
             notificationMessage: document.getElementById('notification-message'),
             notificationCloseBtn: document.getElementById('notification-close-btn'),
@@ -376,6 +410,8 @@
             compactViewBtn: document.getElementById('compact-view-btn'),
             colorPicker: document.getElementById('color-picker'),
             tabs: document.querySelectorAll('.tab-btn'),
+            mainContentGrid: document.getElementById('main-content-grid'),
+            toolsGrid: document.getElementById('tools-grid'),
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -403,7 +439,7 @@
         function showConfirmationModal(title, body, onConfirm) {
             ui.modalTitle.textContent = title;
             ui.modalBody.textContent = body;
-            ui.modal.classList.remove('opacity-0', 'pointer-events-none');
+            ui.confirmationModal.classList.remove('opacity-0', 'pointer-events-none');
             
             const confirmHandler = () => {
                 onConfirm();
@@ -415,7 +451,7 @@
             };
 
             const hideModal = () => {
-                ui.modal.classList.add('opacity-0', 'pointer-events-none');
+                ui.confirmationModal.classList.add('opacity-0', 'pointer-events-none');
                 ui.modalConfirmBtn.removeEventListener('click', confirmHandler);
                 ui.modalCancelBtn.removeEventListener('click', cancelHandler);
             };
@@ -488,6 +524,7 @@
         // --- App Initialization & Data Handling ---
         async function initApp() {
             loadPreferences();
+            initSortable();
 
             if (unsubscribeData) unsubscribeData();
             if (unsubscribeHistory) unsubscribeHistory();
@@ -571,7 +608,7 @@
             ui.tableBody.innerHTML = '';
             months.forEach(month => {
                 const amount = yearData[month] || 0;
-                ui.tableBody.innerHTML += `<tr class="border-b border-color last:border-b-0"><td class="p-3">${month}</td><td class="p-3 text-right data-cell" data-month="${month}">${formatCurrency(amount, '$')}</td></tr>`;
+                ui.tableBody.innerHTML += `<tr class="border-b border-color last:border-b-0" data-month-row="${month}"><td class="p-3">${month}</td><td class="p-3 text-right data-cell" data-month="${month}">${formatCurrency(amount, '$')}</td></tr>`;
             });
             const total = Object.values(yearData).reduce((sum, amount) => sum + parseFloat(amount), 0);
             ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-3 font-bold">Total Anual</td><td class="p-3 text-right text-lg font-bold">${formatCurrency(total, '$')}</td></tr>`;
@@ -600,9 +637,9 @@
             const avgTrend = avg > prevAvg ? 'up' : 'down';
             
             ui.summaryContainer.innerHTML = `
-                <div class="summary-card"><p class="text-base font-medium text-secondary">Promedio Mensual</p><div class="flex items-baseline"><p id="avg-value" class="text-4xl font-bold mt-1"></p><span class="ml-2 trend-${avgTrend}">${avg > 0 && prevAvg > 0 ? (avgTrend === 'up' ? '▲' : '▼') : ''}</span></div></div>
-                <div class="summary-card"><p class="text-base font-medium text-secondary">Mejor Mes</p><p class="text-4xl font-bold mt-1">${bestMonth}</p><p class="text-lg text-accent">${bestAmount > 0 ? formatCurrency(bestAmount, '$') : ''}</p></div>
-                <div class="summary-card"><p class="text-base font-medium text-secondary">Ganancia Total</p><div class="flex items-baseline"><p id="total-value" class="text-4xl font-bold mt-1"></p><span class="ml-2 trend-${totalTrend}">${total > 0 && prevTotal > 0 ? (totalTrend === 'up' ? '▲' : '▼') : ''}</span></div></div>
+                <div class="summary-card" data-id="avg-card"><p class="text-base font-medium text-secondary">Promedio Mensual</p><div class="flex items-baseline"><p id="avg-value" class="text-4xl font-bold mt-1"></p><span class="ml-2 trend-${avgTrend}">${avg > 0 && prevAvg > 0 ? (avgTrend === 'up' ? '▲' : '▼') : ''}</span></div></div>
+                <div class="summary-card" data-id="best-month-card"><p class="text-base font-medium text-secondary">Mejor Mes</p><p class="text-4xl font-bold mt-1">${bestMonth}</p><p class="text-lg text-accent">${bestAmount > 0 ? formatCurrency(bestAmount, '$') : ''}</p></div>
+                <div class="summary-card" data-id="total-card"><p class="text-base font-medium text-secondary">Ganancia Total</p><div class="flex items-baseline"><p id="total-value" class="text-4xl font-bold mt-1"></p><span class="ml-2 trend-${totalTrend}">${total > 0 && prevTotal > 0 ? (totalTrend === 'up' ? '▲' : '▼') : ''}</span></div></div>
             `;
             
             animateCountUp(document.getElementById('avg-value'), avg);
@@ -670,6 +707,13 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const clickedIndex = elements[0].index;
+                            const month = labels[clickedIndex];
+                            highlightTableRow(month);
+                        }
+                    },
                     plugins: {
                         legend: {
                             position: 'top',
@@ -1014,6 +1058,54 @@
                 document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
             });
         });
+
+        ui.settingsBtn.addEventListener('click', () => ui.settingsModal.classList.remove('opacity-0', 'pointer-events-none'));
+        ui.settingsCloseBtn.addEventListener('click', () => ui.settingsModal.classList.add('opacity-0', 'pointer-events-none'));
+
+        function highlightTableRow(month) {
+            const rows = ui.tableBody.querySelectorAll('tr');
+            rows.forEach(row => row.classList.remove('table-row-highlight'));
+            const targetRow = ui.tableBody.querySelector(`[data-month-row="${month}"]`);
+            if (targetRow) {
+                targetRow.classList.add('table-row-highlight');
+                targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    targetRow.classList.remove('table-row-highlight');
+                }, 2000);
+            }
+        }
+
+        // Drag and Drop
+        function initSortable() {
+            const sortableOptions = {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: (evt) => {
+                    const parent = evt.from;
+                    const order = [...parent.children].map(child => child.dataset.id);
+                    localStorage.setItem(`${parent.id}-order`, JSON.stringify(order));
+                }
+            };
+
+            Sortable.create(ui.summaryContainer, sortableOptions);
+            Sortable.create(ui.mainContentGrid, sortableOptions);
+            Sortable.create(ui.toolsGrid, sortableOptions);
+
+            applySortableOrder(ui.summaryContainer);
+            applySortableOrder(ui.mainContentGrid);
+            applySortableOrder(ui.toolsGrid);
+        }
+
+        function applySortableOrder(container) {
+            const order = JSON.parse(localStorage.getItem(`${container.id}-order`));
+            if (order) {
+                const items = new Map([...container.children].map(child => [child.dataset.id, child]));
+                order.forEach(id => {
+                    const item = items.get(id);
+                    if (item) container.appendChild(item);
+                });
+            }
+        }
 
     </script>
 </body>
