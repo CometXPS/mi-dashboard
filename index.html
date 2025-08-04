@@ -163,7 +163,7 @@
     </div>
 
     <!-- App Container -->
-    <div id="app-container" class="max-w-6xl mx-auto hidden">
+    <div id="app-container" class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
             <div class="flex items-center gap-4">
@@ -502,8 +502,8 @@
         onAuthStateChanged(auth, user => {
             if (user) {
                 userId = user.uid;
-                ui.authContainer.classList.add('hidden');
-                ui.appContainer.classList.remove('hidden');
+                ui.authContainer.style.display = 'none';
+                ui.appContainer.style.display = 'block';
                 ui.userInfo.textContent = `Conectado como: ${user.email}`;
                 setupActivityListeners();
                 resetInactivityTimer();
@@ -518,8 +518,8 @@
                 ui.authError.textContent = '';
                 ui.authError.classList.add('hidden');
 
-                ui.authContainer.classList.remove('hidden');
-                ui.appContainer.classList.add('hidden');
+                ui.authContainer.style.display = 'block';
+                ui.appContainer.style.display = 'none';
                 clearTimeout(inactivityTimer);
                 clearActivityListeners();
             }
