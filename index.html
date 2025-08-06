@@ -579,7 +579,7 @@
                 showNotification("Error al cargar los datos de ganancias.");
             });
 
-            const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
+            const historyCollectionPath = `${FIRESTORE_HISTORY_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
             const historyQuery = query(collection(db, historyCollectionPath), orderBy('timestamp', 'desc'), limit(20));
             unsubscribeHistory = onSnapshot(historyQuery, (snapshot) => {
                 lastHistoryLogs = snapshot.docs;
@@ -980,7 +980,7 @@
             input.select();
 
             const saveChanges = async () => {
-                const inputText = input.value.trim().replace('.', '').replace(',', '.');
+                const inputText = input.value.trim().replace(/\./g, '').replace(',', '.');
                 let newValue;
 
                 if ((inputText.startsWith('+') || inputText.startsWith('-')) && !isNaN(parseFloat(inputText))) {
