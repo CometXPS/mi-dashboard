@@ -1120,40 +1120,43 @@
 
         async function undoLastChange() {
             const undoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_UNDO_HISTORY_COLLECTION}`);
-            const q = query(undoHistoryCol, orderBy('timestamp', 'desc'), limit(1));
-            const snapshot = await getDocs(q);
-
-            if (snapshot.empty) {
+            const undoQuery = query(undoHistoryCol, orderBy('timestamp', 'desc'), limit(1));
+            const undoSnapshot = await getDocs(undoQuery);
+            if (undoSnapshot.empty) {
                 showNotification("No hay más acciones que deshacer.");
                 return;
             }
+            const lastStateDoc = undoSnapshot.docs[0];
+            const lastState = JSON.parse(lastStateDoc.data().data);
 
-            const currentState = JSON.stringify(allData);
+            const historyCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`);
+            const historyQuery = query(historyCol, orderBy('timestamp', 'desc'), limit(1));
+            const historySnapshot = await getDocs(historyQuery);
+            const lastHistoryLogDoc = historySnapshot.empty ? null : historySnapshot.docs[0];
+
             const redoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_REDO_HISTORY_COLLECTION}`);
             await addDoc(redoHistoryCol, {
                 timestamp: serverTimestamp(),
-                data: currentState
+                data: JSON.stringify(allData),
+                historyLog: lastHistoryLogDoc ? lastHistoryLogDoc.data() : null
             });
 
-            const lastStateDoc = snapshot.docs[0];
-            const lastState = JSON.parse(lastStateDoc.data().data);
-            
             const earningsCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`);
+            const batch = writeBatch(db);
             
-            try {
-                const batch = writeBatch(db);
-                
-                Object.keys(allData).forEach(year => {
-                    if (!lastState[year]) {
-                        batch.delete(doc(earningsCol, year));
-                    }
-                });
+            Object.keys(allData).forEach(year => {
+                if (!lastState[year]) batch.delete(doc(earningsCol, year));
+            });
+            for (const year in lastState) {
+                batch.set(doc(earningsCol, year), lastState[year]);
+            }
+            
+            batch.delete(lastStateDoc.ref);
+            if (lastHistoryLogDoc) {
+                batch.delete(lastHistoryLogDoc.ref);
+            }
 
-                for (const year in lastState) {
-                    batch.set(doc(earningsCol, year), lastState[year]);
-                }
-                
-                batch.delete(lastStateDoc.ref);
+            try {
                 await batch.commit();
                 showNotification("Último cambio deshecho.", false);
             } catch (error) {
@@ -1164,40 +1167,42 @@
 
         async function redoLastChange() {
             const redoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_REDO_HISTORY_COLLECTION}`);
-            const q = query(redoHistoryCol, orderBy('timestamp', 'desc'), limit(1));
-            const snapshot = await getDocs(q);
-
-            if (snapshot.empty) {
+            const redoQuery = query(redoHistoryCol, orderBy('timestamp', 'desc'), limit(1));
+            const redoSnapshot = await getDocs(redoQuery);
+            if (redoSnapshot.empty) {
                 showNotification("No hay más acciones que rehacer.");
                 return;
             }
+            const nextStateDoc = redoSnapshot.docs[0];
+            const redoData = nextStateDoc.data();
+            const nextState = JSON.parse(redoData.data);
+            const historyLogToRestore = redoData.historyLog;
 
-            const currentState = JSON.stringify(allData);
             const undoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_UNDO_HISTORY_COLLECTION}`);
-             await addDoc(undoHistoryCol, {
+            await addDoc(undoHistoryCol, {
                 timestamp: serverTimestamp(),
-                data: currentState
+                data: JSON.stringify(allData)
             });
 
-            const nextStateDoc = snapshot.docs[0];
-            const nextState = JSON.parse(nextStateDoc.data().data);
-            
             const earningsCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`);
+            const historyCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`);
+            const batch = writeBatch(db);
+
+            Object.keys(allData).forEach(year => {
+                if (!nextState[year]) batch.delete(doc(earningsCol, year));
+            });
+            for (const year in nextState) {
+                batch.set(doc(earningsCol, year), nextState[year]);
+            }
+
+            if (historyLogToRestore) {
+                const newHistoryDocRef = doc(collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`));
+                batch.set(newHistoryDocRef, historyLogToRestore);
+            }
+            
+            batch.delete(nextStateDoc.ref);
             
             try {
-                const batch = writeBatch(db);
-                
-                Object.keys(allData).forEach(year => {
-                    if (!nextState[year]) {
-                        batch.delete(doc(earningsCol, year));
-                    }
-                });
-
-                for (const year in nextState) {
-                    batch.set(doc(earningsCol, year), nextState[year]);
-                }
-                
-                batch.delete(nextStateDoc.ref);
                 await batch.commit();
                 showNotification("Cambio rehecho con éxito.", false);
             } catch (error) {
