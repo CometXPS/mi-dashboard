@@ -355,7 +355,7 @@
     <script type="module">
         import { firebaseConfig } from './config.js'; 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, addDoc, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
@@ -366,6 +366,7 @@
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
         const FIRESTORE_HISTORY_COLLECTION = 'history';
         const FIRESTORE_UNDO_HISTORY_COLLECTION = 'undo_history';
+        const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
         const initialUserData = {
             "2024": { "Noviembre": 1528.9, "Diciembre": 1250 },
@@ -379,6 +380,7 @@
         let comparisonChart, doughnutChart;
         let areValuesHidden = false;
         let debounceTimer;
+        let inactivityTimer;
         let notificationTimeout;
         let lastHistoryLogs = [];
 
@@ -488,6 +490,26 @@
         }
 
         // --- Auth & Inactivity ---
+        const userActivityEvents = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
+
+        const logoutAfterInactivity = () => {
+            showNotification("Cerrando sesión por inactividad.", false);
+            signOut(auth);
+        };
+
+        const resetInactivityTimer = () => {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(logoutAfterInactivity, INACTIVITY_TIMEOUT);
+        };
+
+        const setupActivityListeners = () => {
+            userActivityEvents.forEach(event => window.addEventListener(event, resetInactivityTimer));
+        };
+        
+        const clearActivityListeners = () => {
+            userActivityEvents.forEach(event => window.removeEventListener(event, resetInactivityTimer));
+        };
+
         onAuthStateChanged(auth, user => {
             ui.loadingContainer.style.display = 'none';
             if (user) {
@@ -495,6 +517,8 @@
                 ui.authContainer.style.display = 'none';
                 ui.appContainer.style.display = 'block';
                 ui.userInfo.textContent = `Conectado como: ${user.email}`;
+                setupActivityListeners();
+                resetInactivityTimer();
                 initApp();
             } else {
                 userId = null;
@@ -508,6 +532,8 @@
 
                 ui.authContainer.style.display = 'block';
                 ui.appContainer.style.display = 'none';
+                clearTimeout(inactivityTimer);
+                clearActivityListeners();
             }
         });
 
@@ -518,7 +544,6 @@
             ui.authError.classList.add('hidden');
 
             try {
-                await setPersistence(auth, browserSessionPersistence);
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 ui.authError.textContent = "Error: Credenciales incorrectas.";
@@ -1167,4 +1192,4 @@
         }
     </script>
 </body>
-</html>
+</html>Ft
