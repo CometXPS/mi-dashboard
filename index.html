@@ -193,9 +193,6 @@
                  <button id="undo-btn" title="Deshacer último cambio" class="p-2 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600 disabled:opacity-50">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 10v4a1 1 0 001 1h3l1.5 1.5a1 1 0 001.414 0L11 15h3a1 1 0 001-1v-4M3 10V7a1 1 0 011-1h12a1 1 0 011 1v3" /></svg>
                  </button>
-                 <button id="redo-btn" title="Rehacer último cambio" class="p-2 bg-green-500 text-white rounded-md shadow-sm hover:bg-green-600 disabled:opacity-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="transform: scaleX(-1);"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 10v4a1 1 0 001 1h3l1.5 1.5a1 1 0 001.414 0L11 15h3a1 1 0 001-1v-4M3 10V7a1 1 0 011-1h12a1 1 0 011 1v3" /></svg>
-                 </button>
                  <button id="toggle-visibility-btn" title="Ocultar/Mostrar valores" class="p-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600"></button>
                  <button id="logout-btn" title="Cerrar Sesión" class="p-2 bg-gray-600 text-white rounded-md shadow-sm hover:opacity-90">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
@@ -254,12 +251,12 @@
                                 <div>
                                     <label for="paypal-receive" class="block text-sm font-medium">Para recibir:</label>
                                     <input type="number" id="paypal-receive" placeholder="Monto a recibir" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
-                                    <p class="text-sm text-secondary mt-1">Debes solicitar: <span id="paypal-request-result" class="font-bold text-primary">$ 0,00</span></p>
+                                    <p class="text-sm text-secondary mt-1">Debes solicitar: <span id="paypal-request-result" class="font-bold text-primary">$ 0.00</span></p>
                                 </div>
                                 <div>
                                     <label for="paypal-send" class="block text-sm font-medium">Si te envían:</label>
                                     <input type="number" id="paypal-send" placeholder="Monto enviado" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
-                                    <p class="text-sm text-secondary mt-1">Recibirás: <span id="paypal-receive-result" class="font-bold text-primary">$ 0,00</span></p>
+                                    <p class="text-sm text-secondary mt-1">Recibirás: <span id="paypal-receive-result" class="font-bold text-primary">$ 0.00</span></p>
                                 </div>
                             </div>
                         </div>
@@ -275,7 +272,7 @@
                                 <div class="md:col-span-2 grid grid-cols-2 gap-4">
                                     <div>
                                         <p class="text-sm text-secondary">Resultado en EUR</p>
-                                        <p id="eur-result" class="text-2xl font-bold mt-1">€ 0,00</p>
+                                        <p id="eur-result" class="text-2xl font-bold mt-1">€ 0.00</p>
                                     </div>
                                     <div>
                                         <p class="text-sm text-secondary">Resultado en CLP</p>
@@ -369,7 +366,7 @@
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
         const FIRESTORE_HISTORY_COLLECTION = 'history';
         const FIRESTORE_UNDO_HISTORY_COLLECTION = 'undo_history';
-        const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+        const INACTIVITY_TIMEOUT = 10 * 60 * 1000;
 
         const initialUserData = {
             "2024": { "Noviembre": 1528.9, "Diciembre": 1250 },
@@ -444,6 +441,8 @@
             paypalSendInput: document.getElementById('paypal-send'),
             paypalRequestResult: document.getElementById('paypal-request-result'),
             paypalReceiveResult: document.getElementById('paypal-receive-result'),
+            calculatorDisplay: document.getElementById('calculator-display'),
+            calculatorButtons: document.querySelectorAll('.calc-btn'),
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -786,7 +785,7 @@
                 const change = data.changeAmount !== undefined ? data.changeAmount : data.newValue - data.oldValue;
                 const changeClass = change >= 0 ? 'trend-up' : 'trend-down';
                 const changeSign = change >= 0 ? '+' : '-';
-                const formattedChange = formatCurrency(Math.abs(change), '$', true);
+                const formattedChange = formatCurrency(Math.abs(change), '$');
 
                 return `
                     <div class="border-b border-color p-3 text-sm last:border-b-0">
@@ -829,7 +828,10 @@
         function formatCurrency(value, currencySymbol, forceVisible = false) {
             if (areValuesHidden && !forceVisible) return `${currencySymbol} ****`;
             const numberValue = Number(value);
-            const formatted = new Intl.NumberFormat('es-CL').format(numberValue.toFixed(2));
+            const formatted = new Intl.NumberFormat('es-CL', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }).format(numberValue);
             return `${currencySymbol} ${formatted}`;
         }
         
@@ -980,7 +982,7 @@
             input.select();
 
             const saveChanges = async () => {
-                const inputText = input.value.trim().replace(/\./g, '').replace(',', '.');
+                const inputText = input.value.trim().replace(',', '.');
                 let newValue;
 
                 if ((inputText.startsWith('+') || inputText.startsWith('-')) && !isNaN(parseFloat(inputText))) {
