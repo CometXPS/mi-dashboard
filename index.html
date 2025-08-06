@@ -1269,10 +1269,16 @@
         }
         
         function handlePercent() {
-            const { displayValue } = calculator;
-            const value = parseFloat(displayValue);
-            if (value === 0) return;
-            calculator.displayValue = (value / 100).toString();
+            const { displayValue, firstOperand, operator } = calculator;
+            const currentValue = parseFloat(displayValue);
+            if (currentValue === 0) return;
+
+            if (firstOperand == null || operator == null) {
+                 calculator.displayValue = (currentValue / 100).toString();
+            } else {
+                 const percentValue = (firstOperand * currentValue) / 100;
+                 calculator.displayValue = percentValue.toString();
+            }
         }
 
         const performCalculation = {
