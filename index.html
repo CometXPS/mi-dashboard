@@ -139,17 +139,6 @@
             background-color: rgba(var(--accent-color-rgb), 0.2);
             transition: background-color 0.3s;
         }
-        
-        /* Calculator Styles */
-        .calc-btn {
-            height: 64px;
-            width: 64px;
-            font-size: 1.5rem;
-            transition: filter 0.15s;
-        }
-        .calc-btn:active {
-            filter: brightness(1.2);
-        }
     </style>
 </head>
 <body class="p-4 sm:p-6">
@@ -278,29 +267,28 @@
                             <div id="calculator" class="space-y-2">
                                 <div id="calculator-display" class="bg-primary text-right p-4 rounded-md text-3xl font-mono break-all">0</div>
                                 <div class="grid grid-cols-4 gap-2 text-center">
-                                    <button class="calc-btn rounded-full bg-gray-400 text-black" data-action="clear">C</button>
-                                    <button class="calc-btn rounded-full bg-gray-400 text-black" data-action="toggle-sign">+/-</button>
-                                    <button class="calc-btn rounded-full bg-gray-400 text-black" data-action="percent">%</button>
-                                    <button class="calc-btn rounded-full bg-orange-500 text-white" data-action="operator" data-value="/">÷</button>
+                                    <button class="calc-btn p-4 rounded-md bg-danger text-white hover:opacity-90" data-action="clear">C</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="percent">%</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="operator" data-value="/">÷</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="operator" data-value="*">×</button>
                                     
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="number" data-value="7">7</button>
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="number" data-value="8">8</button>
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="number" data-value="9">9</button>
-                                    <button class="calc-btn rounded-full bg-orange-500 text-white" data-action="operator" data-value="*">×</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="number" data-value="7">7</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="number" data-value="8">8</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="number" data-value="9">9</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="operator" data-value="-">-</button>
 
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="number" data-value="4">4</button>
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="number" data-value="5">5</button>
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="number" data-value="6">6</button>
-                                    <button class="calc-btn rounded-full bg-orange-500 text-white" data-action="operator" data-value="-">-</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="number" data-value="4">4</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="number" data-value="5">5</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="number" data-value="6">6</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80 row-span-2" data-action="operator" data-value="+">+</button>
 
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="number" data-value="1">1</button>
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="number" data-value="2">2</button>
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="number" data-value="3">3</button>
-                                    <button class="calc-btn rounded-full bg-orange-500 text-white" data-action="operator" data-value="+">+</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="number" data-value="1">1</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="number" data-value="2">2</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="number" data-value="3">3</button>
                                     
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white col-span-2 w-full" data-action="number" data-value="0">0</button>
-                                    <button class="calc-btn rounded-full bg-gray-600 text-white" data-action="decimal" data-value=",">,</button>
-                                    <button class="calc-btn rounded-full bg-orange-500 text-white" data-action="calculate">=</button>
+                                    <button class="calc-btn p-4 rounded-md bg-accent text-white hover:opacity-90 row-span-2" data-action="calculate">=</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80 col-span-2" data-action="number" data-value="0">0</button>
+                                    <button class="calc-btn p-4 rounded-md bg-secondary hover:opacity-80" data-action="decimal" data-value=",">,</button>
                                 </div>
                             </div>
                         </div>
