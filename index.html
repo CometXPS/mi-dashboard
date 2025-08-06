@@ -191,7 +191,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                  </button>
                  <button id="undo-btn" title="Deshacer último cambio" class="p-2 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600 disabled:opacity-50">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 10v4a1 1 0 001 1h3l1.5 1.5a1 1 0 001.414 0L11 15h3a1 1 0 001-1v-4M3 10V7a1 1 0 011-1h12a1 1 0 011 1v3" /></svg>
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l4-4m-4 4l4 4" /></svg>
+                 </button>
+                 <button id="redo-btn" title="Rehacer último cambio" class="p-2 bg-indigo-500 text-white rounded-md shadow-sm hover:bg-indigo-600 disabled:opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2m18-10l-4-4m4 4l-4 4" /></svg>
                  </button>
                  <button id="toggle-visibility-btn" title="Ocultar/Mostrar valores" class="p-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600"></button>
                  <button id="logout-btn" title="Cerrar Sesión" class="p-2 bg-gray-600 text-white rounded-md shadow-sm hover:opacity-90">
@@ -366,8 +369,9 @@
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
         const FIRESTORE_HISTORY_COLLECTION = 'history';
         const FIRESTORE_UNDO_HISTORY_COLLECTION = 'undo_history';
+        const FIRESTORE_REDO_HISTORY_COLLECTION = 'redo_history';
         const INACTIVITY_TIMEOUT = 20 * 60 * 1000;
-        const UNDO_HISTORY_LIMIT = 5; // Changed from 10 to 5
+        const UNDO_HISTORY_LIMIT = 5;
 
         const initialUserData = {
             "2024": { "Noviembre": 1528.9, "Diciembre": 1250 },
@@ -375,7 +379,7 @@
         };
 
         let userId = null;
-        let unsubscribeData, unsubscribeHistory, unsubscribeUndoHistory;
+        let unsubscribeData, unsubscribeHistory, unsubscribeUndoHistory, unsubscribeRedoHistory;
         let allData = {};
         let currentYear;
         let comparisonChart, doughnutChart;
@@ -408,6 +412,7 @@
             addYearBtn: document.getElementById('add-year-btn'),
             deleteYearBtn: document.getElementById('delete-year-btn'),
             undoBtn: document.getElementById('undo-btn'),
+            redoBtn: document.getElementById('redo-btn'),
             toggleVisibilityBtn: document.getElementById('toggle-visibility-btn'),
             chartCanvas: document.getElementById('comparisonChart').getContext('2d'),
             doughnutChartCanvas: document.getElementById('doughnutChart').getContext('2d'),
@@ -442,8 +447,6 @@
             paypalSendInput: document.getElementById('paypal-send'),
             paypalRequestResult: document.getElementById('paypal-request-result'),
             paypalReceiveResult: document.getElementById('paypal-receive-result'),
-            calculatorDisplay: document.getElementById('calculator-display'),
-            calculatorButtons: document.querySelectorAll('.calc-btn'),
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -528,6 +531,7 @@
                 if(unsubscribeData) unsubscribeData();
                 if(unsubscribeHistory) unsubscribeHistory();
                 if(unsubscribeUndoHistory) unsubscribeUndoHistory();
+                if(unsubscribeRedoHistory) unsubscribeRedoHistory();
                 
                 ui.authForm.reset();
                 ui.authError.textContent = '';
@@ -565,6 +569,7 @@
             if (unsubscribeData) unsubscribeData();
             if (unsubscribeHistory) unsubscribeHistory();
             if (unsubscribeUndoHistory) unsubscribeUndoHistory();
+            if (unsubscribeRedoHistory) unsubscribeRedoHistory();
             
             const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
             const earningsCol = collection(db, earningsCollectionPath);
@@ -595,6 +600,11 @@
             const undoHistoryCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_UNDO_HISTORY_COLLECTION}`;
             unsubscribeUndoHistory = onSnapshot(query(collection(db, undoHistoryCollectionPath)), (snapshot) => {
                 ui.undoBtn.disabled = snapshot.empty;
+            });
+
+            const redoHistoryCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_REDO_HISTORY_COLLECTION}`;
+            unsubscribeRedoHistory = onSnapshot(query(collection(db, redoHistoryCollectionPath)), (snapshot) => {
+                ui.redoBtn.disabled = snapshot.empty;
             });
         }
 
@@ -1078,7 +1088,21 @@
 
         ui.toggleVisibilityBtn.addEventListener('click', toggleVisibility);
 
+        async function clearRedoHistory() {
+            const redoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_REDO_HISTORY_COLLECTION}`);
+            try {
+                const snapshot = await getDocs(redoHistoryCol);
+                if (snapshot.empty) return;
+                const batch = writeBatch(db);
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+            } catch (error) {
+                console.error("Error clearing redo history:", error);
+            }
+        }
+
         async function pushToHistory() {
+            await clearRedoHistory();
             const undoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_UNDO_HISTORY_COLLECTION}`);
             
             const q = query(undoHistoryCol, orderBy('timestamp', 'desc'));
@@ -1104,11 +1128,17 @@
                 return;
             }
 
+            const currentState = JSON.stringify(allData);
+            const redoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_REDO_HISTORY_COLLECTION}`);
+            await addDoc(redoHistoryCol, {
+                timestamp: serverTimestamp(),
+                data: currentState
+            });
+
             const lastStateDoc = snapshot.docs[0];
             const lastState = JSON.parse(lastStateDoc.data().data);
             
             const earningsCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`);
-            const historyCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`);
             
             try {
                 const batch = writeBatch(db);
@@ -1124,13 +1154,6 @@
                 }
                 
                 batch.delete(lastStateDoc.ref);
-
-                const lastHistoryQuery = query(historyCol, orderBy('timestamp', 'desc'), limit(1));
-                const lastHistorySnapshot = await getDocs(lastHistoryQuery);
-                if(!lastHistorySnapshot.empty) {
-                    batch.delete(lastHistorySnapshot.docs[0].ref);
-                }
-
                 await batch.commit();
                 showNotification("Último cambio deshecho.", false);
             } catch (error) {
@@ -1139,12 +1162,56 @@
             }
         }
 
+        async function redoLastChange() {
+            const redoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_REDO_HISTORY_COLLECTION}`);
+            const q = query(redoHistoryCol, orderBy('timestamp', 'desc'), limit(1));
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                showNotification("No hay más acciones que rehacer.");
+                return;
+            }
+
+            const currentState = JSON.stringify(allData);
+            const undoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_UNDO_HISTORY_COLLECTION}`);
+             await addDoc(undoHistoryCol, {
+                timestamp: serverTimestamp(),
+                data: currentState
+            });
+
+            const nextStateDoc = snapshot.docs[0];
+            const nextState = JSON.parse(nextStateDoc.data().data);
+            
+            const earningsCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`);
+            
+            try {
+                const batch = writeBatch(db);
+                
+                Object.keys(allData).forEach(year => {
+                    if (!nextState[year]) {
+                        batch.delete(doc(earningsCol, year));
+                    }
+                });
+
+                for (const year in nextState) {
+                    batch.set(doc(earningsCol, year), nextState[year]);
+                }
+                
+                batch.delete(nextStateDoc.ref);
+                await batch.commit();
+                showNotification("Cambio rehecho con éxito.", false);
+            } catch (error) {
+                console.error("Error redoing change:", error);
+                showNotification("Error al rehacer el cambio.");
+            }
+        }
+
         ui.undoBtn.addEventListener('click', () => {
-             showConfirmationModal(
-                'Confirmar Deshacer',
-                '¿Estás seguro de que quieres deshacer el último cambio? Esta acción no se puede revertir.',
-                undoLastChange
-            );
+             showConfirmationModal('Confirmar Deshacer', '¿Estás seguro de que quieres deshacer el último cambio?', undoLastChange);
+        });
+
+        ui.redoBtn.addEventListener('click', () => {
+             showConfirmationModal('Confirmar Rehacer', '¿Estás seguro de que quieres rehacer el último cambio?', redoLastChange);
         });
 
         ui.themeToggleBtn.addEventListener('click', () => {
@@ -1152,7 +1219,7 @@
             const newTheme = isLight ? 'dark' : 'light';
             localStorage.setItem('dashboardTheme', newTheme);
             applyTheme(newTheme);
-            renderAllComponents(currentYear); // Re-render charts with new theme
+            renderAllComponents(currentYear);
         });
 
         ui.compactViewBtn.addEventListener('click', () => {
@@ -1196,4 +1263,3 @@
     </script>
 </body>
 </html>
-
