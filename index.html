@@ -980,7 +980,7 @@
             input.select();
 
             const saveChanges = async () => {
-                const inputText = input.value.trim().replace(',', '.');
+                const inputText = input.value.trim().replace('.', '').replace(',', '.');
                 let newValue;
 
                 if ((inputText.startsWith('+') || inputText.startsWith('-')) && !isNaN(parseFloat(inputText))) {
