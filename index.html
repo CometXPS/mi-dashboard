@@ -787,6 +787,10 @@
                 const changeClass = change >= 0 ? 'trend-up' : 'trend-down';
                 const changeSign = change >= 0 ? '+' : '-';
                 const formattedChange = formatCurrency(Math.abs(change), '$');
+                
+                const newTotalDisplay = data.newYearTotal !== undefined
+                    ? `<p class="font-semibold text-base text-accent">Total Año: ${formatCurrency(data.newYearTotal, '$', true)}</p>`
+                    : '';
 
                 return `
                     <div class="border-b border-color p-3 text-sm last:border-b-0">
@@ -794,7 +798,10 @@
                             <p class="font-semibold"><span class="text-accent">${data.month} ${data.year}</span></p>
                             <p class="font-semibold text-lg ${changeClass}">${changeSign} ${formattedChange}</p>
                         </div>
-                        <p class="text-xs text-secondary text-right mt-1">${formattedDate}</p>
+                        <div class="text-right mt-1">
+                            ${newTotalDisplay}
+                            <p class="text-xs text-secondary mt-1">${formattedDate}</p>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -999,6 +1006,11 @@
                     await pushToHistory();
                     const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                     const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
+                    
+                    const yearDataCopy = { ...allData[currentYear] };
+                    yearDataCopy[month] = newValue;
+                    const newYearTotal = Object.values(yearDataCopy).reduce((sum, amount) => sum + parseFloat(amount), 0);
+
                     try {
                         await setDoc(doc(db, earningsCollectionPath, currentYear), { [month]: newValue }, { merge: true });
                         await addDoc(collection(db, historyCollectionPath), {
@@ -1007,7 +1019,8 @@
                             month: month,
                             oldValue: currentValue,
                             newValue: newValue,
-                            changeAmount: newValue - currentValue
+                            changeAmount: newValue - currentValue,
+                            newYearTotal: newYearTotal
                         });
 
                         cell.classList.add('saved-feedback');
