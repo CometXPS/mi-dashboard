@@ -367,6 +367,7 @@
         const FIRESTORE_HISTORY_COLLECTION = 'history';
         const FIRESTORE_UNDO_HISTORY_COLLECTION = 'undo_history';
         const INACTIVITY_TIMEOUT = 10 * 60 * 1000;
+        const UNDO_HISTORY_LIMIT = 5; // Changed from 10 to 5
 
         const initialUserData = {
             "2024": { "Noviembre": 1528.9, "Diciembre": 1250 },
@@ -1082,7 +1083,7 @@
             
             const q = query(undoHistoryCol, orderBy('timestamp', 'desc'));
             const snapshot = await getDocs(q);
-            if (snapshot.docs.length >= 10) {
+            if (snapshot.docs.length >= UNDO_HISTORY_LIMIT) {
                 const oldestDoc = snapshot.docs[snapshot.docs.length - 1];
                 await deleteDoc(oldestDoc.ref);
             }
