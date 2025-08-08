@@ -1023,7 +1023,7 @@
             const currentValue = (allData[currentYear] || {})[month] || 0;
             cell.classList.add('editing');
             
-            cell.innerHTML = `<input type="text" value="${currentValue}" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3">`;
+            cell.innerHTML = `<input type="text" value="${String(currentValue).replace('.', ',')}" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3">`;
             const input = cell.querySelector('input');
             input.focus();
             input.select();
