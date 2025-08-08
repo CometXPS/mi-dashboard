@@ -254,12 +254,12 @@
                                 <div>
                                     <label for="paypal-receive" class="block text-sm font-medium">Para recibir:</label>
                                     <input type="number" id="paypal-receive" placeholder="Monto a recibir" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
-                                    <p class="text-sm text-secondary mt-1">Debes solicitar: <span id="paypal-request-result" class="font-bold text-primary">$ 0.00</span></p>
+                                    <p class="text-sm text-secondary mt-1">Debes solicitar: <span id="paypal-request-result" class="font-bold text-primary">$ 0,00</span></p>
                                 </div>
                                 <div>
                                     <label for="paypal-send" class="block text-sm font-medium">Si te envían:</label>
                                     <input type="number" id="paypal-send" placeholder="Monto enviado" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
-                                    <p class="text-sm text-secondary mt-1">Recibirás: <span id="paypal-receive-result" class="font-bold text-primary">$ 0.00</span></p>
+                                    <p class="text-sm text-secondary mt-1">Recibirás: <span id="paypal-receive-result" class="font-bold text-primary">$ 0,00</span></p>
                                 </div>
                             </div>
                         </div>
@@ -275,7 +275,7 @@
                                 <div class="md:col-span-2 grid grid-cols-2 gap-4">
                                     <div>
                                         <p class="text-sm text-secondary">Resultado en EUR</p>
-                                        <p id="eur-result" class="text-2xl font-bold mt-1">€ 0.00</p>
+                                        <p id="eur-result" class="text-2xl font-bold mt-1">€ 0,00</p>
                                     </div>
                                     <div>
                                         <p class="text-sm text-secondary">Resultado en CLP</p>
@@ -796,7 +796,7 @@
                 const change = data.changeAmount !== undefined ? data.changeAmount : data.newValue - data.oldValue;
                 const changeClass = change >= 0 ? 'trend-up' : 'trend-down';
                 const changeSign = change >= 0 ? '+' : '-';
-                const formattedChange = formatCurrency(Math.abs(change), '$');
+                const formattedChange = formatCurrency(Math.abs(change), '$', true);
 
                 return `
                     <div class="border-b border-color p-3 text-sm last:border-b-0">
@@ -993,7 +993,7 @@
             input.select();
 
             const saveChanges = async () => {
-                const inputText = input.value.trim().replace(',', '.');
+                const inputText = input.value.trim().replace(/\./g, '').replace(',', '.');
                 let newValue;
 
                 if ((inputText.startsWith('+') || inputText.startsWith('-')) && !isNaN(parseFloat(inputText))) {
@@ -1224,7 +1224,7 @@
             const newTheme = isLight ? 'dark' : 'light';
             localStorage.setItem('dashboardTheme', newTheme);
             applyTheme(newTheme);
-            renderAllComponents(currentYear);
+            renderAllComponents(currentYear); // Re-render charts with new theme
         });
 
         ui.compactViewBtn.addEventListener('click', () => {
