@@ -621,18 +621,21 @@
             if (unsubscribeHistory) unsubscribeHistory();
             if (unsubscribeUndoHistory) unsubscribeUndoHistory();
             if (unsubscribeRedoHistory) unsubscribeRedoHistory();
-            
+
             const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
             const earningsCol = collection(db, earningsCollectionPath);
-            unsubscribeData = onSnapshot(query(earningsCol), async (snapshot) => {
+
+            // Perform a one-time check for initial data
+            const initialCheck = await getDocs(query(earningsCol));
+            if (initialCheck.empty) {
+                await importInitialData(earningsCol);
+            }
+            
+            // Now, set up real-time listeners
+            unsubscribeData = onSnapshot(query(earningsCol), (snapshot) => {
                 allData = {};
                 snapshot.forEach(doc => { allData[doc.id] = doc.data(); });
-
-                if (snapshot.empty) {
-                    await importInitialData(earningsCol);
-                } else {
-                    updateFullUI();
-                }
+                updateFullUI();
             }, error => {
                 console.error("Error fetching earnings data: ", error);
                 showNotification("Error al cargar los datos de ganancias.");
@@ -1200,21 +1203,25 @@
         async function restoreDataState(stateToRestore) {
             const earningsCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`);
             const batch = writeBatch(db);
+            try {
+                const currentStateYears = Object.keys(allData);
+                const newStateYears = Object.keys(stateToRestore);
 
-            const currentStateYears = Object.keys(allData);
-            const newStateYears = Object.keys(stateToRestore);
+                currentStateYears.forEach(year => {
+                    if (!newStateYears.includes(year)) {
+                        batch.delete(doc(earningsCol, year));
+                    }
+                });
 
-            currentStateYears.forEach(year => {
-                if (!newStateYears.includes(year)) {
-                    batch.delete(doc(earningsCol, year));
+                for (const year in stateToRestore) {
+                    batch.set(doc(earningsCol, year), stateToRestore[year]);
                 }
-            });
-
-            for (const year in stateToRestore) {
-                batch.set(doc(earningsCol, year), stateToRestore[year]);
+                
+                await batch.commit();
+            } catch (error) {
+                console.error("Error restoring data state:", error);
+                showNotification("Error al restaurar los datos. Inténtalo de nuevo.");
             }
-            
-            await batch.commit();
         }
 
         async function undoLastChange() {
@@ -1227,10 +1234,8 @@
             const sortedUndoDocs = undoSnapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0));
             const lastStateDoc = sortedUndoDocs[0];
             const lastState = JSON.parse(lastStateDoc.data().data);
-
-            const historyCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`);
-            const historySnapshot = await getDocs(historyCol);
-            const lastHistoryLogDoc = historySnapshot.empty ? null : historySnapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0))[0];
+            
+            const lastHistoryLogDoc = lastHistoryLogs.length > 0 ? lastHistoryLogs[0] : null;
 
             const batch = writeBatch(db);
 
