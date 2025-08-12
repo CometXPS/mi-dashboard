@@ -463,8 +463,6 @@
             compactViewBtn: document.getElementById('compact-view-btn'),
             colorPicker: document.getElementById('color-picker'),
             tabs: document.querySelectorAll('.tab-btn'),
-            mainContentGrid: document.getElementById('main-content-grid'),
-            toolsGrid: document.getElementById('tools-grid'),
             paypalReceiveInput: document.getElementById('paypal-receive'),
             paypalSendInput: document.getElementById('paypal-send'),
             paypalRequestResult: document.getElementById('paypal-request-result'),
@@ -499,44 +497,53 @@
         
         ui.notificationCloseBtn.addEventListener('click', hideNotification);
 
-        function showConfirmationModal(title, body, onConfirm) {
-            ui.modalTitle.textContent = title;
-            ui.modalBody.textContent = body;
-            ui.confirmationModal.classList.remove('opacity-0', 'pointer-events-none');
-            
-            const confirmHandler = () => {
-                onConfirm();
-                hideModal();
-            };
-            
-            const cancelHandler = () => {
-                hideModal();
-            };
-            
+        function showModal(modalElement, onOpen, onClose) {
+            modalElement.classList.remove('opacity-0', 'pointer-events-none');
+
             const backdropHandler = (e) => {
-                if (e.target === ui.confirmationModal) {
+                if (e.target === modalElement) {
                     hideModal();
                 }
             };
-
             const escapeHandler = (e) => {
                 if (e.key === 'Escape') {
                     hideModal();
                 }
             };
-
             const hideModal = () => {
-                ui.confirmationModal.classList.add('opacity-0', 'pointer-events-none');
-                ui.modalConfirmBtn.removeEventListener('click', confirmHandler);
-                ui.modalCancelBtn.removeEventListener('click', cancelHandler);
-                ui.confirmationModal.removeEventListener('click', backdropHandler);
+                modalElement.classList.add('opacity-0', 'pointer-events-none');
+                modalElement.removeEventListener('click', backdropHandler);
                 document.removeEventListener('keydown', escapeHandler);
+                if (onClose) onClose();
             };
 
-            ui.modalConfirmBtn.addEventListener('click', confirmHandler);
-            ui.modalCancelBtn.addEventListener('click', cancelHandler);
-            ui.confirmationModal.addEventListener('click', backdropHandler);
+            if (onOpen) onOpen(hideModal);
+            modalElement.addEventListener('click', backdropHandler);
             document.addEventListener('keydown', escapeHandler);
+        }
+
+        function showConfirmationModal(title, body, onConfirm) {
+            ui.modalTitle.textContent = title;
+            ui.modalBody.textContent = body;
+            
+            let confirmHandler, cancelHandler;
+
+            const onOpen = (hideModal) => {
+                confirmHandler = () => {
+                    onConfirm();
+                    hideModal();
+                };
+                cancelHandler = hideModal;
+                ui.modalConfirmBtn.addEventListener('click', confirmHandler);
+                ui.modalCancelBtn.addEventListener('click', cancelHandler);
+            };
+
+            const onClose = () => {
+                ui.modalConfirmBtn.removeEventListener('click', confirmHandler);
+                ui.modalCancelBtn.removeEventListener('click', cancelHandler);
+            };
+
+            showModal(ui.confirmationModal, onOpen, onClose);
         }
 
         // --- Auth & Inactivity ---
@@ -1351,8 +1358,16 @@
             });
         });
 
-        ui.settingsBtn.addEventListener('click', () => ui.settingsModal.classList.remove('opacity-0', 'pointer-events-none'));
-        ui.settingsCloseBtn.addEventListener('click', () => ui.settingsModal.classList.add('opacity-0', 'pointer-events-none'));
+        ui.settingsBtn.addEventListener('click', () => {
+            const hideModal = () => ui.settingsModal.classList.add('opacity-0', 'pointer-events-none');
+            const onOpen = () => {
+                ui.settingsCloseBtn.addEventListener('click', hideModal, { once: true });
+            };
+            const onClose = () => {
+                // No need to remove listener if { once: true } is used
+            };
+            showModal(ui.settingsModal, onOpen, onClose);
+        });
 
         function highlightTableRow(month) {
             const rows = ui.tableBody.querySelectorAll('tr');
