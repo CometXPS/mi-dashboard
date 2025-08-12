@@ -512,15 +512,31 @@
             const cancelHandler = () => {
                 hideModal();
             };
+            
+            const backdropHandler = (e) => {
+                if (e.target === ui.confirmationModal) {
+                    hideModal();
+                }
+            };
+
+            const escapeHandler = (e) => {
+                if (e.key === 'Escape') {
+                    hideModal();
+                }
+            };
 
             const hideModal = () => {
                 ui.confirmationModal.classList.add('opacity-0', 'pointer-events-none');
                 ui.modalConfirmBtn.removeEventListener('click', confirmHandler);
                 ui.modalCancelBtn.removeEventListener('click', cancelHandler);
+                ui.confirmationModal.removeEventListener('click', backdropHandler);
+                document.removeEventListener('keydown', escapeHandler);
             };
 
             ui.modalConfirmBtn.addEventListener('click', confirmHandler);
             ui.modalCancelBtn.addEventListener('click', cancelHandler);
+            ui.confirmationModal.addEventListener('click', backdropHandler);
+            document.addEventListener('keydown', escapeHandler);
         }
 
         // --- Auth & Inactivity ---
