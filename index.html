@@ -640,7 +640,7 @@
 
             const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
             unsubscribeHistory = onSnapshot(query(collection(db, historyCollectionPath)), (snapshot) => {
-                const sortedLogs = snapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
+                const sortedLogs = snapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0));
                 lastHistoryLogs = sortedLogs.slice(0, 20);
                 renderHistory(lastHistoryLogs);
             }, error => {
@@ -709,14 +709,30 @@
 
         function renderTable(year) {
             const yearData = allData[year] || {};
-            ui.tableHead.innerHTML = '<tr><th class="p-3 text-left font-semibold text-secondary border-b border-color">Mes</th><th class="p-3 text-right font-semibold text-secondary border-b border-color">Ganancias (USD)</th></tr>';
-            ui.tableBody.innerHTML = '';
+            if (ui.tableHead.innerHTML === '') {
+                 ui.tableHead.innerHTML = '<tr><th class="p-3 text-left font-semibold text-secondary border-b border-color">Mes</th><th class="p-3 text-right font-semibold text-secondary border-b border-color">Ganancias (USD)</th></tr>';
+            }
+
             months.forEach(month => {
-                const amount = yearData[month] || 0;
-                ui.tableBody.innerHTML += `<tr class="border-b border-color last:border-b-0" data-month-row="${month}"><td class="p-3">${month}</td><td class="p-3 text-right data-cell" data-month="${month}">${formatCurrency(amount, '$')}</td></tr>`;
+                let row = ui.tableBody.querySelector(`[data-month-row="${month}"]`);
+                if (!row) {
+                    row = document.createElement('tr');
+                    row.className = "border-b border-color last:border-b-0";
+                    row.dataset.monthRow = month;
+                    row.innerHTML = `<td class="p-3">${month}</td><td class="p-3 text-right data-cell" data-month="${month}"></td>`;
+                    ui.tableBody.appendChild(row);
+                }
+                const cell = row.querySelector(`[data-month="${month}"]`);
+                if (cell && !cell.classList.contains('editing')) {
+                    cell.innerHTML = formatCurrency(yearData[month] || 0, '$');
+                }
             });
+            
             const total = Object.values(yearData).reduce((sum, amount) => sum + parseFloat(amount), 0);
-            ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-3 font-bold">Total Anual</td><td class="p-3 text-right text-lg font-bold">${formatCurrency(total, '$')}</td></tr>`;
+            if (ui.tableFoot.innerHTML === '') {
+                ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-3 font-bold">Total Anual</td><td id="total-anual-cell" class="p-3 text-right text-lg font-bold"></td></tr>`;
+            }
+            document.getElementById('total-anual-cell').innerHTML = formatCurrency(total, '$');
         }
         
         function renderSummaryCards(year) {
@@ -741,12 +757,25 @@
             const totalTrend = total > prevTotal ? 'up' : 'down';
             const avgTrend = avg > prevAvg ? 'up' : 'down';
             
-            ui.summaryContainer.innerHTML = `
-                <div class="summary-card" data-id="avg-card"><p class="text-base font-medium text-secondary">Promedio Mensual</p><div class="flex items-baseline"><p id="avg-value" class="text-4xl font-bold mt-1"></p><span class="ml-2 trend-${avgTrend}">${avg > 0 && prevAvg > 0 ? (avgTrend === 'up' ? '▲' : '▼') : ''}</span></div></div>
-                <div class="summary-card" data-id="best-month-card"><p class="text-base font-medium text-secondary">Mejor Mes</p><p class="text-4xl font-bold mt-1">${bestMonth}</p><p class="text-lg text-accent">${bestAmount > 0 ? formatCurrency(bestAmount, '$') : ''}</p></div>
-                <div class="summary-card" data-id="total-card"><p class="text-base font-medium text-secondary">Ganancia Total</p><div class="flex items-baseline"><p id="total-value" class="text-4xl font-bold mt-1"></p><span class="ml-2 trend-${totalTrend}">${total > 0 && prevTotal > 0 ? (totalTrend === 'up' ? '▲' : '▼') : ''}</span></div></div>
-            `;
+            if (ui.summaryContainer.innerHTML === '') {
+                ui.summaryContainer.innerHTML = `
+                    <div class="summary-card"><p class="text-base font-medium text-secondary">Promedio Mensual</p><div class="flex items-baseline"><p id="avg-value" class="text-4xl font-bold mt-1"></p><span id="avg-trend" class="ml-2"></span></div></div>
+                    <div class="summary-card"><p class="text-base font-medium text-secondary">Mejor Mes</p><p id="best-month-value" class="text-4xl font-bold mt-1"></p><p id="best-amount-value" class="text-lg text-accent"></p></div>
+                    <div class="summary-card"><p class="text-base font-medium text-secondary">Ganancia Total</p><div class="flex items-baseline"><p id="total-value" class="text-4xl font-bold mt-1"></p><span id="total-trend" class="ml-2"></span></div></div>
+                `;
+            }
+
+            const avgTrendEl = document.getElementById('avg-trend');
+            avgTrendEl.className = `ml-2 trend-${avgTrend}`;
+            avgTrendEl.textContent = avg > 0 && prevAvg > 0 ? (avgTrend === 'up' ? '▲' : '▼') : '';
             
+            document.getElementById('best-month-value').textContent = bestMonth;
+            document.getElementById('best-amount-value').textContent = bestAmount > 0 ? formatCurrency(bestAmount, '$') : '';
+
+            const totalTrendEl = document.getElementById('total-trend');
+            totalTrendEl.className = `ml-2 trend-${totalTrend}`;
+            totalTrendEl.textContent = total > 0 && prevTotal > 0 ? (totalTrend === 'up' ? '▲' : '▼') : '';
+
             animateCountUp(document.getElementById('avg-value'), avg);
             animateCountUp(document.getElementById('total-value'), total);
         }
@@ -1158,7 +1187,7 @@
             
             const snapshot = await getDocs(undoHistoryCol);
             if (snapshot.docs.length >= UNDO_HISTORY_LIMIT) {
-                const sortedDocs = snapshot.docs.sort((a, b) => a.data().timestamp - b.data().timestamp);
+                const sortedDocs = snapshot.docs.sort((a, b) => (a.data().timestamp?.seconds ?? 0) - (b.data().timestamp?.seconds ?? 0));
                 await deleteDoc(sortedDocs[0].ref);
             }
 
@@ -1175,14 +1204,12 @@
             const currentStateYears = Object.keys(allData);
             const newStateYears = Object.keys(stateToRestore);
 
-            // Delete years that are in current state but not in the new state
             currentStateYears.forEach(year => {
                 if (!newStateYears.includes(year)) {
                     batch.delete(doc(earningsCol, year));
                 }
             });
 
-            // Set data for all years in the new state
             for (const year in stateToRestore) {
                 batch.set(doc(earningsCol, year), stateToRestore[year]);
             }
@@ -1197,15 +1224,14 @@
                 showNotification("No hay más acciones que deshacer.");
                 return;
             }
-            const sortedUndoDocs = undoSnapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
+            const sortedUndoDocs = undoSnapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0));
             const lastStateDoc = sortedUndoDocs[0];
             const lastState = JSON.parse(lastStateDoc.data().data);
 
             const historyCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`);
             const historySnapshot = await getDocs(historyCol);
-            const lastHistoryLogDoc = historySnapshot.empty ? null : historySnapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp)[0];
+            const lastHistoryLogDoc = historySnapshot.empty ? null : historySnapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0))[0];
 
-            const redoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_REDO_HISTORY_COLLECTION}`);
             const batch = writeBatch(db);
 
             batch.set(doc(collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_REDO_HISTORY_COLLECTION}`)), {
@@ -1236,7 +1262,7 @@
                 showNotification("No hay más acciones que rehacer.");
                 return;
             }
-            const sortedRedoDocs = redoSnapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
+            const sortedRedoDocs = redoSnapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0));
             const nextStateDoc = sortedRedoDocs[0];
             const redoData = nextStateDoc.data();
             const nextState = JSON.parse(redoData.data);
