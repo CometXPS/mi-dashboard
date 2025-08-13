@@ -167,11 +167,7 @@
                     <label for="password" class="block text-sm font-medium text-secondary">Contraseña</label>
                     <input type="password" id="password" required class="mt-1 block w-full bg-primary border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
                 </div>
-                <div class="flex items-center justify-between mb-6">
-                    <label class="flex items-center text-sm text-secondary">
-                        <input type="checkbox" id="remember-me" class="rounded border-gray-500 text-accent shadow-sm focus:border-accent focus:ring focus:ring-offset-0 focus:ring-accent focus:ring-opacity-50">
-                        <span class="ml-2">Recordarme</span>
-                    </label>
+                <div class="text-right mb-6">
                     <a href="#" id="forgot-password-link" class="text-sm text-accent hover:underline">¿Olvidaste tu contraseña?</a>
                 </div>
                 <button type="submit" id="submit-btn" class="w-full bg-accent text-white py-2 px-4 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus-accent">Acceder</button>
@@ -380,7 +376,7 @@
     <script type="module">
         import { firebaseConfig } from './config.js'; 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence, browserLocalPersistence, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
@@ -392,7 +388,7 @@
         const FIRESTORE_HISTORY_COLLECTION = 'history';
         const FIRESTORE_UNDO_HISTORY_COLLECTION = 'undo_history';
         const FIRESTORE_REDO_HISTORY_COLLECTION = 'redo_history';
-        const INACTIVITY_TIMEOUT = 20 * 60 * 1000; // 20 minutes
+        const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
         const UNDO_HISTORY_LIMIT = 5;
 
         const initialUserData = {
@@ -590,12 +586,10 @@
             e.preventDefault();
             const email = ui.authForm.email.value;
             const password = ui.authForm.password.value;
-            const rememberMe = document.getElementById('remember-me').checked;
             ui.authError.classList.add('hidden');
 
             try {
-                const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
-                await setPersistence(auth, persistence);
+                await setPersistence(auth, browserSessionPersistence);
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 ui.authError.textContent = "Error: Credenciales incorrectas.";
