@@ -1086,19 +1086,29 @@
             const currentValue = (allData[currentYear] || {})[month] || 0;
             cell.classList.add('editing');
             
-            cell.innerHTML = `<input type="text" value="${String(currentValue).replace('.', ',')}" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3">`;
+            cell.innerHTML = `<input type="text" value="" placeholder="${formatCurrency(currentValue, '$')}" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3">`;
             const input = cell.querySelector('input');
             input.focus();
-            input.select();
 
             const saveChanges = async () => {
                 const inputText = input.value.trim().replace(/\./g, '').replace(',', '.');
                 let newValue;
 
-                if ((inputText.startsWith('+') || inputText.startsWith('-')) && !isNaN(parseFloat(inputText))) {
+                // If input is empty, don't change anything
+                if (inputText === '') {
+                    newValue = currentValue;
+                }
+                // If input starts with '=', it's a replacement.
+                else if (inputText.startsWith('=')) {
+                    newValue = parseFloat(inputText.substring(1)) || 0;
+                } 
+                // If it's just a number (or starts with + or -), add it to the current value.
+                else if (!isNaN(parseFloat(inputText))) {
                     newValue = currentValue + (parseFloat(inputText) || 0);
-                } else {
-                    newValue = parseFloat(inputText) || 0;
+                } 
+                // If input is invalid, revert to the current value.
+                else {
+                    newValue = currentValue;
                 }
 
                 cell.classList.remove('editing');
@@ -1135,6 +1145,7 @@
                 else if (e.key === 'Escape') {
                     cell.classList.remove('editing');
                     cell.innerHTML = formatCurrency(currentValue, '$');
+                    input.removeEventListener('blur', saveChanges);
                 }
             });
         }
