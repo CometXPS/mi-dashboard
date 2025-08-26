@@ -17,7 +17,7 @@
             --accent-color: #34d399;
             --accent-color-rgb: 52, 211, 153;
             --danger-color: #ef4444;
-            --success-color: var(--accent-color); /* <-- CORRECCIÓN AQUÍ */
+            --success-color: var(--accent-color); /* <-- CORRECCIÃ“N AQUÃ */
         }
 
         .light-mode {
@@ -148,7 +148,7 @@
         <div class="main-card p-8 text-center">
             <h2 class="text-2xl font-bold mb-4">Conectando...</h2>
             <div class="spinner"></div>
-            <p class="text-secondary">Verificando sesión, por favor espera.</p>
+            <p class="text-secondary">Verificando sesiÃ³n, por favor espera.</p>
         </div>
     </div>
 
@@ -156,36 +156,36 @@
     <div id="auth-container" class="max-w-md mx-auto hidden">
         <!-- Login Form -->
         <div id="login-card" class="main-card p-8">
-            <h2 id="auth-title" class="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
+            <h2 id="auth-title" class="text-2xl font-bold text-center mb-6">Iniciar SesiÃ³n</h2>
             <div id="auth-error" class="text-red-400 text-center mb-4 hidden"></div>
             <form id="auth-form">
                 <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-secondary">Correo Electrónico</label>
+                    <label for="email" class="block text-sm font-medium text-secondary">Correo ElectrÃ³nico</label>
                     <input type="email" id="email" required class="mt-1 block w-full bg-primary border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
                 </div>
                 <div class="mb-4">
-                    <label for="password" class="block text-sm font-medium text-secondary">Contraseña</label>
+                    <label for="password" class="block text-sm font-medium text-secondary">ContraseÃ±a</label>
                     <input type="password" id="password" required class="mt-1 block w-full bg-primary border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
                 </div>
                 <div class="text-right mb-6">
-                    <a href="#" id="forgot-password-link" class="text-sm text-accent hover:underline">¿Olvidaste tu contraseña?</a>
+                    <a href="#" id="forgot-password-link" class="text-sm text-accent hover:underline">Â¿Olvidaste tu contraseÃ±a?</a>
                 </div>
                 <button type="submit" id="submit-btn" class="w-full bg-accent text-white py-2 px-4 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus-accent">Acceder</button>
             </form>
         </div>
         <!-- Reset Password Form -->
         <div id="reset-password-card" class="main-card p-8 hidden">
-            <h2 class="text-2xl font-bold text-center mb-6">Restablecer Contraseña</h2>
-            <p class="text-center text-secondary mb-4">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</p>
+            <h2 class="text-2xl font-bold text-center mb-6">Restablecer ContraseÃ±a</h2>
+            <p class="text-center text-secondary mb-4">Ingresa tu correo electrÃ³nico y te enviaremos un enlace para restablecer tu contraseÃ±a.</p>
             <div id="reset-error" class="text-red-400 text-center mb-4 hidden"></div>
             <form id="reset-password-form">
                 <div class="mb-4">
-                    <label for="reset-email" class="block text-sm font-medium text-secondary">Correo Electrónico</label>
+                    <label for="reset-email" class="block text-sm font-medium text-secondary">Correo ElectrÃ³nico</label>
                     <input type="email" id="reset-email" required class="mt-1 block w-full bg-primary border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
                 </div>
                 <button type="submit" id="reset-submit-btn" class="w-full bg-accent text-white py-2 px-4 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus-accent">Enviar Enlace</button>
             </form>
-            <button id="back-to-login-btn" class="w-full mt-4 text-center text-sm text-accent hover:underline">Volver a Iniciar Sesión</button>
+            <button id="back-to-login-btn" class="w-full mt-4 text-center text-sm text-accent hover:underline">Volver a Iniciar SesiÃ³n</button>
         </div>
     </div>
 
@@ -197,25 +197,25 @@
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" onerror="this.onerror=null;this.src='https://placehold.co/40x40/1f2937/ffffff?text=B';" alt="Logo de Bitcoin" class="h-10 w-10">
                 <div>
                     <h1 class="text-3xl font-extrabold">Dashboard Intercambio de Divisas</h1>
-                    <p class="text-secondary mt-1">Análisis de rendimiento financiero en tiempo real.</p>
+                    <p class="text-secondary mt-1">AnÃ¡lisis de rendimiento financiero en tiempo real.</p>
                 </div>
             </div>
             <div class="flex items-center justify-end flex-wrap gap-2 mt-4 sm:mt-0">
                  <select id="year-selector" class="p-2 bg-secondary border border-color rounded-md shadow-sm"></select>
-                 <button id="add-year-btn" title="Añadir nuevo año" class="p-2 bg-accent text-white rounded-md shadow-sm hover:opacity-90">
+                 <button id="add-year-btn" title="AÃ±adir nuevo aÃ±o" class="p-2 bg-accent text-white rounded-md shadow-sm hover:opacity-90">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                  </button>
-                 <button id="delete-year-btn" title="Borrar año seleccionado" class="p-2 bg-danger text-white rounded-md shadow-sm disabled:opacity-50 hover:opacity-90">
+                 <button id="delete-year-btn" title="Borrar aÃ±o seleccionado" class="p-2 bg-danger text-white rounded-md shadow-sm disabled:opacity-50 hover:opacity-90">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                  </button>
-                 <button id="undo-btn" title="Deshacer último cambio" class="p-2 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600 disabled:opacity-50">
+                 <button id="undo-btn" title="Deshacer Ãºltimo cambio" class="p-2 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600 disabled:opacity-50">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l4-4m-4 4l4 4" /></svg>
                  </button>
-                 <button id="redo-btn" title="Rehacer último cambio" class="p-2 bg-indigo-500 text-white rounded-md shadow-sm hover:bg-indigo-600 disabled:opacity-50">
+                 <button id="redo-btn" title="Rehacer Ãºltimo cambio" class="p-2 bg-indigo-500 text-white rounded-md shadow-sm hover:bg-indigo-600 disabled:opacity-50">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2m18-10l-4-4m4 4l-4 4" /></svg>
                  </button>
                  <button id="toggle-visibility-btn" title="Ocultar/Mostrar valores" class="p-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600"></button>
-                 <button id="logout-btn" title="Cerrar Sesión" class="p-2 bg-gray-600 text-white rounded-md shadow-sm hover:opacity-90">
+                 <button id="logout-btn" title="Cerrar SesiÃ³n" class="p-2 bg-gray-600 text-white rounded-md shadow-sm hover:opacity-90">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                  </button>
             </div>
@@ -224,12 +224,12 @@
         <!-- Settings Bar -->
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-4 p-2 bg-secondary rounded-md border border-color">
             <div class="flex gap-2">
-                <button class="tab-btn active px-4 py-2 rounded-md text-sm font-medium" data-tab="analysis">Análisis Anual</button>
+                <button class="tab-btn active px-4 py-2 rounded-md text-sm font-medium" data-tab="analysis">AnÃ¡lisis Anual</button>
                 <button class="tab-btn px-4 py-2 rounded-md text-sm font-medium" data-tab="tools">Herramientas</button>
             </div>
 
             <div class="flex items-center gap-3">
-                <button id="settings-btn" title="Configuración" class="p-2 rounded-md bg-primary">
+                <button id="settings-btn" title="ConfiguraciÃ³n" class="p-2 rounded-md bg-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </button>
             </div>
@@ -255,7 +255,7 @@
                          <div class="relative mt-4 h-64"><canvas id="comparisonChart"></canvas></div>
                      </div>
                      <div class="p-6">
-                         <h2 class="text-xl font-bold">Distribución Anual</h2>
+                         <h2 class="text-xl font-bold">DistribuciÃ³n Anual</h2>
                          <div class="relative mt-4 h-64"><canvas id="doughnutChart"></canvas></div>
                      </div>
                 </div>
@@ -275,9 +275,9 @@
                                     <p class="text-sm text-secondary mt-1">Debes solicitar: <span id="paypal-request-result" class="font-bold text-primary">$ 0,00</span></p>
                                 </div>
                                 <div>
-                                    <label for="paypal-send" class="block text-sm font-medium">Si te envían:</label>
+                                    <label for="paypal-send" class="block text-sm font-medium">Si te envÃ­an:</label>
                                     <input type="number" id="paypal-send" placeholder="Monto enviado" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
-                                    <p class="text-sm text-secondary mt-1">Recibirás: <span id="paypal-receive-result" class="font-bold text-primary">$ 0,00</span></p>
+                                    <p class="text-sm text-secondary mt-1">RecibirÃ¡s: <span id="paypal-receive-result" class="font-bold text-primary">$ 0,00</span></p>
                                 </div>
                             </div>
                         </div>
@@ -293,7 +293,7 @@
                                 <div class="md:col-span-2 grid grid-cols-2 gap-4">
                                     <div>
                                         <p class="text-sm text-secondary">Resultado en EUR</p>
-                                        <p id="eur-result" class="text-2xl font-bold mt-1">€ 0,00</p>
+                                        <p id="eur-result" class="text-2xl font-bold mt-1">â‚¬ 0,00</p>
                                     </div>
                                     <div>
                                         <p class="text-sm text-secondary">Resultado en CLP</p>
@@ -338,7 +338,7 @@
     <div id="settings-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
         <div class="main-card p-6 w-full max-w-sm">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold">Configuración</h3>
+                <h3 class="text-lg font-bold">ConfiguraciÃ³n</h3>
                 <button id="settings-close-btn" class="text-secondary hover:text-primary">&times;</button>
             </div>
             <div class="space-y-4">
@@ -548,7 +548,7 @@
             inactivityTimer = setTimeout(() => {
                 if (auth.currentUser) {
                     signOut(auth);
-                    showNotification("Sesión cerrada por inactividad.", false);
+                    showNotification("SesiÃ³n cerrada por inactividad.", false);
                 }
             }, INACTIVITY_TIMEOUT);
         }
@@ -624,7 +624,7 @@
                 ui.loginCard.classList.remove('hidden');
             } catch (error) {
                 console.error("Error sending password reset email:", error);
-                ui.resetError.textContent = "Error: No se pudo enviar el correo. Verifica la dirección.";
+                ui.resetError.textContent = "Error: No se pudo enviar el correo. Verifica la direcciÃ³n.";
                 ui.resetError.classList.remove('hidden');
             }
         });
@@ -786,14 +786,14 @@
 
             const avgTrendEl = document.getElementById('avg-trend');
             avgTrendEl.className = `ml-2 trend-${avgTrend}`;
-            avgTrendEl.textContent = avg > 0 && prevAvg > 0 ? (avgTrend === 'up' ? '▲' : '▼') : '';
+            avgTrendEl.textContent = avg > 0 && prevAvg > 0 ? (avgTrend === 'up' ? 'â–²' : 'â–¼') : '';
             
             document.getElementById('best-month-value').textContent = bestMonth;
             document.getElementById('best-amount-value').textContent = bestAmount > 0 ? formatCurrency(bestAmount, '$') : '';
 
             const totalTrendEl = document.getElementById('total-trend');
             totalTrendEl.className = `ml-2 trend-${totalTrend}`;
-            totalTrendEl.textContent = total > 0 && prevTotal > 0 ? (totalTrend === 'up' ? '▲' : '▼') : '';
+            totalTrendEl.textContent = total > 0 && prevTotal > 0 ? (totalTrend === 'up' ? 'â–²' : 'â–¼') : '';
 
             animateCountUp(document.getElementById('avg-value'), avg);
             animateCountUp(document.getElementById('total-value'), total);
@@ -950,7 +950,7 @@
         async function convertCurrency() {
             const amount = parseFloat(ui.usdAmountInput.value);
             if(isNaN(amount) || amount <= 0) {
-                ui.eurResult.textContent = formatCurrency(0, '€', true);
+                ui.eurResult.textContent = formatCurrency(0, 'â‚¬', true);
                 ui.clpResult.textContent = formatCurrency(0, '$', true);
                 return;
             }
@@ -964,14 +964,14 @@
                 const eurAmount = amount * rates.EUR;
                 const clpAmount = amount * rates.CLP;
 
-                ui.eurResult.textContent = formatCurrency(eurAmount, '€', true);
+                ui.eurResult.textContent = formatCurrency(eurAmount, 'â‚¬', true);
                 ui.clpResult.textContent = formatCurrency(clpAmount, '$', true);
                 
                 const date = new Date(data.time_last_update_utc);
                 ui.converterStatus.textContent = `Tasa de cambio actualizada el ${date.toLocaleDateString()}`;
 
             } catch (error) {
-                console.error("Error de conversión:", error);
+                console.error("Error de conversiÃ³n:", error);
                 showNotification("Error al obtener la tasa de cambio.");
             }
         }
@@ -1026,7 +1026,7 @@
                 await setDoc(doc(db, collectionPath, year), initialYearData);
             } catch (error) {
                 console.error("Error creating new year:", error);
-                showNotification("No se pudo crear el nuevo año.");
+                showNotification("No se pudo crear el nuevo aÃ±o.");
             }
         }
         
@@ -1041,9 +1041,9 @@
         });
 
         ui.deleteYearBtn.addEventListener('click', () => {
-            showConfirmationModal('Confirmar Eliminación', `¿Estás seguro de que quieres eliminar el año ${ui.yearSelector.value}?`, async () => {
+            showConfirmationModal('Confirmar EliminaciÃ³n', `Â¿EstÃ¡s seguro de que quieres eliminar el aÃ±o ${ui.yearSelector.value}?`, async () => {
                 if (Object.keys(allData).length <= 1) {
-                    showNotification("No se puede eliminar el último año.");
+                    showNotification("No se puede eliminar el Ãºltimo aÃ±o.");
                     return;
                 }
                 await pushToHistory();
@@ -1052,7 +1052,7 @@
                     await deleteDoc(doc(db, collectionPath, ui.yearSelector.value));
                 } catch (error) {
                     console.error("Error deleting year:", error);
-                    showNotification("No se pudo eliminar el año.");
+                    showNotification("No se pudo eliminar el aÃ±o.");
                 }
             });
         });
@@ -1065,7 +1065,7 @@
                 const batch = writeBatch(db);
                 snapshot.docs.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
-                showNotification("Historial borrado con éxito.", false);
+                showNotification("Historial borrado con Ã©xito.", false);
             } catch (error) {
                 console.error("Error clearing history:", error);
                 showNotification("No se pudo borrar el historial.");
@@ -1073,7 +1073,7 @@
         }
 
         ui.clearHistoryBtn.addEventListener('click', () => {
-            showConfirmationModal('Confirmar Borrado', '¿Estás seguro de que quieres borrar todo el historial?', clearHistory);
+            showConfirmationModal('Confirmar Borrado', 'Â¿EstÃ¡s seguro de que quieres borrar todo el historial?', clearHistory);
         });
 
         ui.tableBody.addEventListener('click', (e) => {
@@ -1247,7 +1247,7 @@
                 await batch.commit();
             } catch (error) {
                 console.error("Error restoring data state:", error);
-                showNotification("Error al restaurar los datos. Inténtalo de nuevo.");
+                showNotification("Error al restaurar los datos. IntÃ©ntalo de nuevo.");
             }
         }
 
@@ -1255,7 +1255,7 @@
             const undoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_UNDO_HISTORY_COLLECTION}`);
             const undoSnapshot = await getDocs(undoHistoryCol);
             if (undoSnapshot.empty) {
-                showNotification("No hay más acciones que deshacer.");
+                showNotification("No hay mÃ¡s acciones que deshacer.");
                 return;
             }
             const sortedUndoDocs = undoSnapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0));
@@ -1280,7 +1280,7 @@
             try {
                 await batch.commit();
                 await restoreDataState(lastState);
-                showNotification("Último cambio deshecho.", false);
+                showNotification("Ãšltimo cambio deshecho.", false);
             } catch (error) {
                 console.error("Error undoing change:", error);
                 showNotification("Error al deshacer el cambio.");
@@ -1291,7 +1291,7 @@
             const redoHistoryCol = collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_REDO_HISTORY_COLLECTION}`);
             const redoSnapshot = await getDocs(redoHistoryCol);
             if (redoSnapshot.empty) {
-                showNotification("No hay más acciones que rehacer.");
+                showNotification("No hay mÃ¡s acciones que rehacer.");
                 return;
             }
             const sortedRedoDocs = redoSnapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0));
@@ -1316,7 +1316,7 @@
             try {
                 await batch.commit();
                 await restoreDataState(nextState);
-                showNotification("Cambio rehecho con éxito.", false);
+                showNotification("Cambio rehecho con Ã©xito.", false);
             } catch (error) {
                 console.error("Error redoing change:", error);
                 showNotification("Error al rehacer el cambio.");
@@ -1324,11 +1324,11 @@
         }
 
         ui.undoBtn.addEventListener('click', () => {
-             showConfirmationModal('Confirmar Deshacer', '¿Estás seguro de que quieres deshacer el último cambio?', undoLastChange);
+             showConfirmationModal('Confirmar Deshacer', 'Â¿EstÃ¡s seguro de que quieres deshacer el Ãºltimo cambio?', undoLastChange);
         });
 
         ui.redoBtn.addEventListener('click', () => {
-             showConfirmationModal('Confirmar Rehacer', '¿Estás seguro de que quieres rehacer el último cambio?', redoLastChange);
+             showConfirmationModal('Confirmar Rehacer', 'Â¿EstÃ¡s seguro de que quieres rehacer el Ãºltimo cambio?', redoLastChange);
         });
 
         ui.themeToggleBtn.addEventListener('click', () => {
