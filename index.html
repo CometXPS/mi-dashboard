@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Intercambio de Divisas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#111827">
-    <link rel="icon" type="image/svg+xml" href="icono.svg">
-    <link rel="apple-touch-icon" href="icono.png">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -193,7 +194,7 @@
     <div id="app-container" class="max-w-6xl mx-auto hidden">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
             <div class="flex items-center gap-4">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" onerror="this.onerror=null;this.src='https://placehold.co/40x40/1f2937/ffffff?text=B';" alt="Logo de Bitcoin" class="h-10 w-10">
+                <img src="icon.svg" alt="Logo de Bitcoin" class="h-10 w-10">
                 <div>
                     <h1 class="text-3xl font-extrabold">Dashboard Intercambio de Divisas</h1>
                     <p class="text-secondary mt-1">Análisis de rendimiento financiero en tiempo real.</p>
@@ -405,7 +406,6 @@
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
         const FIRESTORE_HISTORY_COLLECTION = 'history';
 
-        // REFACTOR UNDO/REDO LOCAL
         const LOCAL_HISTORY_LIMIT = 20;
         let undoStack = []; // Pila de acciones para deshacer
         let redoStack = []; // Pila de acciones para rehacer
@@ -546,7 +546,7 @@
             showModal(ui.confirmationModal, onOpen, onClose);
         }
 
-        // --- Auth & Inactivity (MEJORADO) ---
+        // --- Auth & Inactivity ---
         const INACTIVITY_LIMIT = 30 * 60 * 1000;
         const WARNING_DURATION = 60 * 1000;
         let inactivityTimer;
@@ -595,12 +595,7 @@
                 if(unsubscribeData) unsubscribeData();
                 if(unsubscribeHistory) unsubscribeHistory();
                 removeActivityListeners();
-                
-                // Limpiar pilas locales al salir
-                undoStack = [];
-                redoStack = [];
-                updateUndoRedoUI();
-
+                undoStack = []; redoStack = []; updateUndoRedoUI();
                 ui.authForm.reset();
                 ui.authError.classList.add('hidden');
                 ui.resetPasswordCard.classList.add('hidden');
@@ -668,12 +663,12 @@
             } catch (error) { console.error(error); }
         }
         
-        // --- Undo/Redo Local Logic ---
+        // --- Undo/Redo Logic with History & Context Switching ---
         function addToLocalUndo(year, month, oldValue, newValue) {
             const command = { year, month, oldValue, newValue };
             undoStack.push(command);
             if (undoStack.length > LOCAL_HISTORY_LIMIT) undoStack.shift();
-            redoStack = []; // Limpiar redo al hacer nueva acción
+            redoStack = []; 
             updateUndoRedoUI();
         }
 
@@ -681,28 +676,37 @@
             if (undoStack.length === 0) return;
             const command = undoStack.pop();
             
-            // FIX: Cambiar contexto de año si es necesario
             if (currentYear !== command.year) {
                 currentYear = command.year;
                 ui.yearSelector.value = currentYear;
+                showNotification(`Regresando al año ${currentYear}...`, false);
             }
 
-            // Revertir en local
             if (allData[command.year]) allData[command.year][command.month] = command.oldValue;
             
-            // Revertir en DB (Solo 1 escritura)
             try {
                 const docRef = doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, command.year);
                 await updateDoc(docRef, { [command.month]: command.oldValue });
                 
+                // Registro de historial con etiqueta
+                const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
+                await addDoc(collection(db, historyCollectionPath), {
+                    timestamp: serverTimestamp(),
+                    year: command.year,
+                    month: command.month,
+                    oldValue: command.newValue,
+                    newValue: command.oldValue,
+                    changeAmount: command.oldValue - command.newValue,
+                    actionType: 'undo' 
+                });
+
                 redoStack.push(command);
                 updateUndoRedoUI();
-                showNotification("Cambio deshecho (Local)", false);
+                showNotification("Cambio deshecho.", false);
                 renderAllComponents(currentYear);
             } catch (error) {
                 console.error("Error undo:", error);
                 showNotification("Error al deshacer.");
-                // Rollback local si falla DB
                 undoStack.push(command);
                 allData[command.year][command.month] = command.newValue;
             }
@@ -712,23 +716,33 @@
             if (redoStack.length === 0) return;
             const command = redoStack.pop();
 
-            // FIX: Cambiar contexto de año si es necesario
             if (currentYear !== command.year) {
                 currentYear = command.year;
                 ui.yearSelector.value = currentYear;
+                showNotification(`Avanzando al año ${currentYear}...`, false);
             }
 
-            // Aplicar en local
             if (allData[command.year]) allData[command.year][command.month] = command.newValue;
 
-            // Aplicar en DB
             try {
                 const docRef = doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, command.year);
                 await updateDoc(docRef, { [command.month]: command.newValue });
 
+                // Registro de historial con etiqueta
+                const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
+                await addDoc(collection(db, historyCollectionPath), {
+                    timestamp: serverTimestamp(),
+                    year: command.year,
+                    month: command.month,
+                    oldValue: command.oldValue,
+                    newValue: command.newValue,
+                    changeAmount: command.newValue - command.oldValue,
+                    actionType: 'redo'
+                });
+
                 undoStack.push(command);
                 updateUndoRedoUI();
-                showNotification("Cambio rehecho (Local)", false);
+                showNotification("Cambio rehecho.", false);
                 renderAllComponents(currentYear);
             } catch (error) {
                 console.error("Error redo:", error);
@@ -748,7 +762,6 @@
             ui.redoBtn.classList.toggle('cursor-not-allowed', redoStack.length === 0);
         }
 
-        // --- Modals for Undo/Redo ---
         ui.undoBtn.addEventListener('click', () => {
              showConfirmationModal('Deshacer Cambio', '¿Estás seguro de que quieres deshacer la última acción?', undoLastChange);
         });
@@ -859,11 +872,21 @@
         function renderHistory(logs) {
             ui.historyLoader.style.display = 'none';
             if (!logs || logs.length === 0) { ui.historyLogContainer.innerHTML = '<p class="text-secondary text-center py-4">No hay historial de cambios.</p>'; return; }
+            
             ui.historyLogContainer.innerHTML = logs.map(log => {
                 const data = log.data(); if (!data.timestamp) return '';
                 const date = data.timestamp.toDate();
                 const change = data.changeAmount !== undefined ? data.changeAmount : data.newValue - data.oldValue;
-                return `<div class="border-b border-color p-3 text-sm last:border-b-0"><div class="flex justify-between items-center"><p class="font-semibold"><span class="text-accent">${data.month} ${data.year}</span></p><p class="font-semibold text-lg ${change >= 0 ? 'trend-up' : 'trend-down'}">${change >= 0 ? '+' : '-'} ${formatCurrency(Math.abs(change), '$', true)}</p></div><p class="text-xs text-secondary text-right mt-1">${date.toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}</p></div>`;
+                
+                // LÓGICA DE ETIQUETAS
+                let badge = '';
+                if (data.actionType === 'undo') {
+                    badge = '<span class="ml-2 text-[10px] uppercase font-bold text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded border border-yellow-500/20">Deshacer</span>';
+                } else if (data.actionType === 'redo') {
+                    badge = '<span class="ml-2 text-[10px] uppercase font-bold text-indigo-500 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">Rehacer</span>';
+                }
+                
+                return `<div class="border-b border-color p-3 text-sm last:border-b-0"><div class="flex justify-between items-center"><div class="flex items-center"><p class="font-semibold"><span class="text-accent">${data.month} ${data.year}</span></p>${badge}</div><p class="font-semibold text-lg ${change >= 0 ? 'trend-up' : 'trend-down'}">${change >= 0 ? '+' : '-'} ${formatCurrency(Math.abs(change), '$', true)}</p></div><p class="text-xs text-secondary text-right mt-1">${date.toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}</p></div>`;
             }).join('');
         }
 
@@ -876,7 +899,7 @@
             renderAllComponents(currentYear);
             ui.loader.style.display = 'none'; ui.earningsTable.classList.remove('hidden');
             document.querySelectorAll('.summary-card, .main-card').forEach((el, i) => { el.style.animationDelay = `${i * 50}ms`; el.classList.add('fade-in-up'); });
-            updateUndoRedoUI(); // Asegurar estado botones
+            updateUndoRedoUI();
         }
 
         function formatCurrency(value, symbol, force = false) {
@@ -884,7 +907,7 @@
             return `${symbol} ${new Intl.NumberFormat('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value))}`;
         }
         
-        // --- Cell Editing Logic (MODIFIED FOR LOCAL UNDO) ---
+        // --- Cell Editing Logic ---
         ui.tableBody.addEventListener('click', (e) => { if (e.target.classList.contains('data-cell')) makeCellEditable(e.target); });
 
         async function makeCellEditable(cell) {
@@ -908,18 +931,16 @@
                 cell.innerHTML = formatCurrency(newValue, '$');
                 
                 if (currentValue !== newValue) {
-                    // 1. Guardar en Stack Local
                     addToLocalUndo(currentYear, month, currentValue, newValue);
-                    
-                    // 2. Guardar en Firestore (Data y Log)
                     const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                     const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
                     try {
                         await setDoc(doc(db, earningsCollectionPath, currentYear), { [month]: newValue }, { merge: true });
-                        // El Log se mantiene porque es barato y útil para auditoría
+                        // Edición manual = actionType 'edit' (sin badge)
                         await addDoc(collection(db, historyCollectionPath), {
                             timestamp: serverTimestamp(),
-                            year: currentYear, month: month, oldValue: currentValue, newValue: newValue, changeAmount: newValue - currentValue
+                            year: currentYear, month: month, oldValue: currentValue, newValue: newValue, changeAmount: newValue - currentValue,
+                            actionType: 'edit'
                         });
                         cell.classList.add('saved-feedback'); setTimeout(() => cell.classList.remove('saved-feedback'), 700);
                     } catch (error) { console.error(error); showNotification("No se pudo guardar."); cell.innerHTML = formatCurrency(currentValue, '$'); }
@@ -932,50 +953,28 @@
         // --- Other Actions ---
         ui.yearSelector.addEventListener('change', (e) => { currentYear = e.target.value; renderAllComponents(currentYear); });
         
-        // --- FIX: Logic for Adding Year (UI First) ---
         ui.addYearBtn.addEventListener('click', async () => {
              const existingYears = Object.keys(allData).map(Number);
              const newYear = (existingYears.length > 0 ? Math.max(...existingYears) + 1 : new Date().getFullYear()).toString();
-             
-             if (allData[newYear]) return; // Ya existe
-
-             // 1. Update UI Locally First
+             if (allData[newYear]) return;
              const emptyYearData = months.reduce((acc, m) => ({...acc, [m]: 0}), {});
              allData[newYear] = emptyYearData;
              currentYear = newYear;
-             updateFullUI(); // This will refresh the dropdown and select the new year
-
-             // 2. Save to DB
-             try { 
-                 await setDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, newYear), emptyYearData); 
-             } catch (e) { 
-                 console.error(e);
-                 showNotification("Error guardando el año nuevo.", true);
-             }
+             updateFullUI(); 
+             try { await setDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, newYear), emptyYearData); } 
+             catch (e) { console.error(e); showNotification("Error guardando el año nuevo.", true); }
         });
 
-        // --- FIX: Logic for Deleting Year (UI First) ---
         ui.deleteYearBtn.addEventListener('click', () => {
             showConfirmationModal('Confirmar Eliminación', `¿Eliminar año ${ui.yearSelector.value}?`, async () => {
                 const yearToDelete = ui.yearSelector.value;
                 if (Object.keys(allData).length <= 1) return;
-
-                // 1. Remove from local state and update currentYear
                 delete allData[yearToDelete];
-                
-                // Switch to another available year
                 const remainingYears = Object.keys(allData).sort((a,b) => b-a);
                 currentYear = remainingYears[0];
                 updateFullUI();
-
-                // 2. Update DB
-                try { 
-                    await deleteDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, yearToDelete)); 
-                    showNotification("Año eliminado.", false);
-                } catch (e) { 
-                    console.error(e); 
-                    showNotification("Error eliminando año en DB.", true);
-                }
+                try { await deleteDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, yearToDelete)); showNotification("Año eliminado.", false); } 
+                catch (e) { console.error(e); showNotification("Error eliminando año en DB.", true); }
             });
         });
 
@@ -1022,5 +1021,3 @@
     </script>
 </body>
 </html>
-
-
