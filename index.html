@@ -17,7 +17,6 @@
             --accent-color: #34d399;
             --accent-color-rgb: 52, 211, 153;
             --danger-color: #ef4444;
-            /* CORRECCIÓN 1: Color de éxito fijo (Verde) independiente del tema */
             --success-color: #10b981; 
         }
 
@@ -327,6 +326,22 @@
             </div>
         </div>
     </div>
+
+    <div id="timeout-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[60] opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="main-card p-6 w-full max-w-sm border-2 border-yellow-500 shadow-2xl relative animate-bounce-small">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <h3 class="text-lg font-bold text-primary mb-2">Cierre de sesión inminente</h3>
+                <p class="text-secondary mb-6">Tu sesión expirará en menos de 60 segundos debido a inactividad.</p>
+                <div class="flex flex-col gap-3">
+                    <button id="timeout-stay-btn" class="w-full px-4 py-2 bg-accent text-white rounded-md hover:opacity-90 font-medium transition-colors">Mantener sesión activa</button>
+                    <button id="timeout-logout-btn" class="w-full px-4 py-2 bg-transparent border border-color text-secondary rounded-md hover:bg-white/5 transition-colors">Cerrar sesión ahora</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div id="settings-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
         <div class="main-card p-6 w-full max-w-sm">
@@ -357,7 +372,7 @@
         </div>
     </div>
 
-    <div id="notification" class="fixed bottom-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-20 opacity-0">
+    <div id="notification" class="fixed bottom-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-20 opacity-0 z-[70]">
          <div class="flex items-center justify-between">
              <p id="notification-message"></p>
              <button id="notification-close-btn" class="ml-4 text-xl leading-none">&times;</button>
@@ -367,7 +382,6 @@
 
     <script type="module">
         import { firebaseConfig } from './config.js'; 
-        // CORRECCIÓN 3: Actualización a versión 10.13.0 (Estable y compatible)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -386,10 +400,8 @@
         const FIRESTORE_HISTORY_COLLECTION = 'history';
         const FIRESTORE_UNDO_HISTORY_COLLECTION = 'undo_history';
         const FIRESTORE_REDO_HISTORY_COLLECTION = 'redo_history';
-        const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
         const UNDO_HISTORY_LIMIT = 5;
 
-        // Nota: Datos iniciales de ejemplo si la base de datos está vacía
         const initialUserData = {
             "2024": { "Noviembre": 1528.9, "Diciembre": 1250 },
             "2025": { "Enero": 3060.85, "Febrero": 1200, "Marzo": 604, "Abril": 2384.97, "Mayo": 2428.37, "Junio": 969.7, "Julio": 1893.1, "Agosto": 39.87 }
@@ -402,7 +414,6 @@
         let comparisonChart, doughnutChart;
         let areValuesHidden = false;
         let debounceTimer;
-        let inactivityTimer;
         let notificationTimeout;
         let lastHistoryLogs = [];
 
@@ -444,6 +455,10 @@
             modalBody: document.getElementById('modal-body'),
             modalConfirmBtn: document.getElementById('modal-confirm-btn'),
             modalCancelBtn: document.getElementById('modal-cancel-btn'),
+            // NUEVO: Referencias al modal de timeout
+            timeoutModal: document.getElementById('timeout-modal'),
+            timeoutStayBtn: document.getElementById('timeout-stay-btn'),
+            timeoutLogoutBtn: document.getElementById('timeout-logout-btn'),
             settingsModal: document.getElementById('settings-modal'),
             settingsBtn: document.getElementById('settings-btn'),
             settingsCloseBtn: document.getElementById('settings-close-btn'),
@@ -475,7 +490,7 @@
         function showNotification(message, isError = true) {
             clearTimeout(notificationTimeout);
             ui.notificationMessage.textContent = message;
-            ui.notification.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 overflow-hidden ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            ui.notification.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 overflow-hidden z-[70] ${isError ? 'bg-red-500' : 'bg-green-500'}`;
             ui.notificationTimer.classList.remove('timer-animate');
             void ui.notificationTimer.offsetWidth; // Trigger reflow
             ui.notificationTimer.classList.add('timer-animate');
@@ -541,29 +556,96 @@
             showModal(ui.confirmationModal, onOpen, onClose);
         }
 
-        // --- Auth & Inactivity ---
-        function resetInactivityTimer() {
+        // --- Auth & Inactivity (MEJORADO & SINCRONIZADO) ---
+        const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 minutos
+        const WARNING_DURATION = 60 * 1000; // 60 segundos antes de logout
+        
+        let inactivityTimer;
+        let warningTimer;
+        const activityChannel = new BroadcastChannel('app_activity_channel');
+
+        function resetInactivityTimer(fromOtherTab = false) {
+            // Comunicar actividad a otras pestañas
+            if (!fromOtherTab) {
+                activityChannel.postMessage({ type: 'ACTIVITY_DETECTED' });
+            }
+
+            // Limpiar timers previos
             clearTimeout(inactivityTimer);
+            clearTimeout(warningTimer);
+            
+            // Ocultar modal de timeout si está visible
+            hideTimeoutModal();
+
+            // Programar advertencia (29 min)
+            warningTimer = setTimeout(() => {
+                showTimeoutModal();
+            }, INACTIVITY_LIMIT - WARNING_DURATION);
+
+            // Programar cierre (30 min)
             inactivityTimer = setTimeout(() => {
-                if (auth.currentUser) {
-                    signOut(auth);
-                    showNotification("Sesión cerrada por inactividad.", false);
-                }
-            }, INACTIVITY_TIMEOUT);
+                performLogout();
+            }, INACTIVITY_LIMIT);
         }
 
+        function showTimeoutModal() {
+            if (!auth.currentUser) return;
+            ui.timeoutModal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function hideTimeoutModal() {
+            ui.timeoutModal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function performLogout() {
+            if (auth.currentUser) {
+                signOut(auth).then(() => {
+                    showNotification("Sesión cerrada por inactividad.", false);
+                    hideTimeoutModal();
+                });
+            }
+        }
+
+        // Listeners del nuevo modal de timeout
+        ui.timeoutStayBtn.addEventListener('click', () => resetInactivityTimer(false));
+        ui.timeoutLogoutBtn.addEventListener('click', () => performLogout());
+
+        // Sincronización entre pestañas
+        activityChannel.onmessage = (event) => {
+            if (event.data.type === 'ACTIVITY_DETECTED') {
+                resetInactivityTimer(true); 
+            }
+        };
+
+        const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+        const activityHandler = () => resetInactivityTimer(false);
+
+        function setupActivityListeners() {
+            activityEvents.forEach(event => document.addEventListener(event, activityHandler));
+        }
+
+        function removeActivityListeners() {
+            activityEvents.forEach(event => document.removeEventListener(event, activityHandler));
+            clearTimeout(inactivityTimer);
+            clearTimeout(warningTimer);
+        }
+
+        // --- Auth State Change ---
         onAuthStateChanged(auth, user => {
             ui.loadingContainer.style.display = 'none';
-            clearTimeout(inactivityTimer);
             
             if (user) {
                 userId = user.uid;
                 ui.authContainer.style.display = 'none';
                 ui.appContainer.style.display = 'block';
                 ui.userInfo.textContent = `Conectado como: ${user.email}`;
+                
                 initApp();
+                
+                // INICIAR EL SISTEMA DE INACTIVIDAD
+                setupActivityListeners();
                 resetInactivityTimer();
-                ['mousemove', 'mousedown', 'keydown'].forEach(event => document.addEventListener(event, resetInactivityTimer));
+
             } else {
                 userId = null;
                 if(unsubscribeData) unsubscribeData();
@@ -571,7 +653,9 @@
                 if(unsubscribeUndoHistory) unsubscribeUndoHistory();
                 if(unsubscribeRedoHistory) unsubscribeRedoHistory();
                 
-                // CORRECCIÓN 4: Reset UI al logout
+                // DETENER EL SISTEMA DE INACTIVIDAD
+                removeActivityListeners();
+                
                 ui.authForm.reset();
                 ui.authError.textContent = '';
                 ui.authError.classList.add('hidden');
@@ -580,7 +664,6 @@
 
                 ui.authContainer.style.display = 'block';
                 ui.appContainer.style.display = 'none';
-                ['mousemove', 'mousedown', 'keydown'].forEach(event => document.removeEventListener(event, resetInactivityTimer));
             }
         });
 
@@ -643,13 +726,11 @@
             const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
             const earningsCol = collection(db, earningsCollectionPath);
 
-            // Perform a one-time check for initial data
             const initialCheck = await getDocs(query(earningsCol));
             if (initialCheck.empty) {
                 await importInitialData(earningsCol);
             }
             
-            // Now, set up real-time listeners
             unsubscribeData = onSnapshot(query(earningsCol), (snapshot) => {
                 allData = {};
                 snapshot.forEach(doc => { allData[doc.id] = doc.data(); });
@@ -947,8 +1028,6 @@
             return `${currencySymbol} ${formatted}`;
         }
         
-        // --- Event Handlers & Actions ---
-        
         async function convertCurrency() {
             const amount = parseFloat(ui.usdAmountInput.value);
             if(isNaN(amount) || amount <= 0) {
@@ -1093,10 +1172,7 @@
             input.focus();
 
             const saveChanges = async () => {
-                // CORRECCIÓN 2: Limpieza inteligente de inputs
                 let cleanValue = input.value.trim();
-                
-                // Si contiene comas y NO es una fórmula, asumimos formato ES/CL (1.000,50)
                 if (cleanValue.includes(',') && !cleanValue.startsWith('=')) {
                      cleanValue = cleanValue.replace(/\./g, '').replace(',', '.');
                 }
@@ -1109,7 +1185,6 @@
                 } else if (cleanValue.startsWith('=')) {
                     newValue = parseFloat(cleanValue.substring(1)) || 0;
                 } else if (!isNaN(parsedValue)) {
-                    // Si el valor empieza con + o -, lo sumamos, si no, lo reemplazamos
                     if (cleanValue.startsWith('+') || cleanValue.startsWith('-')) {
                         newValue = currentValue + parsedValue;
                     } else {
@@ -1229,7 +1304,6 @@
                 await deleteDoc(sortedDocs[0].ref);
             }
 
-            // CORRECCIÓN 5: Evitar guardar historial vacío innecesario
             if (Object.keys(allData).length > 0) {
                 await addDoc(undoHistoryCol, {
                     timestamp: serverTimestamp(),
