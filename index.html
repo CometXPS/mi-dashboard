@@ -919,28 +919,46 @@
             const input = cell.querySelector('input'); input.focus();
 
             const saveChanges = async () => {
-                let cleanValue = input.value.trim();
-                if (cleanValue.includes(',') && !cleanValue.startsWith('=')) cleanValue = cleanValue.replace(/\./g, '').replace(',', '.');
-                let newValue; const parsedValue = parseFloat(cleanValue);
-                if (cleanValue === '') newValue = currentValue;
-                else if (cleanValue.startsWith('=')) newValue = parseFloat(cleanValue.substring(1)) || 0;
-                else if (!isNaN(parsedValue)) newValue = (cleanValue.startsWith('+') || cleanValue.startsWith('-')) ? currentValue + parsedValue : parsedValue;
-                else newValue = currentValue;
+                const rawValue = input.value.trim();
+                
+                // --- ROBUST PARSING LOGIC ---
+                // 1. Remove non-numeric except . , - (for negative)
+                // Note: We strip + because we handle logic manually, but keep - for standard parsing
+                let cleanStr = rawValue.replace(/[^0-9.,-]/g, '');
+
+                // 2. Handle locale format (1.000,50 -> 1000.50)
+                if (cleanStr.includes(',')) {
+                    cleanStr = cleanStr.replace(/\./g, '').replace(',', '.');
+                }
+
+                const parsedNum = parseFloat(cleanStr);
+                let newValue;
+
+                if (isNaN(parsedNum)) {
+                    newValue = currentValue; // Invalid input, keep old value
+                } else if (rawValue.startsWith('=')) {
+                    newValue = parsedNum; // Explicit replacement
+                } else if (rawValue.startsWith('-')) {
+                    newValue = currentValue - Math.abs(parsedNum); // Force subtract
+                } else {
+                    // Default Case: ADDITION (Implicit +)
+                    // If user types "30", it means "Current + 30"
+                    newValue = currentValue + Math.abs(parsedNum); 
+                }
+                // ---------------------------
 
                 cell.classList.remove('editing');
                 cell.innerHTML = formatCurrency(newValue, '$');
                 
                 if (currentValue !== newValue) {
-                    // 1. Update Local State (CRITICAL for auto-sum)
+                    // 1. Update Local State & UI IMMEDIATELY
                     allData[currentYear][month] = newValue;
-
-                    // 2. Refresh UI immediately
                     renderAllComponents(currentYear);
 
-                    // 3. Add to Undo Stack
+                    // 2. Add to Undo Stack
                     addToLocalUndo(currentYear, month, currentValue, newValue);
 
-                    // 4. Send to Firestore
+                    // 3. Send to Firestore
                     const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                     const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
                     try {
