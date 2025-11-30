@@ -677,6 +677,12 @@
             if (undoStack.length === 0) return;
             const command = undoStack.pop();
             
+            // FIX: Cambiar contexto de año si es necesario
+            if (currentYear !== command.year) {
+                currentYear = command.year;
+                ui.yearSelector.value = currentYear;
+            }
+
             // Revertir en local
             if (allData[command.year]) allData[command.year][command.month] = command.oldValue;
             
@@ -692,6 +698,7 @@
             } catch (error) {
                 console.error("Error undo:", error);
                 showNotification("Error al deshacer.");
+                // Rollback local si falla DB
                 undoStack.push(command);
                 allData[command.year][command.month] = command.newValue;
             }
@@ -700,6 +707,12 @@
         async function redoLastChange() {
             if (redoStack.length === 0) return;
             const command = redoStack.pop();
+
+            // FIX: Cambiar contexto de año si es necesario
+            if (currentYear !== command.year) {
+                currentYear = command.year;
+                ui.yearSelector.value = currentYear;
+            }
 
             // Aplicar en local
             if (allData[command.year]) allData[command.year][command.month] = command.newValue;
