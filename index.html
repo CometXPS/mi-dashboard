@@ -921,12 +921,11 @@
             const saveChanges = async () => {
                 const rawValue = input.value.trim();
                 
-                // --- ROBUST PARSING LOGIC ---
-                // 1. Remove non-numeric except . , - (for negative)
-                // Note: We strip + because we handle logic manually, but keep - for standard parsing
+                // --- LOGICA ROBUSTA DE AUTO-SUMA ---
+                // 1. Limpiamos cualquier caracter que no sea numero, punto, coma o signo menos
                 let cleanStr = rawValue.replace(/[^0-9.,-]/g, '');
 
-                // 2. Handle locale format (1.000,50 -> 1000.50)
+                // 2. Manejo de locales (1.000,50 -> 1000.50)
                 if (cleanStr.includes(',')) {
                     cleanStr = cleanStr.replace(/\./g, '').replace(',', '.');
                 }
@@ -935,17 +934,18 @@
                 let newValue;
 
                 if (isNaN(parsedNum)) {
-                    newValue = currentValue; // Invalid input, keep old value
+                    newValue = currentValue; // Si no es numero valido, mantenemos valor anterior
                 } else if (rawValue.startsWith('=')) {
-                    newValue = parsedNum; // Explicit replacement
-                } else if (rawValue.startsWith('-')) {
-                    newValue = currentValue - Math.abs(parsedNum); // Force subtract
+                    newValue = parsedNum; // Reemplazo explícito
+                } else if (parsedNum === 0) {
+                    newValue = 0; // Excepción: Si es cero exacto, reseteamos a cero
                 } else {
-                    // Default Case: ADDITION (Implicit +)
-                    // If user types "30", it means "Current + 30"
-                    newValue = currentValue + Math.abs(parsedNum); 
+                    // Caso por defecto: SUMA (Implícita)
+                    // Si el usuario escribe "30", se interpreta como "Actual + 30"
+                    // Si escribe "-30", se interpreta como "Actual - 30"
+                    newValue = currentValue + parsedNum; 
                 }
-                // ---------------------------
+                // -----------------------------------
 
                 cell.classList.remove('editing');
                 cell.innerHTML = formatCurrency(newValue, '$');
