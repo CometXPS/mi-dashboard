@@ -17,7 +17,8 @@
             --accent-color: #34d399;
             --accent-color-rgb: 52, 211, 153;
             --danger-color: #ef4444;
-            --success-color: var(--accent-color); /* <-- CORRECCIÓN AQUÍ */
+            /* CORRECCIÓN 1: Color de éxito fijo (Verde) independiente del tema */
+            --success-color: #10b981; 
         }
 
         .light-mode {
@@ -54,6 +55,7 @@
         }
         .data-cell:hover {
             background-color: var(--border-color);
+            cursor: pointer;
         }
         .total-row td {
             background-color: rgba(var(--accent-color-rgb), 0.1);
@@ -143,7 +145,6 @@
 </head>
 <body class="p-4 sm:p-6">
 
-    <!-- Loading Container -->
     <div id="loading-container" class="max-w-md mx-auto">
         <div class="main-card p-8 text-center">
             <h2 class="text-2xl font-bold mb-4">Conectando...</h2>
@@ -152,9 +153,7 @@
         </div>
     </div>
 
-    <!-- Auth Container -->
     <div id="auth-container" class="max-w-md mx-auto hidden">
-        <!-- Login Form -->
         <div id="login-card" class="main-card p-8">
             <h2 id="auth-title" class="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
             <div id="auth-error" class="text-red-400 text-center mb-4 hidden"></div>
@@ -173,7 +172,6 @@
                 <button type="submit" id="submit-btn" class="w-full bg-accent text-white py-2 px-4 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus-accent">Acceder</button>
             </form>
         </div>
-        <!-- Reset Password Form -->
         <div id="reset-password-card" class="main-card p-8 hidden">
             <h2 class="text-2xl font-bold text-center mb-6">Restablecer Contraseña</h2>
             <p class="text-center text-secondary mb-4">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</p>
@@ -189,9 +187,7 @@
         </div>
     </div>
 
-    <!-- App Container -->
     <div id="app-container" class="max-w-6xl mx-auto hidden">
-        <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
             <div class="flex items-center gap-4">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" onerror="this.onerror=null;this.src='https://placehold.co/40x40/1f2937/ffffff?text=B';" alt="Logo de Bitcoin" class="h-10 w-10">
@@ -221,7 +217,6 @@
             </div>
         </div>
 
-        <!-- Settings Bar -->
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-4 p-2 bg-secondary rounded-md border border-color">
             <div class="flex gap-2">
                 <button class="tab-btn active px-4 py-2 rounded-md text-sm font-medium" data-tab="analysis">Análisis Anual</button>
@@ -235,7 +230,6 @@
             </div>
         </div>
 
-        <!-- Tab Content -->
         <div id="analysis-tab" class="tab-content active">
             <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
             <div id="main-content-grid" class="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -323,7 +317,6 @@
         <div id="user-info" class="mt-6 text-center text-xs text-secondary"></div>
     </div>
 
-    <!-- Modals -->
     <div id="confirmation-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
         <div class="main-card p-6 w-full max-w-sm">
             <h3 id="modal-title" class="text-lg font-bold"></h3>
@@ -364,7 +357,6 @@
         </div>
     </div>
 
-    <!-- Notification Toast -->
     <div id="notification" class="fixed bottom-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-20 opacity-0">
          <div class="flex items-center justify-between">
              <p id="notification-message"></p>
@@ -375,9 +367,15 @@
 
     <script type="module">
         import { firebaseConfig } from './config.js'; 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // CORRECCIÓN 3: Actualización a versión 10.13.0 (Estable y compatible)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        if (!firebaseConfig) {
+            alert("Error crítico: No se ha podido cargar la configuración de Firebase desde config.js");
+            throw new Error("Missing config");
+        }
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -391,6 +389,7 @@
         const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
         const UNDO_HISTORY_LIMIT = 5;
 
+        // Nota: Datos iniciales de ejemplo si la base de datos está vacía
         const initialUserData = {
             "2024": { "Noviembre": 1528.9, "Diciembre": 1250 },
             "2025": { "Enero": 3060.85, "Febrero": 1200, "Marzo": 604, "Abril": 2384.97, "Mayo": 2428.37, "Junio": 969.7, "Julio": 1893.1, "Agosto": 39.87 }
@@ -572,9 +571,12 @@
                 if(unsubscribeUndoHistory) unsubscribeUndoHistory();
                 if(unsubscribeRedoHistory) unsubscribeRedoHistory();
                 
+                // CORRECCIÓN 4: Reset UI al logout
                 ui.authForm.reset();
                 ui.authError.textContent = '';
                 ui.authError.classList.add('hidden');
+                ui.resetPasswordCard.classList.add('hidden');
+                ui.loginCard.classList.remove('hidden');
 
                 ui.authContainer.style.display = 'block';
                 ui.appContainer.style.display = 'none';
@@ -1091,23 +1093,29 @@
             input.focus();
 
             const saveChanges = async () => {
-                const inputText = input.value.trim().replace(/\./g, '').replace(',', '.');
-                let newValue;
-
-                // If input is empty, don't change anything
-                if (inputText === '') {
-                    newValue = currentValue;
+                // CORRECCIÓN 2: Limpieza inteligente de inputs
+                let cleanValue = input.value.trim();
+                
+                // Si contiene comas y NO es una fórmula, asumimos formato ES/CL (1.000,50)
+                if (cleanValue.includes(',') && !cleanValue.startsWith('=')) {
+                     cleanValue = cleanValue.replace(/\./g, '').replace(',', '.');
                 }
-                // If input starts with '=', it's a replacement.
-                else if (inputText.startsWith('=')) {
-                    newValue = parseFloat(inputText.substring(1)) || 0;
-                } 
-                // If it's just a number (or starts with + or -), add it to the current value.
-                else if (!isNaN(parseFloat(inputText))) {
-                    newValue = currentValue + (parseFloat(inputText) || 0);
-                } 
-                // If input is invalid, revert to the current value.
-                else {
+                
+                let newValue;
+                const parsedValue = parseFloat(cleanValue);
+
+                if (cleanValue === '') {
+                    newValue = currentValue;
+                } else if (cleanValue.startsWith('=')) {
+                    newValue = parseFloat(cleanValue.substring(1)) || 0;
+                } else if (!isNaN(parsedValue)) {
+                    // Si el valor empieza con + o -, lo sumamos, si no, lo reemplazamos
+                    if (cleanValue.startsWith('+') || cleanValue.startsWith('-')) {
+                        newValue = currentValue + parsedValue;
+                    } else {
+                        newValue = parsedValue;
+                    }
+                } else {
                     newValue = currentValue;
                 }
 
@@ -1221,10 +1229,13 @@
                 await deleteDoc(sortedDocs[0].ref);
             }
 
-            await addDoc(undoHistoryCol, {
-                timestamp: serverTimestamp(),
-                data: JSON.stringify(allData)
-            });
+            // CORRECCIÓN 5: Evitar guardar historial vacío innecesario
+            if (Object.keys(allData).length > 0) {
+                await addDoc(undoHistoryCol, {
+                    timestamp: serverTimestamp(),
+                    data: JSON.stringify(allData)
+                });
+            }
         }
 
         async function restoreDataState(stateToRestore) {
