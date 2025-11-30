@@ -6,8 +6,6 @@
     <title>Dashboard Intercambio de Divisas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#111827">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -690,12 +688,10 @@
                 redoStack.push(command);
                 updateUndoRedoUI();
                 showNotification("Cambio deshecho (Local)", false);
-                // UI se actualiza por el snapshot listener, pero podemos forzar para feedback instantáneo
                 renderAllComponents(currentYear);
             } catch (error) {
                 console.error("Error undo:", error);
                 showNotification("Error al deshacer.");
-                // Rollback local si falla DB
                 undoStack.push(command);
                 allData[command.year][command.month] = command.newValue;
             }
@@ -735,8 +731,14 @@
             ui.redoBtn.classList.toggle('cursor-not-allowed', redoStack.length === 0);
         }
 
-        ui.undoBtn.addEventListener('click', undoLastChange);
-        ui.redoBtn.addEventListener('click', redoLastChange);
+        // --- Modals for Undo/Redo ---
+        ui.undoBtn.addEventListener('click', () => {
+             showConfirmationModal('Deshacer Cambio', '¿Estás seguro de que quieres deshacer la última acción?', undoLastChange);
+        });
+
+        ui.redoBtn.addEventListener('click', () => {
+             showConfirmationModal('Rehacer Cambio', '¿Estás seguro de que quieres rehacer la última acción?', redoLastChange);
+        });
 
         // --- Rendering ---
         function animateCountUp(element, end) {
@@ -912,20 +914,54 @@
         
         // --- Other Actions ---
         ui.yearSelector.addEventListener('change', (e) => { currentYear = e.target.value; renderAllComponents(currentYear); });
+        
+        // --- FIX: Logic for Adding Year (UI First) ---
         ui.addYearBtn.addEventListener('click', async () => {
              const existingYears = Object.keys(allData).map(Number);
              const newYear = (existingYears.length > 0 ? Math.max(...existingYears) + 1 : new Date().getFullYear()).toString();
-             if (allData[newYear]) return;
+             
+             if (allData[newYear]) return; // Ya existe
+
+             // 1. Update UI Locally First
+             const emptyYearData = months.reduce((acc, m) => ({...acc, [m]: 0}), {});
+             allData[newYear] = emptyYearData;
              currentYear = newYear;
-             // Nota: Crear año no necesita undo local complejo por ahora
-             try { await setDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, newYear), months.reduce((acc, m) => ({...acc, [m]: 0}), {})); } catch (e) { console.error(e); }
+             updateFullUI(); // This will refresh the dropdown and select the new year
+
+             // 2. Save to DB
+             try { 
+                 await setDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, newYear), emptyYearData); 
+             } catch (e) { 
+                 console.error(e);
+                 showNotification("Error guardando el año nuevo.", true);
+             }
         });
+
+        // --- FIX: Logic for Deleting Year (UI First) ---
         ui.deleteYearBtn.addEventListener('click', () => {
             showConfirmationModal('Confirmar Eliminación', `¿Eliminar año ${ui.yearSelector.value}?`, async () => {
+                const yearToDelete = ui.yearSelector.value;
                 if (Object.keys(allData).length <= 1) return;
-                try { await deleteDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, ui.yearSelector.value)); } catch (e) { console.error(e); }
+
+                // 1. Remove from local state and update currentYear
+                delete allData[yearToDelete];
+                
+                // Switch to another available year
+                const remainingYears = Object.keys(allData).sort((a,b) => b-a);
+                currentYear = remainingYears[0];
+                updateFullUI();
+
+                // 2. Update DB
+                try { 
+                    await deleteDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, yearToDelete)); 
+                    showNotification("Año eliminado.", false);
+                } catch (e) { 
+                    console.error(e); 
+                    showNotification("Error eliminando año en DB.", true);
+                }
             });
         });
+
         ui.clearHistoryBtn.addEventListener('click', () => showConfirmationModal('Borrar Historial', '¿Borrar todo?', async () => {
             try { const s = await getDocs(collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`)); const b = writeBatch(db); s.docs.forEach(d => b.delete(d.ref)); await b.commit(); showNotification("Historial borrado.", false); } catch(e){ console.error(e); }
         }));
