@@ -8,6 +8,7 @@
     <meta name="theme-color" content="#111827">
     <link rel="icon" type="image/svg+xml" href="icono.svg">
     <link rel="apple-touch-icon" href="icono.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -930,7 +931,16 @@
                 cell.innerHTML = formatCurrency(newValue, '$');
                 
                 if (currentValue !== newValue) {
+                    // 1. Update Local State (CRITICAL for auto-sum)
+                    allData[currentYear][month] = newValue;
+
+                    // 2. Refresh UI immediately
+                    renderAllComponents(currentYear);
+
+                    // 3. Add to Undo Stack
                     addToLocalUndo(currentYear, month, currentValue, newValue);
+
+                    // 4. Send to Firestore
                     const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
                     const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
                     try {
@@ -942,7 +952,13 @@
                             actionType: 'edit'
                         });
                         cell.classList.add('saved-feedback'); setTimeout(() => cell.classList.remove('saved-feedback'), 700);
-                    } catch (error) { console.error(error); showNotification("No se pudo guardar."); cell.innerHTML = formatCurrency(currentValue, '$'); }
+                    } catch (error) { 
+                        console.error(error); 
+                        showNotification("No se pudo guardar."); 
+                        // Revert local change if DB fails
+                        allData[currentYear][month] = currentValue;
+                        renderAllComponents(currentYear);
+                    }
                 }
             };
             input.addEventListener('blur', saveChanges);
