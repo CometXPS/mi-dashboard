@@ -704,6 +704,16 @@
                 updateUndoRedoUI();
                 showNotification("Cambio deshecho.", false);
                 renderAllComponents(currentYear);
+                
+                // Feedback visual en la celda
+                setTimeout(() => {
+                    const cell = document.querySelector(`td[data-month="${command.month}"]`);
+                    if (cell) {
+                        cell.classList.add('saved-feedback');
+                        setTimeout(() => cell.classList.remove('saved-feedback'), 700);
+                    }
+                }, 100);
+
             } catch (error) {
                 console.error("Error undo:", error);
                 showNotification("Error al deshacer.");
@@ -744,6 +754,16 @@
                 updateUndoRedoUI();
                 showNotification("Cambio rehecho.", false);
                 renderAllComponents(currentYear);
+
+                // Feedback visual en la celda
+                setTimeout(() => {
+                    const cell = document.querySelector(`td[data-month="${command.month}"]`);
+                    if (cell) {
+                        cell.classList.add('saved-feedback');
+                        setTimeout(() => cell.classList.remove('saved-feedback'), 700);
+                    }
+                }, 100);
+
             } catch (error) {
                 console.error("Error redo:", error);
                 showNotification("Error al rehacer.");
@@ -914,11 +934,18 @@
             if (cell.classList.contains('editing') || areValuesHidden) return;
             const month = cell.dataset.month;
             const currentValue = (allData[currentYear] || {})[month] || 0;
+            
+            // Flag para evitar doble ejecución (Enter + Blur)
+            let isSaving = false;
+
             cell.classList.add('editing');
             cell.innerHTML = `<input type="text" value="" placeholder="${formatCurrency(currentValue, '$')}" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3">`;
             const input = cell.querySelector('input'); input.focus();
 
             const saveChanges = async () => {
+                if (isSaving) return; 
+                isSaving = true;
+
                 const rawValue = input.value.trim();
                 
                 // --- LOGICA ROBUSTA DE AUTO-SUMA ---
@@ -937,13 +964,14 @@
                     newValue = currentValue; // Si no es numero valido, mantenemos valor anterior
                 } else if (rawValue.startsWith('=')) {
                     newValue = parsedNum; // Reemplazo explícito
-                } else if (parsedNum === 0) {
-                    newValue = 0; // Excepción: Si es cero exacto, reseteamos a cero
+                } else if (parsedNum === 0 && !rawValue.startsWith('+') && !rawValue.startsWith('-')) {
+                    newValue = 0; // Excepción: Si es cero exacto (y no es +0 o -0), reseteamos a cero
+                } else if (rawValue.startsWith('-')) {
+                    newValue = currentValue - Math.abs(parsedNum); // Resta explicita
                 } else {
                     // Caso por defecto: SUMA (Implícita)
                     // Si el usuario escribe "30", se interpreta como "Actual + 30"
-                    // Si escribe "-30", se interpreta como "Actual - 30"
-                    newValue = currentValue + parsedNum; 
+                    newValue = currentValue + Math.abs(parsedNum); 
                 }
                 // -----------------------------------
 
@@ -978,9 +1006,20 @@
                         renderAllComponents(currentYear);
                     }
                 }
+                input.removeEventListener('blur', saveChanges);
             };
+            
             input.addEventListener('blur', saveChanges);
-            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); else if (e.key === 'Escape') { cell.classList.remove('editing'); cell.innerHTML = formatCurrency(currentValue, '$'); input.removeEventListener('blur', saveChanges); } });
+            input.addEventListener('keydown', (e) => { 
+                if (e.key === 'Enter') {
+                    input.blur(); 
+                } else if (e.key === 'Escape') { 
+                    isSaving = true; // Block saveChanges
+                    cell.classList.remove('editing'); 
+                    cell.innerHTML = formatCurrency(currentValue, '$'); 
+                    input.removeEventListener('blur', saveChanges); 
+                } 
+            });
         }
         
         // --- Other Actions ---
