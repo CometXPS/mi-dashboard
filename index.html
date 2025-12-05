@@ -33,15 +33,15 @@
 
         .light-mode {
             /* MODO CLARO (Ajustado) */
-            --bg-primary: #f8fafc; /* Un gris azulado muy sutil (Slate-50), más elegante que el gris plano */
+            --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
-            --border-color: #e2e8f0; /* Slate-200, más suave */
-            --text-primary: #0f172a; /* Slate-900, casi negro pero con tono */
-            --text-secondary: #64748b; /* Slate-500 */
+            --border-color: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
             
             /* Hover oscuro suave para que contraste sobre blanco */
             --hover-row-bg: rgba(0, 0, 0, 0.03); 
-            /* Inputs sutilmente grises para diferenciarlos del blanco puro de la tarjeta */
+            /* Inputs sutilmente grises */
             --input-bg: #f1f5f9; 
         }
 
@@ -69,13 +69,11 @@
             background-color: var(--bg-secondary);
             border-radius: 1rem;
             border: 1px solid var(--border-color);
-            /* Sombra más suave y difusa en general */
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             overflow: hidden;
             transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
         
-        /* En modo claro, damos un poco más de sombra al hover para "levantar" la tarjeta */
         .light-mode .main-card:hover {
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
         }
@@ -108,7 +106,6 @@
         .data-cell { transition: background-color 0.15s; }
         .data-cell:hover { background-color: var(--hover-row-bg); cursor: pointer; } 
         
-        /* Nueva clase para el hover de filas usando la variable CSS */
         .row-hover:hover {
             background-color: var(--hover-row-bg);
         }
@@ -127,7 +124,6 @@
             box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
         }
         
-        /* Estilos generales para inputs */
         input, select {
             background-color: var(--input-bg) !important;
             color: var(--text-primary) !important;
@@ -180,12 +176,12 @@
         .trend-down { color: var(--danger-color); }
         
         .glass-header {
-            background-color: rgba(31, 41, 55, 0.85); /* Más oscuro en dark mode para legibilidad */
+            background-color: rgba(31, 41, 55, 0.85); 
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
         .light-mode .glass-header { 
             background-color: rgba(255, 255, 255, 0.85); 
-            border-bottom: 1px solid var(--border-color); /* Borde sutil en modo claro para separar del fondo */
+            border-bottom: 1px solid var(--border-color);
         }
         
         .error-box { background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 1rem; border-radius: 0.5rem; text-align: left; font-size: 0.875rem; margin-top: 1rem; }
@@ -1218,8 +1214,22 @@
         function applyCompactView(c) { document.body.classList.toggle('compact-mode', c); }
         function updateVisibilityButton() { ui.toggleVisibilityBtn.innerHTML = areValuesHidden ? icons.eyeClosed : icons.eyeOpen; }
         
+        // --- NUEVA FUNCIÓN AUTOMÁTICA ---
+        function getAutoTheme() {
+            const hour = new Date().getHours();
+            // De 7 AM a 8 PM (20:00) es día (light), el resto noche (dark)
+            return (hour >= 7 && hour < 20) ? 'light' : 'dark';
+        }
+
         function loadPreferences() {
-            applyTheme(localStorage.getItem('dashboardTheme') || 'dark');
+            // Verifica si el usuario guardó manualmente una preferencia
+            const savedTheme = localStorage.getItem('dashboardTheme');
+            
+            // Si existe preferencia guardada, úsala. Si no, usa la automática basada en la hora.
+            const themeToApply = savedTheme || getAutoTheme();
+            
+            applyTheme(themeToApply);
+            
             applyAccentColor(localStorage.getItem('dashboardAccentColor') || '#34d399');
             applyCompactView(localStorage.getItem('dashboardCompactView') === 'true');
             areValuesHidden = localStorage.getItem('dashboardAreValuesHidden') === 'true'; updateVisibilityButton();
