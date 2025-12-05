@@ -52,7 +52,7 @@
         }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* UI ELEMENTS */
+        /* CARDS & UI */
         .main-card {
             background-color: var(--bg-secondary);
             border-radius: 1rem;
@@ -88,7 +88,7 @@
         }
 
         .data-cell { transition: background-color 0.15s; }
-        .data-cell:hover { background-color: rgba(156, 163, 175, 0.1); cursor: pointer; }
+        .data-cell:hover { background-color: rgba(156, 163, 175, 0.1); cursor: pointer; } 
         
         .total-row td {
             background-color: rgba(var(--accent-color-rgb), 0.08);
@@ -126,7 +126,7 @@
             border-radius: 0.5rem 0.5rem 0 0;
             opacity: 0.7;
         }
-        .tab-btn:hover { opacity: 1; background-color: rgba(156, 163, 175, 0.1); }
+        .tab-btn:hover { opacity: 1; background-color: rgba(156, 163, 175, 0.1); } 
         .tab-btn.active {
             background-color: transparent;
             color: var(--accent-color);
@@ -138,6 +138,7 @@
         .tab-content.active { display: block; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* UTILIDADES DE COLOR */
         .bg-accent { background-color: var(--accent-color); }
         .bg-danger { background-color: var(--danger-color); }
         .bg-primary { background-color: var(--bg-primary); }
@@ -185,7 +186,7 @@
                 <div class="h-48 bg-gray-700/50 rounded-2xl"></div>
             </div>
         </div>
-        <div id="loading-error" class="hidden mx-auto max-w-md mt-4 text-center text-red-400 text-sm"></div>
+        <div id="loading-error" class="hidden mx-auto max-w-md mt-4"></div>
     </div>
 
     <div id="auth-container" class="max-w-md mx-auto hidden mt-10">
