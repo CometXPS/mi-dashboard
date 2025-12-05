@@ -48,19 +48,48 @@
             transition: background-color 0.3s, color 0.3s;
             font-feature-settings: "tnum"; 
             font-variant-numeric: tabular-nums;
+            -webkit-text-size-adjust: 100%; /* Previene zoom indeseado en iOS */
         }
 
-        /* VISTA COMPACTA (NUEVO CÓDIGO CSS PARA QUE FUNCIONE) */
+        /* --- VISTA COMPACTA AGRESIVA (Optimizado para Móvil) --- */
+        
+        /* Reducir drasticamente paddings en contenedores */
         body.compact-mode .main-card, 
-        body.compact-mode .summary-card { padding: 1rem !important; }
+        body.compact-mode .summary-card { 
+            padding: 0.75rem !important; 
+        }
         
+        /* Reducir espacios internos específicos de Tailwind */
+        body.compact-mode .p-4 { padding: 0.5rem !important; }
+        body.compact-mode .p-6 { padding: 0.75rem !important; }
+        body.compact-mode .p-8 { padding: 1rem !important; }
+
+        /* Comprimir tabla al máximo */
         body.compact-mode td, 
-        body.compact-mode th { padding: 0.5rem 0.75rem !important; font-size: 0.85rem !important; }
+        body.compact-mode th { 
+            padding: 0.35rem 0.5rem !important; 
+            font-size: 0.8rem !important; 
+        }
         
-        body.compact-mode .text-3xl { font-size: 1.5rem !important; } 
-        body.compact-mode .gap-6 { gap: 1rem !important; } 
-        body.compact-mode .mb-8 { margin-bottom: 1.5rem !important; }
-        body.compact-mode .py-3 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+        /* Reducir tamaño de fuentes grandes (Totales) */
+        body.compact-mode .text-3xl,
+        body.compact-mode .text-4xl { 
+            font-size: 1.25rem !important; 
+            line-height: 1.5rem !important;
+        } 
+        
+        /* Reducir espacios verticales entre elementos (Gaps y Margins) */
+        body.compact-mode .gap-6 { gap: 0.75rem !important; } 
+        body.compact-mode .gap-4 { gap: 0.5rem !important; }
+        body.compact-mode .mb-8 { margin-bottom: 1rem !important; }
+        body.compact-mode .mb-6 { margin-bottom: 0.75rem !important; }
+        body.compact-mode .mb-4 { margin-bottom: 0.5rem !important; }
+        body.compact-mode .space-y-6 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: 0.75rem !important; margin-bottom: 0.75rem !important; }
+        body.compact-mode .space-y-5 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: 0.5rem !important; margin-bottom: 0.5rem !important; }
+
+        /* Ajustar botones de navegación */
+        body.compact-mode .py-3 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+        body.compact-mode .px-6 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
 
         /* SKELETON */
         .skeleton {
