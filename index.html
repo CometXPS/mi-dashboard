@@ -42,7 +42,7 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* SKELETON LOADING */
+        /* SKELETON */
         .skeleton {
             background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
             background-size: 200% 100%;
@@ -52,7 +52,7 @@
         }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* ESTILOS DE TARJETAS */
+        /* CARDS & UI */
         .main-card {
             background-color: var(--bg-secondary);
             border-radius: 1rem;
@@ -87,9 +87,8 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        /* TABLA */
         .data-cell { transition: background-color 0.15s; }
-        .data-cell:hover { background-color: rgba(156, 163, 175, 0.1); cursor: pointer; }
+        .data-cell:hover { background-color: rgba(156, 163, 175, 0.1); cursor: pointer; } 
         
         .total-row td {
             background-color: rgba(var(--accent-color-rgb), 0.08);
@@ -105,7 +104,6 @@
             box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
         }
 
-        /* UTILIDADES */
         .spinner {
             border: 3px solid var(--border-color);
             border-top: 3px solid var(--accent-color);
@@ -128,7 +126,7 @@
             border-radius: 0.5rem 0.5rem 0 0;
             opacity: 0.7;
         }
-        .tab-btn:hover { opacity: 1; background-color: rgba(156, 163, 175, 0.1); }
+        .tab-btn:hover { opacity: 1; background-color: rgba(156, 163, 175, 0.1); } 
         .tab-btn.active {
             background-color: transparent;
             color: var(--accent-color);
@@ -140,6 +138,7 @@
         .tab-content.active { display: block; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* UTILIDADES DE COLOR */
         .bg-accent { background-color: var(--accent-color); }
         .bg-danger { background-color: var(--danger-color); }
         .bg-primary { background-color: var(--bg-primary); }
@@ -150,10 +149,6 @@
         .border-color { border-color: var(--border-color); }
         .trend-up { color: var(--success-color); }
         .trend-down { color: var(--danger-color); }
-        
-        @keyframes shrink-width { from { width: 100%; } to { width: 0%; } }
-        .timer-animate { animation: shrink-width 4s linear forwards; }
-        .table-row-highlight { background-color: rgba(var(--accent-color-rgb), 0.2); transition: background-color 0.5s; }
         
         .glass-header {
             background-color: rgba(31, 41, 55, 0.7);
@@ -213,7 +208,6 @@
                 <button type="submit" id="submit-btn" class="w-full bg-accent text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-emerald-500/20">Iniciar Sesión</button>
             </form>
         </div>
-        
         <div id="reset-password-card" class="main-card p-8 hidden shadow-xl">
             <h2 class="text-xl font-bold text-center mb-2">Recuperar Acceso</h2>
             <p class="text-center text-secondary text-sm mb-6">Te enviaremos un enlace a tu correo.</p>
@@ -465,8 +459,8 @@
         const db = getFirestore(app);
 
         enableIndexedDbPersistence(db).catch((err) => {
-            if (err.code == 'failed-precondition') { console.warn('La persistencia falló: Múltiples pestañas abiertas.'); } 
-            else if (err.code == 'unimplemented') { console.warn('El navegador no soporta persistencia.'); }
+            if (err.code == 'failed-precondition') { console.warn('Persistencia falló: Múltiples pestañas.'); } 
+            else if (err.code == 'unimplemented') { console.warn('Navegador no soporta persistencia.'); }
         });
 
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
@@ -557,7 +551,347 @@
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-        // --- FUNCIONES LÓGICAS (Sin cambios) ---
+        function showNotification(message, isError = true) {
+            clearTimeout(notificationTimeout);
+            ui.notificationMessage.textContent = message;
+            ui.notification.className = `fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl transform translate-y-0 opacity-100 overflow-hidden z-[70] flex items-center gap-3 ${isError ? 'bg-red-600' : 'bg-emerald-600'}`;
+            ui.notificationTimer.classList.remove('timer-animate');
+            void ui.notificationTimer.offsetWidth; 
+            ui.notificationTimer.classList.add('timer-animate');
+            notificationTimeout = setTimeout(() => hideNotification(), 4000);
+        }
+        
+        function hideNotification() {
+            ui.notification.className = ui.notification.className.replace('translate-y-0 opacity-100', 'translate-y-20 opacity-0');
+            clearTimeout(notificationTimeout);
+        }
+        
+        ui.notificationCloseBtn.addEventListener('click', hideNotification);
+
+        function showModal(modalElement, onOpen, onClose) {
+            modalElement.classList.remove('opacity-0', 'pointer-events-none');
+            const backdropHandler = (e) => { if (e.target === modalElement) hideModal(); };
+            const escapeHandler = (e) => { if (e.key === 'Escape') hideModal(); };
+            const hideModal = () => {
+                modalElement.classList.add('opacity-0', 'pointer-events-none');
+                modalElement.removeEventListener('click', backdropHandler);
+                document.removeEventListener('keydown', escapeHandler);
+                if (onClose) onClose();
+            };
+            if (onOpen) onOpen(hideModal);
+            modalElement.addEventListener('click', backdropHandler);
+            document.addEventListener('keydown', escapeHandler);
+        }
+
+        function showConfirmationModal(title, body, onConfirm) {
+            ui.modalTitle.textContent = title;
+            ui.modalBody.textContent = body;
+            let confirmHandler, cancelHandler;
+            const onOpen = (hideModal) => {
+                confirmHandler = () => { onConfirm(); hideModal(); };
+                cancelHandler = hideModal;
+                ui.modalConfirmBtn.addEventListener('click', confirmHandler);
+                ui.modalCancelBtn.addEventListener('click', cancelHandler);
+            };
+            const onClose = () => {
+                ui.modalConfirmBtn.removeEventListener('click', confirmHandler);
+                ui.modalCancelBtn.removeEventListener('click', cancelHandler);
+            };
+            showModal(ui.confirmationModal, onOpen, onClose);
+        }
+
+        const INACTIVITY_LIMIT = 30 * 60 * 1000;
+        const WARNING_DURATION = 60 * 1000;
+        let inactivityTimer;
+        let warningTimer;
+        const activityChannel = new BroadcastChannel('app_activity_channel');
+
+        function resetInactivityTimer(fromOtherTab = false) {
+            if (!fromOtherTab) activityChannel.postMessage({ type: 'ACTIVITY_DETECTED' });
+            clearTimeout(inactivityTimer);
+            clearTimeout(warningTimer);
+            hideTimeoutModal();
+            warningTimer = setTimeout(() => showTimeoutModal(), INACTIVITY_LIMIT - WARNING_DURATION);
+            inactivityTimer = setTimeout(() => performLogout(), INACTIVITY_LIMIT);
+        }
+
+        function showTimeoutModal() { if (!auth.currentUser) return; ui.timeoutModal.classList.remove('opacity-0', 'pointer-events-none'); }
+        function hideTimeoutModal() { ui.timeoutModal.classList.add('opacity-0', 'pointer-events-none'); }
+        function performLogout() { if (auth.currentUser) signOut(auth).then(() => { showNotification("Sesión cerrada por inactividad.", false); hideTimeoutModal(); }); }
+
+        ui.timeoutStayBtn.addEventListener('click', () => resetInactivityTimer(false));
+        ui.timeoutLogoutBtn.addEventListener('click', () => performLogout());
+        activityChannel.onmessage = (event) => { if (event.data.type === 'ACTIVITY_DETECTED') resetInactivityTimer(true); };
+
+        const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+        const activityHandler = () => resetInactivityTimer(false);
+        function setupActivityListeners() { activityEvents.forEach(event => document.addEventListener(event, activityHandler)); }
+        function removeActivityListeners() {
+            activityEvents.forEach(event => document.removeEventListener(event, activityHandler));
+            clearTimeout(inactivityTimer);
+            clearTimeout(warningTimer);
+        }
+
+        onAuthStateChanged(auth, user => {
+            ui.loadingContainer.style.display = 'none';
+            if (user) {
+                userId = user.uid;
+                ui.authContainer.style.display = 'none';
+                ui.appContainer.style.display = 'block';
+                ui.userInfo.textContent = `Conectado como: ${user.email}`;
+                initApp();
+                setupActivityListeners();
+                resetInactivityTimer();
+            } else {
+                userId = null;
+                if(unsubscribeData) unsubscribeData();
+                if(unsubscribeHistory) unsubscribeHistory();
+                removeActivityListeners();
+                undoStack = []; redoStack = []; updateUndoRedoUI();
+                ui.authForm.reset();
+                ui.authError.classList.add('hidden');
+                ui.resetPasswordCard.classList.add('hidden');
+                ui.loginCard.classList.remove('hidden');
+                ui.authContainer.style.display = 'block';
+                ui.appContainer.style.display = 'none';
+            }
+        });
+
+        ui.authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = ui.authForm.email.value;
+            const password = ui.authForm.password.value;
+            ui.authError.classList.add('hidden');
+            try { await signInWithEmailAndPassword(auth, email, password); } 
+            catch (error) { ui.authError.textContent = "Error: Credenciales incorrectas."; ui.authError.classList.remove('hidden'); }
+        });
+
+        ui.logoutBtn.addEventListener('click', () => signOut(auth));
+        ui.forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); ui.loginCard.classList.add('hidden'); ui.resetPasswordCard.classList.remove('hidden'); });
+        ui.backToLoginBtn.addEventListener('click', (e) => { e.preventDefault(); ui.resetPasswordCard.classList.add('hidden'); ui.loginCard.classList.remove('hidden'); });
+        ui.resetPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = ui.resetPasswordForm['reset-email'].value;
+            ui.resetError.classList.add('hidden');
+            try { await sendPasswordResetEmail(auth, email); showNotification("Enlace enviado.", false); ui.resetPasswordCard.classList.add('hidden'); ui.loginCard.classList.remove('hidden'); } 
+            catch (error) { ui.resetError.textContent = "Error: No se pudo enviar el correo."; ui.resetError.classList.remove('hidden'); }
+        });
+        
+        async function initApp() {
+            loadPreferences();
+            if (unsubscribeData) unsubscribeData();
+            if (unsubscribeHistory) unsubscribeHistory();
+
+            const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
+            const earningsCol = collection(db, earningsCollectionPath);
+
+            // Verificamos si existe algún dato al inicio
+            const initialCheck = await getDocs(query(earningsCol));
+            if (initialCheck.empty) await importInitialData(earningsCol);
+            
+            unsubscribeData = onSnapshot(query(earningsCol), async (snapshot) => {
+                allData = {};
+                snapshot.forEach(doc => { allData[doc.id] = doc.data(); });
+
+                // --- RESTAURADO: AUTO-CREACIÓN DE AÑO ---
+                // Si la base de datos devuelve vacío, creamos el año actual
+                const systemYear = new Date().getFullYear().toString();
+                if (Object.keys(allData).length === 0 || !allData[systemYear]) {
+                    const emptyYearData = months.reduce((acc, m) => ({...acc, [m]: 0}), {});
+                    allData[systemYear] = emptyYearData;
+                    try {
+                        await setDoc(doc(db, earningsCollectionPath, systemYear), emptyYearData);
+                    } catch (error) { console.error("Auto-create error", error); }
+                }
+                // ----------------------------------------
+
+                updateFullUI();
+            }, error => { console.error(error); showNotification("Error al cargar datos."); });
+
+            const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
+            unsubscribeHistory = onSnapshot(query(collection(db, historyCollectionPath)), (snapshot) => {
+                const sortedLogs = snapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0));
+                lastHistoryLogs = sortedLogs.slice(0, 20);
+                renderHistory(lastHistoryLogs);
+            }, error => { console.error(error); showNotification("Error al cargar historial."); });
+        }
+
+        async function importInitialData(earningsCol) {
+            try {
+                const batch = writeBatch(db);
+                for (const year in initialUserData) {
+                    const yearData = initialUserData[year]; 
+                    batch.set(doc(earningsCol, year), yearData);
+                }
+                await batch.commit();
+            } catch (error) { console.error(error); }
+        }
+        
+        function addToLocalUndo(year, month, oldValue, newValue) {
+            const command = { year, month, oldValue, newValue };
+            undoStack.push(command);
+            if (undoStack.length > LOCAL_HISTORY_LIMIT) undoStack.shift();
+            redoStack = []; 
+            updateUndoRedoUI();
+        }
+
+        const roundMoney = (num) => Math.round(num * 100) / 100;
+
+        async function undoLastChange() {
+            if (undoStack.length === 0) return;
+            const command = undoStack.pop();
+            
+            if (currentYear !== command.year) {
+                currentYear = command.year;
+                ui.yearSelector.value = currentYear;
+                showNotification(`Regresando al año ${currentYear}...`, false);
+            }
+
+            if (allData[command.year]) allData[command.year][command.month] = command.oldValue;
+            
+            try {
+                const batch = writeBatch(db);
+                const docRef = doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, command.year);
+                batch.update(docRef, { [command.month]: command.oldValue });
+                
+                const historyRef = doc(collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`));
+                batch.set(historyRef, {
+                    timestamp: serverTimestamp(),
+                    year: command.year,
+                    month: command.month,
+                    oldValue: command.newValue,
+                    newValue: command.oldValue,
+                    changeAmount: roundMoney(command.oldValue - command.newValue),
+                    actionType: 'undo' 
+                });
+
+                await batch.commit();
+
+                redoStack.push(command);
+                updateUndoRedoUI();
+                showNotification("Cambio deshecho.", false);
+                renderAllComponents(currentYear);
+                
+                setTimeout(() => {
+                    const cell = document.querySelector(`td[data-month="${command.month}"]`);
+                    if (cell) {
+                        cell.classList.add('saved-feedback');
+                        setTimeout(() => cell.classList.remove('saved-feedback'), 700);
+                    }
+                }, 100);
+
+            } catch (error) {
+                console.error("Error undo:", error);
+                showNotification("Error al deshacer.");
+                undoStack.push(command);
+                allData[command.year][command.month] = command.newValue;
+            }
+        }
+
+        async function redoLastChange() {
+            if (redoStack.length === 0) return;
+            const command = redoStack.pop();
+
+            if (currentYear !== command.year) {
+                currentYear = command.year;
+                ui.yearSelector.value = currentYear;
+                showNotification(`Avanzando al año ${currentYear}...`, false);
+            }
+
+            if (allData[command.year]) allData[command.year][command.month] = command.newValue;
+
+            try {
+                const batch = writeBatch(db);
+                const docRef = doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, command.year);
+                batch.update(docRef, { [command.month]: command.newValue });
+
+                const historyRef = doc(collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`));
+                batch.set(historyRef, {
+                    timestamp: serverTimestamp(),
+                    year: command.year,
+                    month: command.month,
+                    oldValue: command.oldValue,
+                    newValue: command.newValue,
+                    changeAmount: roundMoney(command.newValue - command.oldValue),
+                    actionType: 'redo'
+                });
+
+                await batch.commit();
+
+                undoStack.push(command);
+                updateUndoRedoUI();
+                showNotification("Cambio rehecho.", false);
+                renderAllComponents(currentYear);
+
+                setTimeout(() => {
+                    const cell = document.querySelector(`td[data-month="${command.month}"]`);
+                    if (cell) {
+                        cell.classList.add('saved-feedback');
+                        setTimeout(() => cell.classList.remove('saved-feedback'), 700);
+                    }
+                }, 100);
+
+            } catch (error) {
+                console.error("Error redo:", error);
+                showNotification("Error al rehacer.");
+                redoStack.push(command);
+                allData[command.year][command.month] = command.oldValue;
+            }
+        }
+
+        function updateUndoRedoUI() {
+            ui.undoBtn.disabled = undoStack.length === 0;
+            ui.undoBtn.classList.toggle('opacity-30', undoStack.length === 0);
+            ui.undoBtn.classList.toggle('cursor-not-allowed', undoStack.length === 0);
+            
+            ui.redoBtn.disabled = redoStack.length === 0;
+            ui.redoBtn.classList.toggle('opacity-30', redoStack.length === 0);
+            ui.redoBtn.classList.toggle('cursor-not-allowed', redoStack.length === 0);
+        }
+
+        ui.undoBtn.addEventListener('click', () => {
+             showConfirmationModal('Deshacer Cambio', '¿Estás seguro de que quieres deshacer la última acción?', undoLastChange);
+        });
+
+        ui.redoBtn.addEventListener('click', () => {
+             showConfirmationModal('Rehacer Cambio', '¿Estás seguro de que quieres rehacer la última acción?', redoLastChange);
+        });
+
+        function animateCountUp(element, end) {
+            let start = parseFloat(element.dataset.currentValue) || 0;
+            element.dataset.currentValue = end;
+            const duration = 700; const frameRate = 60; const totalFrames = Math.round(duration / (1000 / frameRate)); let currentFrame = 0;
+            const counter = () => {
+                currentFrame++; const progress = currentFrame / totalFrames; const currentValue = start + (end - start) * progress;
+                element.innerHTML = formatCurrency(currentValue, '$');
+                if (currentFrame < totalFrames) requestAnimationFrame(counter); else element.innerHTML = formatCurrency(end, '$');
+            };
+            requestAnimationFrame(counter);
+        }
+
+        function renderAllComponents(year) {
+            if (!allData || Object.keys(allData).length === 0 || !year) return;
+            renderTable(year); renderSummaryCards(year); renderChart(year); renderDoughnutChart(year);
+        }
+
+        function renderTable(year) {
+            const yearData = allData[year] || {};
+            if (ui.tableHead.innerHTML === '') ui.tableHead.innerHTML = '<tr><th class="p-4 text-left font-semibold text-secondary tracking-wider">Mes</th><th class="p-4 text-right font-semibold text-secondary tracking-wider">Ganancias (USD)</th></tr>';
+            months.forEach(month => {
+                let row = ui.tableBody.querySelector(`[data-month-row="${month}"]`);
+                if (!row) {
+                    row = document.createElement('tr'); row.className = "hover:bg-white/5 transition-colors group"; row.dataset.monthRow = month;
+                    row.innerHTML = `<td class="p-4 font-medium">${month}</td><td class="p-4 text-right data-cell text-base font-mono tracking-tight group-hover:text-accent transition-colors" data-month="${month}"></td>`;
+                    ui.tableBody.appendChild(row);
+                }
+                const cell = row.querySelector(`[data-month="${month}"]`);
+                if (cell && !cell.classList.contains('editing')) cell.innerHTML = formatCurrency(yearData[month] || 0, '$');
+            });
+            const total = Object.values(yearData).reduce((sum, amount) => sum + parseFloat(amount), 0);
+            if (ui.tableFoot.innerHTML === '') ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-4">Total Anual</td><td id="total-anual-cell" class="p-4 text-right text-lg font-mono tracking-tight"></td></tr>`;
+            document.getElementById('total-anual-cell').innerHTML = formatCurrency(total, '$');
+        }
+        
         function renderSummaryCards(year) {
             const yearData = allData[year] || {};
             const values = Object.values(yearData).filter(v => v > 0);
@@ -606,7 +940,6 @@
             animateCountUp(document.getElementById('avg-value'), avg); animateCountUp(document.getElementById('total-value'), total);
         }
 
-        // ... (resto de funciones: renderChart, renderDoughnut, etc. se mantienen igual) ...
         function renderChart(year) {
             if (!year) return;
             const style = getComputedStyle(document.body);
