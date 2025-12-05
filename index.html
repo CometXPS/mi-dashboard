@@ -25,23 +25,19 @@
             --danger-color: #ef4444;
             --success-color: #10b981; 
             
-            /* Color de hover para tablas (Blanco con baja opacidad) */
             --hover-row-bg: rgba(255, 255, 255, 0.05);
-            /* Color de inputs */
             --input-bg: #111827;
         }
 
         .light-mode {
-            /* MODO CLARO (Ajustado) */
+            /* MODO CLARO */
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
             --border-color: #e2e8f0;
             --text-primary: #0f172a;
             --text-secondary: #64748b;
             
-            /* Hover oscuro suave para que contraste sobre blanco */
             --hover-row-bg: rgba(0, 0, 0, 0.03); 
-            /* Inputs sutilmente grises */
             --input-bg: #f1f5f9; 
         }
 
@@ -53,6 +49,18 @@
             font-feature-settings: "tnum"; 
             font-variant-numeric: tabular-nums;
         }
+
+        /* VISTA COMPACTA (NUEVO CÓDIGO CSS PARA QUE FUNCIONE) */
+        body.compact-mode .main-card, 
+        body.compact-mode .summary-card { padding: 1rem !important; }
+        
+        body.compact-mode td, 
+        body.compact-mode th { padding: 0.5rem 0.75rem !important; font-size: 0.85rem !important; }
+        
+        body.compact-mode .text-3xl { font-size: 1.5rem !important; } 
+        body.compact-mode .gap-6 { gap: 1rem !important; } 
+        body.compact-mode .mb-8 { margin-bottom: 1.5rem !important; }
+        body.compact-mode .py-3 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
 
         /* SKELETON */
         .skeleton {
