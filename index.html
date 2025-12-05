@@ -186,7 +186,7 @@
                 <div class="h-48 bg-gray-700/50 rounded-2xl"></div>
             </div>
         </div>
-        <div id="loading-error" class="hidden mx-auto max-w-md mt-4"></div>
+        <div id="loading-error" class="hidden mx-auto max-w-md mt-4 text-center text-red-400 text-sm"></div>
     </div>
 
     <div id="auth-container" class="max-w-md mx-auto hidden mt-10">
@@ -258,7 +258,7 @@
             </div>
             <div class="p-2 sm:pr-4 w-full sm:w-auto flex justify-end">
                 <button id="settings-btn" title="Configuración" class="p-2 text-secondary hover:text-primary transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </button>
             </div>
         </div>
@@ -293,29 +293,39 @@
 
         <div id="tools-tab" class="tab-content">
             <div id="tools-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                <div class="space-y-6">
+                
+                <div class="main-card flex flex-col h-full order-1 lg:order-2">
+                    <div class="p-6 border-b border-color flex justify-between items-center">
+                         <h2 class="text-lg font-bold">Historial de Cambios</h2>
+                         <button id="clear-history-btn" title="Limpiar" class="text-xs bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500 hover:text-white transition">Limpiar</button>
+                    </div>
+                    <div class="p-0 flex-1 relative min-h-[300px]">
+                         <div id="history-loader" class="spinner absolute inset-0 m-auto"></div>
+                         <div id="history-log-container" class="absolute inset-0 overflow-y-auto custom-scrollbar"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6 order-2 lg:order-1">
                     <div class="main-card p-6">
                         <h2 class="text-lg font-bold mb-4 flex items-center gap-2">Calculadora PayPal</h2>
                         <div class="space-y-4">
                             <div class="bg-primary/50 p-4 rounded-lg border border-color">
                                 <label class="block text-xs font-bold text-secondary uppercase mb-2">Para recibir (Neto)</label>
-                                <div class="flex flex-col sm:flex-row items-center gap-3">
-                                    <input type="number" id="paypal-receive" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
-                                    <span class="text-gray-500 hidden sm:block">→</span>
-                                    <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
-                                        <p class="text-xs text-secondary">Pedir:</p>
-                                        <p id="paypal-request-result" class="text-lg font-bold text-primary">$ 0,00</p>
+                                <div class="flex flex-col gap-3">
+                                    <input type="number" id="paypal-receive" class="w-full bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none placeholder-gray-600" placeholder="0.00">
+                                    <div class="flex justify-between items-center bg-black/20 p-3 rounded border border-color/50">
+                                        <span class="text-xs text-secondary font-medium uppercase">Debes pedir:</span>
+                                        <p id="paypal-request-result" class="text-xl font-bold text-primary">$ 0,00</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="bg-primary/50 p-4 rounded-lg border border-color">
                                 <label class="block text-xs font-bold text-secondary uppercase mb-2">Si envías (Bruto)</label>
-                                <div class="flex flex-col sm:flex-row items-center gap-3">
-                                    <input type="number" id="paypal-send" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
-                                    <span class="text-gray-500 hidden sm:block">→</span>
-                                    <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
-                                        <p class="text-xs text-secondary">Llega:</p>
-                                        <p id="paypal-receive-result" class="text-lg font-bold text-primary">$ 0,00</p>
+                                <div class="flex flex-col gap-3">
+                                    <input type="number" id="paypal-send" class="w-full bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none placeholder-gray-600" placeholder="0.00">
+                                    <div class="flex justify-between items-center bg-black/20 p-3 rounded border border-color/50">
+                                        <span class="text-xs text-secondary font-medium uppercase">Llega a cuenta:</span>
+                                        <p id="paypal-receive-result" class="text-xl font-bold text-primary">$ 0,00</p>
                                     </div>
                                 </div>
                             </div>
@@ -341,17 +351,6 @@
                             </div>
                             <p id="converter-status" class="text-xs text-secondary text-right italic"></p>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="main-card flex flex-col h-full">
-                    <div class="p-6 border-b border-color flex justify-between items-center">
-                         <h2 class="text-lg font-bold">Historial de Cambios</h2>
-                         <button id="clear-history-btn" title="Limpiar" class="text-xs bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500 hover:text-white transition">Limpiar</button>
-                    </div>
-                    <div class="p-0 flex-1 relative min-h-[300px]">
-                         <div id="history-loader" class="spinner absolute inset-0 m-auto"></div>
-                         <div id="history-log-container" class="absolute inset-0 overflow-y-auto custom-scrollbar"></div>
                     </div>
                 </div>
             </div>
@@ -485,73 +484,20 @@
             [new Date().getFullYear()]: { "Enero": 0, "Febrero": 0, "Marzo": 0, "Abril": 0, "Mayo": 0, "Junio": 0, "Julio": 0, "Agosto": 0, "Septiembre": 0, "Octubre": 0, "Noviembre": 0, "Diciembre": 0 }
         };
 
+        // --- SAFETY TIMEOUT ---
+        setTimeout(() => {
+            const loader = document.getElementById('loading-container');
+            if (loader && loader.style.display !== 'none' && !userId) {
+               console.warn("Forzando ocultar loader por tiempo de espera...");
+            }
+        }, 4000);
+
         const icons = {
             sun: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`,
             moon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`,
             eyeOpen: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`,
             eyeClosed: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
         };
-
-        const ui = {
-            loadingContainer: document.getElementById('loading-container'),
-            authContainer: document.getElementById('auth-container'),
-            appContainer: document.getElementById('app-container'),
-            authForm: document.getElementById('auth-form'),
-            authError: document.getElementById('auth-error'),
-            logoutBtn: document.getElementById('logout-btn'),
-            tableBody: document.querySelector('#earnings-table tbody'),
-            tableHead: document.querySelector('#earnings-table thead'),
-            tableFoot: document.querySelector('#earnings-table tfoot'),
-            loader: document.getElementById('loader'),
-            earningsTable: document.getElementById('earnings-table'),
-            yearSelector: document.getElementById('year-selector'),
-            addYearBtn: document.getElementById('add-year-btn'),
-            deleteYearBtn: document.getElementById('delete-year-btn'),
-            undoBtn: document.getElementById('undo-btn'),
-            redoBtn: document.getElementById('redo-btn'),
-            toggleVisibilityBtn: document.getElementById('toggle-visibility-btn'),
-            chartCanvas: document.getElementById('comparisonChart').getContext('2d'),
-            doughnutChartCanvas: document.getElementById('doughnutChart').getContext('2d'),
-            summaryContainer: document.getElementById('summary-container'),
-            userInfo: document.getElementById('user-info'),
-            usdAmountInput: document.getElementById('usd-amount'),
-            eurResult: document.getElementById('eur-result'),
-            clpResult: document.getElementById('clp-result'),
-            converterStatus: document.getElementById('converter-status'),
-            confirmationModal: document.getElementById('confirmation-modal'),
-            modalTitle: document.getElementById('modal-title'),
-            modalBody: document.getElementById('modal-body'),
-            modalConfirmBtn: document.getElementById('modal-confirm-btn'),
-            modalCancelBtn: document.getElementById('modal-cancel-btn'),
-            timeoutModal: document.getElementById('timeout-modal'),
-            timeoutStayBtn: document.getElementById('timeout-stay-btn'),
-            timeoutLogoutBtn: document.getElementById('timeout-logout-btn'),
-            settingsModal: document.getElementById('settings-modal'),
-            settingsBtn: document.getElementById('settings-btn'),
-            settingsCloseBtn: document.getElementById('settings-close-btn'),
-            notification: document.getElementById('notification'),
-            notificationMessage: document.getElementById('notification-message'),
-            notificationCloseBtn: document.getElementById('notification-close-btn'),
-            notificationTimer: document.getElementById('notification-timer'),
-            historyLoader: document.getElementById('history-loader'),
-            historyLogContainer: document.getElementById('history-log-container'),
-            clearHistoryBtn: document.getElementById('clear-history-btn'),
-            themeToggleBtn: document.getElementById('theme-toggle-btn'),
-            compactViewBtn: document.getElementById('compact-view-btn'),
-            colorPicker: document.getElementById('color-picker'),
-            tabs: document.querySelectorAll('.tab-btn'),
-            paypalReceiveInput: document.getElementById('paypal-receive'),
-            paypalSendInput: document.getElementById('paypal-send'),
-            paypalRequestResult: document.getElementById('paypal-request-result'),
-            paypalReceiveResult: document.getElementById('paypal-receive-result'),
-            loginCard: document.getElementById('login-card'),
-            resetPasswordCard: document.getElementById('reset-password-card'),
-            forgotPasswordLink: document.getElementById('forgot-password-link'),
-            backToLoginBtn: document.getElementById('back-to-login-btn'),
-            resetPasswordForm: document.getElementById('reset-password-form'),
-            resetError: document.getElementById('reset-error'),
-        };
-        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         function showNotification(message, isError = true) {
             clearTimeout(notificationTimeout);
@@ -601,12 +547,6 @@
             };
             showModal(ui.confirmationModal, onOpen, onClose);
         }
-
-        const INACTIVITY_LIMIT = 30 * 60 * 1000;
-        const WARNING_DURATION = 60 * 1000;
-        let inactivityTimer;
-        let warningTimer;
-        const activityChannel = new BroadcastChannel('app_activity_channel');
 
         function resetInactivityTimer(fromOtherTab = false) {
             if (!fromOtherTab) activityChannel.postMessage({ type: 'ACTIVITY_DETECTED' });
@@ -991,59 +931,7 @@
             }
         }
         
-        function renderHistory(logs) {
-            ui.historyLoader.style.display = 'none';
-            if (!logs || logs.length === 0) { ui.historyLogContainer.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-secondary opacity-50"><p>Sin cambios recientes</p></div>'; return; }
-            
-            ui.historyLogContainer.innerHTML = logs.map(log => {
-                const data = log.data(); if (!data.timestamp) return '';
-                const date = data.timestamp.toDate();
-                const change = data.changeAmount !== undefined ? data.changeAmount : data.newValue - data.oldValue;
-                
-                let badge = '';
-                if (data.actionType === 'undo') {
-                    badge = '<span class="ml-2 text-[10px] uppercase font-bold text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded border border-yellow-500/20">Deshacer</span>';
-                } else if (data.actionType === 'redo') {
-                    badge = '<span class="ml-2 text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20">Rehacer</span>';
-                }
-                
-                return `
-                    <div class="border-b border-gray-700/50 p-4 text-sm last:border-b-0 hover:bg-white/5 transition-colors">
-                        <div class="flex justify-between items-center mb-1">
-                            <div class="flex items-center">
-                                <span class="w-2 h-2 rounded-full bg-accent mr-2"></span>
-                                <p class="font-semibold text-primary">${data.month} ${data.year}</p>
-                                ${badge}
-                            </div>
-                            <p class="font-bold text-base font-mono tracking-tight ${change >= 0 ? 'text-emerald-400' : 'text-red-400'}">
-                                ${change >= 0 ? '+' : ''} ${formatCurrency(change, '$', true)}
-                            </p>
-                        </div>
-                        <div class="flex justify-between items-center text-xs text-secondary">
-                            <span>${date.toLocaleString('es-CL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-                            <span class="opacity-50">Antes: ${formatCurrency(data.oldValue, '$', true)}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateFullUI() {
-            const years = Object.keys(allData);
-            ui.deleteYearBtn.disabled = years.length <= 1;
-            ui.yearSelector.innerHTML = years.sort((a, b) => b - a).map(year => `<option value="${year}">${year}</option>`).join('');
-            if (!years.includes(currentYear)) currentYear = years.length > 0 ? Math.max(...years.map(Number)).toString() : new Date().getFullYear().toString();
-            ui.yearSelector.value = currentYear;
-            renderAllComponents(currentYear);
-            ui.loader.style.display = 'none'; ui.earningsTable.classList.remove('hidden');
-            document.querySelectorAll('.summary-card, .main-card').forEach((el, i) => { el.style.animationDelay = `${i * 50}ms`; el.classList.add('fade-in-up'); });
-            updateUndoRedoUI();
-        }
-
-        function formatCurrency(value, symbol, force = false) {
-            if (areValuesHidden && !force) return `${symbol} ****`;
-            return `${symbol} ${new Intl.NumberFormat('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value))}`;
-        }
+        function highlightTableRow(month) { const r = ui.tableBody.querySelector(`[data-month-row="${month}"]`); if (r) { r.classList.add('table-row-highlight'); r.scrollIntoView({behavior:'smooth', block:'center'}); setTimeout(() => r.classList.remove('table-row-highlight'), 2000); } }
         
         ui.tableBody.addEventListener('click', (e) => { if (e.target.classList.contains('data-cell')) makeCellEditable(e.target); });
 
@@ -1196,7 +1084,6 @@
         ui.colorPicker.addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON') { const c = e.target.dataset.color; localStorage.setItem('dashboardAccentColor', c); applyAccentColor(c); renderAllComponents(currentYear); } });
         ui.settingsBtn.addEventListener('click', () => showModal(ui.settingsModal, () => ui.settingsCloseBtn.addEventListener('click', () => ui.settingsModal.classList.add('opacity-0', 'pointer-events-none'), {once:true})));
         ui.tabs.forEach(t => t.addEventListener('click', () => { ui.tabs.forEach(x => x.classList.remove('active')); t.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.getElementById(`${t.dataset.tab}-tab`).classList.add('active'); }));
-        function highlightTableRow(month) { const r = ui.tableBody.querySelector(`[data-month-row="${month}"]`); if (r) { r.classList.add('table-row-highlight'); r.scrollIntoView({behavior:'smooth', block:'center'}); setTimeout(() => r.classList.remove('table-row-highlight'), 2000); } }
     </script>
 </body>
 </html>
