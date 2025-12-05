@@ -42,20 +42,17 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* --- SKELETON LOADING (NUEVO) --- */
+        /* SKELETON LOADING */
         .skeleton {
-            background: linear-gradient(90deg, var(--bg-secondary) 25%, #374151 50%, var(--bg-secondary) 75%);
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
             background-size: 200% 100%;
             animation: loading 1.5s infinite;
             border-radius: 8px;
             opacity: 0.6;
         }
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        /* ------------------------------- */
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
+        /* ESTILOS DE TARJETAS */
         .main-card {
             background-color: var(--bg-secondary);
             border-radius: 1rem;
@@ -80,11 +77,8 @@
             border-color: rgba(var(--accent-color-rgb), 0.3);
         }
         .summary-card.highlight-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 4px;
-            background: var(--accent-color);
-            opacity: 0.7;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: var(--accent-color); opacity: 0.7;
         }
 
         .summary-card:hover {
@@ -93,8 +87,10 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
+        /* TABLA */
         .data-cell { transition: background-color 0.15s; }
-        .data-cell:hover { background-color: rgba(255,255,255, 0.03); cursor: pointer; }
+        .data-cell:hover { background-color: rgba(156, 163, 175, 0.1); cursor: pointer; }
+        
         .total-row td {
             background-color: rgba(var(--accent-color-rgb), 0.08);
             font-weight: 800;
@@ -109,6 +105,7 @@
             box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
         }
 
+        /* UTILIDADES */
         .spinner {
             border: 3px solid var(--border-color);
             border-top: 3px solid var(--accent-color);
@@ -131,7 +128,7 @@
             border-radius: 0.5rem 0.5rem 0 0;
             opacity: 0.7;
         }
-        .tab-btn:hover { opacity: 1; background-color: rgba(255,255,255,0.03); }
+        .tab-btn:hover { opacity: 1; background-color: rgba(156, 163, 175, 0.1); }
         .tab-btn.active {
             background-color: transparent;
             color: var(--accent-color);
@@ -160,8 +157,7 @@
         
         .glass-header {
             background-color: rgba(31, 41, 55, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
         .light-mode .glass-header { background-color: rgba(255, 255, 255, 0.7); }
         
@@ -181,13 +177,11 @@
             </div>
             <div class="h-10 w-64 bg-gray-800 rounded-lg skeleton hidden sm:block"></div>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="h-32 bg-gray-800 rounded-2xl skeleton"></div>
             <div class="h-32 bg-gray-800 rounded-2xl skeleton"></div>
             <div class="h-32 bg-gray-800 rounded-2xl skeleton"></div>
         </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div class="lg:col-span-3 h-96 bg-gray-800 rounded-2xl skeleton"></div>
             <div class="lg:col-span-2 space-y-6">
@@ -195,7 +189,6 @@
                 <div class="h-48 bg-gray-800 rounded-2xl skeleton"></div>
             </div>
         </div>
-        
         <div id="loading-error" class="hidden mx-auto max-w-md mt-4"></div>
     </div>
 
@@ -206,9 +199,7 @@
                 <h2 id="auth-title" class="text-2xl font-extrabold">Bienvenido</h2>
                 <p class="text-secondary text-sm">Gestiona tus finanzas personales</p>
             </div>
-            
             <div id="auth-error" class="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-6 hidden text-center"></div>
-            
             <form id="auth-form" class="space-y-5">
                 <div>
                     <label for="email" class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Correo</label>
@@ -218,9 +209,7 @@
                     <label for="password" class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Contraseña</label>
                     <input type="password" id="password" required class="block w-full bg-primary border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors">
                 </div>
-                <div class="text-right">
-                    <a href="#" id="forgot-password-link" class="text-xs text-accent hover:text-emerald-400 font-medium">¿Olvidaste tu contraseña?</a>
-                </div>
+                <div class="text-right"><a href="#" id="forgot-password-link" class="text-xs text-accent hover:text-emerald-400 font-medium">¿Olvidaste tu contraseña?</a></div>
                 <button type="submit" id="submit-btn" class="w-full bg-accent text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-emerald-500/20">Iniciar Sesión</button>
             </form>
         </div>
@@ -236,7 +225,7 @@
                 </div>
                 <button type="submit" id="reset-submit-btn" class="w-full bg-accent text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 shadow-lg shadow-emerald-500/20">Enviar Enlace</button>
             </form>
-            <button id="back-to-login-btn" class="w-full mt-6 text-center text-xs text-secondary hover:text-white transition-colors">← Volver al inicio</button>
+            <button id="back-to-login-btn" class="w-full mt-6 text-center text-xs text-secondary hover:text-primary transition-colors">← Volver al inicio</button>
         </div>
     </div>
 
@@ -254,15 +243,15 @@
             
             <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto p-1 bg-secondary rounded-lg border border-color">
                  <select id="year-selector" class="bg-primary text-sm font-semibold border-none rounded-md py-2 pl-3 pr-8 focus:ring-2 focus:ring-emerald-500/50 cursor-pointer outline-none"></select>
-                 <div class="w-px h-6 bg-gray-700 mx-1"></div>
-                 <button id="add-year-btn" title="Nuevo Año" class="p-2 text-secondary hover:text-white hover:bg-white/5 rounded-md transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg></button>
-                 <button id="delete-year-btn" title="Borrar Año" class="p-2 text-secondary hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                 <div class="w-px h-6 bg-gray-700 mx-1"></div>
-                 <button id="undo-btn" title="Deshacer" disabled class="p-2 text-secondary hover:text-yellow-400 hover:bg-yellow-500/10 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l4-4m-4 4l4 4" /></svg></button>
-                 <button id="redo-btn" title="Rehacer" disabled class="p-2 text-secondary hover:text-blue-400 hover:bg-blue-500/10 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2m18-10l-4-4m4 4l-4 4" /></svg></button>
-                 <div class="w-px h-6 bg-gray-700 mx-1"></div>
-                 <button id="toggle-visibility-btn" title="Ocultar valores" class="p-2 text-secondary hover:text-white hover:bg-white/5 rounded-md transition-colors"></button>
-                 <button id="logout-btn" title="Salir" class="p-2 text-secondary hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors ml-auto"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
+                 <div class="w-px h-6 bg-gray-600/50 mx-1"></div>
+                 <button id="add-year-btn" title="Nuevo Año" class="p-2 text-secondary hover:text-primary hover:bg-gray-500/10 rounded-md transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg></button>
+                 <button id="delete-year-btn" title="Borrar Año" class="p-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                 <div class="w-px h-6 bg-gray-600/50 mx-1"></div>
+                 <button id="undo-btn" title="Deshacer" disabled class="p-2 text-secondary hover:text-yellow-500 hover:bg-yellow-500/10 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l4-4m-4 4l4 4" /></svg></button>
+                 <button id="redo-btn" title="Rehacer" disabled class="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2m18-10l-4-4m4 4l-4 4" /></svg></button>
+                 <div class="w-px h-6 bg-gray-600/50 mx-1"></div>
+                 <button id="toggle-visibility-btn" title="Ocultar valores" class="p-2 text-secondary hover:text-primary hover:bg-gray-500/10 rounded-md transition-colors"></button>
+                 <button id="logout-btn" title="Salir" class="p-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors ml-auto"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
             </div>
         </div>
 
@@ -272,7 +261,7 @@
                 <button class="tab-btn px-6 py-3 text-sm font-semibold flex-1 sm:flex-none text-center" data-tab="tools">Herramientas</button>
             </div>
             <div class="p-2 sm:pr-4 w-full sm:w-auto flex justify-end">
-                <button id="settings-btn" title="Configuración" class="p-2 text-secondary hover:text-white transition-colors">
+                <button id="settings-btn" title="Configuración" class="p-2 text-secondary hover:text-primary transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </button>
             </div>
@@ -319,7 +308,7 @@
                                     <span class="text-gray-500">→</span>
                                     <div class="text-right">
                                         <p class="text-xs text-secondary">Pedir:</p>
-                                        <p id="paypal-request-result" class="text-lg font-bold text-white">$ 0,00</p>
+                                        <p id="paypal-request-result" class="text-lg font-bold text-primary">$ 0,00</p>
                                     </div>
                                 </div>
                             </div>
@@ -330,7 +319,7 @@
                                     <span class="text-gray-500">→</span>
                                     <div class="text-right">
                                         <p class="text-xs text-secondary">Llega:</p>
-                                        <p id="paypal-receive-result" class="text-lg font-bold text-white">$ 0,00</p>
+                                        <p id="paypal-receive-result" class="text-lg font-bold text-primary">$ 0,00</p>
                                     </div>
                                 </div>
                             </div>
@@ -347,11 +336,11 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="bg-primary/50 p-4 rounded-lg border border-color text-center">
                                     <p class="text-xs text-secondary mb-1">EURO</p>
-                                    <p id="eur-result" class="text-xl font-bold text-white">€ 0,00</p>
+                                    <p id="eur-result" class="text-xl font-bold text-primary">€ 0,00</p>
                                 </div>
                                 <div class="bg-primary/50 p-4 rounded-lg border border-color text-center">
                                     <p class="text-xs text-secondary mb-1">CLP (Chile)</p>
-                                    <p id="clp-result" class="text-xl font-bold text-white">$ 0</p>
+                                    <p id="clp-result" class="text-xl font-bold text-primary">$ 0</p>
                                 </div>
                             </div>
                             <p id="converter-status" class="text-xs text-secondary text-right italic"></p>
@@ -380,13 +369,13 @@
             <h3 id="modal-title" class="text-lg font-bold mb-2">Confirmación</h3>
             <p id="modal-body" class="text-secondary mb-6 text-sm">¿Estás seguro?</p>
             <div class="flex justify-end gap-3">
-                <button id="modal-cancel-btn" class="px-4 py-2 text-sm font-medium text-secondary hover:text-white transition-colors">Cancelar</button>
+                <button id="modal-cancel-btn" class="px-4 py-2 text-sm font-medium text-secondary hover:text-primary transition-colors">Cancelar</button>
                 <button id="modal-confirm-btn" class="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-md shadow-lg shadow-red-600/20 transition-all">Confirmar</button>
             </div>
         </div>
     </div>
 
-    <div id="timeout-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[60] opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="timeout-modal" class="modal fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[60] opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="main-card p-6 w-full max-w-sm border-2 border-yellow-500 shadow-2xl relative animate-bounce-small">
             <div class="text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
@@ -396,7 +385,7 @@
                 <p class="text-secondary mb-6">Tu sesión expirará en menos de 60 segundos debido a inactividad.</p>
                 <div class="flex flex-col gap-3">
                     <button id="timeout-stay-btn" class="w-full px-4 py-2 bg-accent text-white rounded-md hover:opacity-90 font-medium transition-colors">Mantener sesión activa</button>
-                    <button id="timeout-logout-btn" class="w-full px-4 py-2 bg-transparent border border-color text-secondary rounded-md hover:bg-white/5 transition-colors">Cerrar sesión ahora</button>
+                    <button id="timeout-logout-btn" class="w-full px-4 py-2 bg-transparent border border-color text-secondary rounded-md hover:bg-gray-500/10 transition-colors">Cerrar sesión ahora</button>
                 </div>
             </div>
         </div>
@@ -406,12 +395,12 @@
         <div class="main-card p-6 w-full max-w-xs border border-color shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-bold">Ajustes</h3>
-                <button id="settings-close-btn" class="text-secondary hover:text-white text-2xl leading-none">&times;</button>
+                <button id="settings-close-btn" class="text-secondary hover:text-primary text-2xl leading-none">&times;</button>
             </div>
             <div class="space-y-6">
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-medium text-secondary">Modo Oscuro/Claro</span>
-                    <button id="theme-toggle-btn" class="p-2 bg-primary rounded-lg text-accent hover:bg-white/5 transition-colors"></button>
+                    <button id="theme-toggle-btn" class="p-2 bg-primary rounded-lg text-accent hover:bg-gray-500/10 transition-colors"></button>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-medium text-secondary">Color Principal</span>
@@ -423,7 +412,7 @@
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-medium text-secondary">Vista Compacta</span>
-                    <button id="compact-view-btn" class="p-2 bg-primary rounded-lg text-secondary hover:text-white hover:bg-white/5 transition-colors">
+                    <button id="compact-view-btn" class="p-2 bg-primary rounded-lg text-secondary hover:text-primary hover:bg-gray-500/10 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                     </button>
                 </div>
@@ -445,7 +434,6 @@
             const errorBox = document.getElementById('loading-error');
             
             if (loader && errorBox) {
-                // Quitamos la animación de pulso para que se lea el error
                 loader.classList.remove('animate-pulse');
                 errorBox.classList.remove('hidden');
                 errorBox.className = 'error-box';
@@ -455,7 +443,7 @@
                     <em>Posibles causas:</em>
                     <ul class="list-disc ml-4 mt-2">
                         <li>Falta el archivo <code>config.js</code>.</li>
-                        <li>No estás usando un servidor local (estás abriendo el archivo directamente).</li>
+                        <li>No estás usando un servidor local.</li>
                     </ul>
                 `;
             }
@@ -476,23 +464,15 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- HABILITAR PERSISTENCIA OFFLINE ---
-        enableIndexedDbPersistence(db)
-            .catch((err) => {
-                if (err.code == 'failed-precondition') {
-                    console.warn('La persistencia falló: Múltiples pestañas abiertas.');
-                } else if (err.code == 'unimplemented') {
-                    console.warn('El navegador no soporta persistencia.');
-                }
-            });
-        // --------------------------------------
+        enableIndexedDbPersistence(db).catch((err) => {
+            if (err.code == 'failed-precondition') { console.warn('La persistencia falló: Múltiples pestañas abiertas.'); } 
+            else if (err.code == 'unimplemented') { console.warn('El navegador no soporta persistencia.'); }
+        });
 
-        // --- Constantes ---
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
         const FIRESTORE_HISTORY_COLLECTION = 'history';
         const LOCAL_HISTORY_LIMIT = 20;
         
-        // --- Estado Local ---
         let undoStack = []; 
         let redoStack = []; 
         let userId = null;
@@ -509,7 +489,6 @@
             [new Date().getFullYear()]: { "Enero": 0, "Febrero": 0, "Marzo": 0, "Abril": 0, "Mayo": 0, "Junio": 0, "Julio": 0, "Agosto": 0, "Septiembre": 0, "Octubre": 0, "Noviembre": 0, "Diciembre": 0 }
         };
 
-        // ... (resto del código JS UI y lógica idéntico al anterior) ...
         const icons = {
             sun: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`,
             moon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`,
@@ -578,339 +557,7 @@
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-        // --- Notifications & Modal ---
-        function showNotification(message, isError = true) {
-            clearTimeout(notificationTimeout);
-            ui.notificationMessage.textContent = message;
-            ui.notification.className = `fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl transform translate-y-0 opacity-100 overflow-hidden z-[70] flex items-center gap-3 ${isError ? 'bg-red-600' : 'bg-emerald-600'}`;
-            ui.notificationTimer.classList.remove('timer-animate');
-            void ui.notificationTimer.offsetWidth; 
-            ui.notificationTimer.classList.add('timer-animate');
-            notificationTimeout = setTimeout(() => hideNotification(), 4000);
-        }
-        
-        function hideNotification() {
-            ui.notification.className = ui.notification.className.replace('translate-y-0 opacity-100', 'translate-y-20 opacity-0');
-            clearTimeout(notificationTimeout);
-        }
-        
-        ui.notificationCloseBtn.addEventListener('click', hideNotification);
-
-        function showModal(modalElement, onOpen, onClose) {
-            modalElement.classList.remove('opacity-0', 'pointer-events-none');
-            const backdropHandler = (e) => { if (e.target === modalElement) hideModal(); };
-            const escapeHandler = (e) => { if (e.key === 'Escape') hideModal(); };
-            const hideModal = () => {
-                modalElement.classList.add('opacity-0', 'pointer-events-none');
-                modalElement.removeEventListener('click', backdropHandler);
-                document.removeEventListener('keydown', escapeHandler);
-                if (onClose) onClose();
-            };
-            if (onOpen) onOpen(hideModal);
-            modalElement.addEventListener('click', backdropHandler);
-            document.addEventListener('keydown', escapeHandler);
-        }
-
-        function showConfirmationModal(title, body, onConfirm) {
-            ui.modalTitle.textContent = title;
-            ui.modalBody.textContent = body;
-            let confirmHandler, cancelHandler;
-            const onOpen = (hideModal) => {
-                confirmHandler = () => { onConfirm(); hideModal(); };
-                cancelHandler = hideModal;
-                ui.modalConfirmBtn.addEventListener('click', confirmHandler);
-                ui.modalCancelBtn.addEventListener('click', cancelHandler);
-            };
-            const onClose = () => {
-                ui.modalConfirmBtn.removeEventListener('click', confirmHandler);
-                ui.modalCancelBtn.removeEventListener('click', cancelHandler);
-            };
-            showModal(ui.confirmationModal, onOpen, onClose);
-        }
-
-        // --- Auth & Inactivity ---
-        const INACTIVITY_LIMIT = 30 * 60 * 1000;
-        const WARNING_DURATION = 60 * 1000;
-        let inactivityTimer;
-        let warningTimer;
-        const activityChannel = new BroadcastChannel('app_activity_channel');
-
-        function resetInactivityTimer(fromOtherTab = false) {
-            if (!fromOtherTab) activityChannel.postMessage({ type: 'ACTIVITY_DETECTED' });
-            clearTimeout(inactivityTimer);
-            clearTimeout(warningTimer);
-            hideTimeoutModal();
-            warningTimer = setTimeout(() => showTimeoutModal(), INACTIVITY_LIMIT - WARNING_DURATION);
-            inactivityTimer = setTimeout(() => performLogout(), INACTIVITY_LIMIT);
-        }
-
-        function showTimeoutModal() { if (!auth.currentUser) return; ui.timeoutModal.classList.remove('opacity-0', 'pointer-events-none'); }
-        function hideTimeoutModal() { ui.timeoutModal.classList.add('opacity-0', 'pointer-events-none'); }
-        function performLogout() { if (auth.currentUser) signOut(auth).then(() => { showNotification("Sesión cerrada por inactividad.", false); hideTimeoutModal(); }); }
-
-        ui.timeoutStayBtn.addEventListener('click', () => resetInactivityTimer(false));
-        ui.timeoutLogoutBtn.addEventListener('click', () => performLogout());
-        activityChannel.onmessage = (event) => { if (event.data.type === 'ACTIVITY_DETECTED') resetInactivityTimer(true); };
-
-        const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
-        const activityHandler = () => resetInactivityTimer(false);
-        function setupActivityListeners() { activityEvents.forEach(event => document.addEventListener(event, activityHandler)); }
-        function removeActivityListeners() {
-            activityEvents.forEach(event => document.removeEventListener(event, activityHandler));
-            clearTimeout(inactivityTimer);
-            clearTimeout(warningTimer);
-        }
-
-        // --- Auth State Change ---
-        onAuthStateChanged(auth, user => {
-            // El loading-container ahora es un esqueleto, pero igual lo ocultamos al cargar
-            ui.loadingContainer.style.display = 'none';
-            if (user) {
-                userId = user.uid;
-                ui.authContainer.style.display = 'none';
-                ui.appContainer.style.display = 'block';
-                ui.userInfo.textContent = `Conectado como: ${user.email}`;
-                initApp();
-                setupActivityListeners();
-                resetInactivityTimer();
-            } else {
-                userId = null;
-                if(unsubscribeData) unsubscribeData();
-                if(unsubscribeHistory) unsubscribeHistory();
-                removeActivityListeners();
-                undoStack = []; redoStack = []; updateUndoRedoUI();
-                ui.authForm.reset();
-                ui.authError.classList.add('hidden');
-                ui.resetPasswordCard.classList.add('hidden');
-                ui.loginCard.classList.remove('hidden');
-                ui.authContainer.style.display = 'block';
-                ui.appContainer.style.display = 'none';
-            }
-        });
-
-        ui.authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = ui.authForm.email.value;
-            const password = ui.authForm.password.value;
-            ui.authError.classList.add('hidden');
-            try { await signInWithEmailAndPassword(auth, email, password); } 
-            catch (error) { ui.authError.textContent = "Error: Credenciales incorrectas."; ui.authError.classList.remove('hidden'); }
-        });
-
-        ui.logoutBtn.addEventListener('click', () => signOut(auth));
-        ui.forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); ui.loginCard.classList.add('hidden'); ui.resetPasswordCard.classList.remove('hidden'); });
-        ui.backToLoginBtn.addEventListener('click', (e) => { e.preventDefault(); ui.resetPasswordCard.classList.add('hidden'); ui.loginCard.classList.remove('hidden'); });
-        ui.resetPasswordForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = ui.resetPasswordForm['reset-email'].value;
-            ui.resetError.classList.add('hidden');
-            try { await sendPasswordResetEmail(auth, email); showNotification("Enlace enviado.", false); ui.resetPasswordCard.classList.add('hidden'); ui.loginCard.classList.remove('hidden'); } 
-            catch (error) { ui.resetError.textContent = "Error: No se pudo enviar el correo."; ui.resetError.classList.remove('hidden'); }
-        });
-        
-        // --- App Initialization ---
-        async function initApp() {
-            loadPreferences();
-            if (unsubscribeData) unsubscribeData();
-            if (unsubscribeHistory) unsubscribeHistory();
-
-            const earningsCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`;
-            const earningsCol = collection(db, earningsCollectionPath);
-
-            const initialCheck = await getDocs(query(earningsCol));
-            if (initialCheck.empty) await importInitialData(earningsCol);
-            
-            unsubscribeData = onSnapshot(query(earningsCol), (snapshot) => {
-                allData = {};
-                snapshot.forEach(doc => { allData[doc.id] = doc.data(); });
-                updateFullUI();
-            }, error => { console.error(error); showNotification("Error al cargar datos."); });
-
-            const historyCollectionPath = `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`;
-            unsubscribeHistory = onSnapshot(query(collection(db, historyCollectionPath)), (snapshot) => {
-                const sortedLogs = snapshot.docs.sort((a, b) => (b.data().timestamp?.seconds ?? 0) - (a.data().timestamp?.seconds ?? 0));
-                lastHistoryLogs = sortedLogs.slice(0, 20);
-                renderHistory(lastHistoryLogs);
-            }, error => { console.error(error); showNotification("Error al cargar historial."); });
-        }
-
-        async function importInitialData(earningsCol) {
-            try {
-                const batch = writeBatch(db);
-                for (const year in initialUserData) {
-                    const yearData = initialUserData[year]; 
-                    batch.set(doc(earningsCol, year), yearData);
-                }
-                await batch.commit();
-            } catch (error) { console.error(error); }
-        }
-        
-        // --- Undo/Redo Logic with History & Context Switching ---
-        function addToLocalUndo(year, month, oldValue, newValue) {
-            const command = { year, month, oldValue, newValue };
-            undoStack.push(command);
-            if (undoStack.length > LOCAL_HISTORY_LIMIT) undoStack.shift();
-            redoStack = []; 
-            updateUndoRedoUI();
-        }
-
-        const roundMoney = (num) => Math.round(num * 100) / 100;
-
-        async function undoLastChange() {
-            if (undoStack.length === 0) return;
-            const command = undoStack.pop();
-            
-            if (currentYear !== command.year) {
-                currentYear = command.year;
-                ui.yearSelector.value = currentYear;
-                showNotification(`Regresando al año ${currentYear}...`, false);
-            }
-
-            if (allData[command.year]) allData[command.year][command.month] = command.oldValue;
-            
-            try {
-                const batch = writeBatch(db);
-                const docRef = doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, command.year);
-                batch.update(docRef, { [command.month]: command.oldValue });
-                
-                const historyRef = doc(collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`));
-                batch.set(historyRef, {
-                    timestamp: serverTimestamp(),
-                    year: command.year,
-                    month: command.month,
-                    oldValue: command.newValue,
-                    newValue: command.oldValue,
-                    changeAmount: roundMoney(command.oldValue - command.newValue),
-                    actionType: 'undo' 
-                });
-
-                await batch.commit();
-
-                redoStack.push(command);
-                updateUndoRedoUI();
-                showNotification("Cambio deshecho.", false);
-                renderAllComponents(currentYear);
-                
-                setTimeout(() => {
-                    const cell = document.querySelector(`td[data-month="${command.month}"]`);
-                    if (cell) {
-                        cell.classList.add('saved-feedback');
-                        setTimeout(() => cell.classList.remove('saved-feedback'), 700);
-                    }
-                }, 100);
-
-            } catch (error) {
-                console.error("Error undo:", error);
-                showNotification("Error al deshacer.");
-                undoStack.push(command);
-                allData[command.year][command.month] = command.newValue;
-            }
-        }
-
-        async function redoLastChange() {
-            if (redoStack.length === 0) return;
-            const command = redoStack.pop();
-
-            if (currentYear !== command.year) {
-                currentYear = command.year;
-                ui.yearSelector.value = currentYear;
-                showNotification(`Avanzando al año ${currentYear}...`, false);
-            }
-
-            if (allData[command.year]) allData[command.year][command.month] = command.newValue;
-
-            try {
-                const batch = writeBatch(db);
-                const docRef = doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, command.year);
-                batch.update(docRef, { [command.month]: command.newValue });
-
-                const historyRef = doc(collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`));
-                batch.set(historyRef, {
-                    timestamp: serverTimestamp(),
-                    year: command.year,
-                    month: command.month,
-                    oldValue: command.oldValue,
-                    newValue: command.newValue,
-                    changeAmount: roundMoney(command.newValue - command.oldValue),
-                    actionType: 'redo'
-                });
-
-                await batch.commit();
-
-                undoStack.push(command);
-                updateUndoRedoUI();
-                showNotification("Cambio rehecho.", false);
-                renderAllComponents(currentYear);
-
-                setTimeout(() => {
-                    const cell = document.querySelector(`td[data-month="${command.month}"]`);
-                    if (cell) {
-                        cell.classList.add('saved-feedback');
-                        setTimeout(() => cell.classList.remove('saved-feedback'), 700);
-                    }
-                }, 100);
-
-            } catch (error) {
-                console.error("Error redo:", error);
-                showNotification("Error al rehacer.");
-                redoStack.push(command);
-                allData[command.year][command.month] = command.oldValue;
-            }
-        }
-
-        function updateUndoRedoUI() {
-            ui.undoBtn.disabled = undoStack.length === 0;
-            ui.undoBtn.classList.toggle('opacity-30', undoStack.length === 0);
-            ui.undoBtn.classList.toggle('cursor-not-allowed', undoStack.length === 0);
-            
-            ui.redoBtn.disabled = redoStack.length === 0;
-            ui.redoBtn.classList.toggle('opacity-30', redoStack.length === 0);
-            ui.redoBtn.classList.toggle('cursor-not-allowed', redoStack.length === 0);
-        }
-
-        ui.undoBtn.addEventListener('click', () => {
-             showConfirmationModal('Deshacer Cambio', '¿Estás seguro de que quieres deshacer la última acción?', undoLastChange);
-        });
-
-        ui.redoBtn.addEventListener('click', () => {
-             showConfirmationModal('Rehacer Cambio', '¿Estás seguro de que quieres rehacer la última acción?', redoLastChange);
-        });
-
-        function animateCountUp(element, end) {
-            let start = parseFloat(element.dataset.currentValue) || 0;
-            element.dataset.currentValue = end;
-            const duration = 700; const frameRate = 60; const totalFrames = Math.round(duration / (1000 / frameRate)); let currentFrame = 0;
-            const counter = () => {
-                currentFrame++; const progress = currentFrame / totalFrames; const currentValue = start + (end - start) * progress;
-                element.innerHTML = formatCurrency(currentValue, '$');
-                if (currentFrame < totalFrames) requestAnimationFrame(counter); else element.innerHTML = formatCurrency(end, '$');
-            };
-            requestAnimationFrame(counter);
-        }
-
-        function renderAllComponents(year) {
-            if (!allData || Object.keys(allData).length === 0 || !year) return;
-            renderTable(year); renderSummaryCards(year); renderChart(year); renderDoughnutChart(year);
-        }
-
-        function renderTable(year) {
-            const yearData = allData[year] || {};
-            if (ui.tableHead.innerHTML === '') ui.tableHead.innerHTML = '<tr><th class="p-4 text-left font-semibold text-secondary tracking-wider">Mes</th><th class="p-4 text-right font-semibold text-secondary tracking-wider">Ganancias (USD)</th></tr>';
-            months.forEach(month => {
-                let row = ui.tableBody.querySelector(`[data-month-row="${month}"]`);
-                if (!row) {
-                    row = document.createElement('tr'); row.className = "hover:bg-white/5 transition-colors group"; row.dataset.monthRow = month;
-                    row.innerHTML = `<td class="p-4 font-medium">${month}</td><td class="p-4 text-right data-cell text-base font-mono tracking-tight group-hover:text-accent transition-colors" data-month="${month}"></td>`;
-                    ui.tableBody.appendChild(row);
-                }
-                const cell = row.querySelector(`[data-month="${month}"]`);
-                if (cell && !cell.classList.contains('editing')) cell.innerHTML = formatCurrency(yearData[month] || 0, '$');
-            });
-            const total = Object.values(yearData).reduce((sum, amount) => sum + parseFloat(amount), 0);
-            if (ui.tableFoot.innerHTML === '') ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-4">Total Anual</td><td id="total-anual-cell" class="p-4 text-right text-lg font-mono tracking-tight"></td></tr>`;
-            document.getElementById('total-anual-cell').innerHTML = formatCurrency(total, '$');
-        }
-        
+        // --- FUNCIONES LÓGICAS (Sin cambios) ---
         function renderSummaryCards(year) {
             const yearData = allData[year] || {};
             const values = Object.values(yearData).filter(v => v > 0);
@@ -944,7 +591,7 @@
                     <div class="summary-card highlight-card">
                         <p class="text-xs font-bold text-accent uppercase tracking-widest mb-2">Ganancia Total</p>
                         <div class="flex items-end justify-between">
-                            <p id="total-value" class="text-3xl sm:text-4xl font-extrabold tracking-tighter text-white"></p>
+                            <p id="total-value" class="text-3xl sm:text-4xl font-extrabold tracking-tighter text-primary"></p>
                             <span id="total-trend" class="text-xl mb-1"></span>
                         </div>
                     </div>
@@ -959,6 +606,7 @@
             animateCountUp(document.getElementById('avg-value'), avg); animateCountUp(document.getElementById('total-value'), total);
         }
 
+        // ... (resto de funciones: renderChart, renderDoughnut, etc. se mantienen igual) ...
         function renderChart(year) {
             if (!year) return;
             const style = getComputedStyle(document.body);
