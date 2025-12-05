@@ -11,13 +11,13 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #111827;
             --bg-secondary: #1f2937;
             --border-color: #374151;
-            --text-primary: #d1d5db;
+            --text-primary: #f3f4f6;
             --text-secondary: #9ca3af;
             --accent-color: #34d399;
             --accent-color-rgb: 52, 211, 153;
@@ -26,10 +26,10 @@
         }
 
         .light-mode {
-            --bg-primary: #f9fafb;
+            --bg-primary: #f3f4f6;
             --bg-secondary: #ffffff;
             --border-color: #e5e7eb;
-            --text-primary: #1f2937;
+            --text-primary: #111827;
             --text-secondary: #6b7280;
         }
 
@@ -38,78 +38,115 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             transition: background-color 0.3s, color 0.3s;
+            /* MEJORA VISUAL 1: Números alineados perfectamente */
+            font-feature-settings: "tnum"; 
+            font-variant-numeric: tabular-nums;
         }
+
+        /* Cards */
         .main-card {
             background-color: var(--bg-secondary);
-            border-radius: 0.75rem;
+            border-radius: 1rem; /* Bordes más redondeados */
             border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             overflow: hidden;
             transition: background-color 0.3s, border-color 0.3s;
         }
+
         .summary-card {
             background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            border-radius: 0.75rem;
+            border-radius: 1rem;
             padding: 1.5rem;
-            transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            overflow: hidden;
         }
+        
+        /* MEJORA VISUAL 2: Tarjeta Total Destacada */
+        .summary-card.highlight-card {
+            background: linear-gradient(145deg, var(--bg-secondary) 0%, rgba(var(--accent-color-rgb), 0.05) 100%);
+            border-color: rgba(var(--accent-color-rgb), 0.3);
+        }
+        .summary-card.highlight-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: var(--accent-color);
+            opacity: 0.7;
+        }
+
         .summary-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-2px);
             border-color: var(--accent-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Tabla */
+        .data-cell {
+            transition: background-color 0.15s;
         }
         .data-cell:hover {
-            background-color: var(--border-color);
+            background-color: rgba(255,255,255, 0.03);
             cursor: pointer;
         }
         .total-row td {
-            background-color: rgba(var(--accent-color-rgb), 0.1);
-            font-weight: 700;
+            background-color: rgba(var(--accent-color-rgb), 0.08);
+            font-weight: 800;
             color: var(--accent-color);
+            border-top: 2px solid var(--border-color);
         }
+        
+        /* Inputs Editables */
         .editing input {
             border: 2px solid var(--accent-color);
-            background-color: var(--bg-secondary);
+            background-color: var(--bg-primary);
             color: var(--text-primary);
+            box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
         }
+
+        /* Animaciones y Utilidades */
         .spinner {
-            border: 4px solid var(--border-color);
-            border-top: 4px solid var(--accent-color);
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-color);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            width: 32px; height: 32px;
+            animation: spin 0.8s linear infinite;
             margin: 20px auto;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .saved-feedback {
-            animation: flash-accent 0.7s ease-out;
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .saved-feedback { animation: flash-accent 0.5s ease-out; }
         @keyframes flash-accent {
-            0% { background-color: rgba(var(--accent-color-rgb), 0.5); }
+            0% { background-color: rgba(var(--accent-color-rgb), 0.4); }
             100% { background-color: transparent; }
         }
-        #notification, .modal {
-            transition: opacity 0.3s ease-in-out;
+
+        #notification, .modal { transition: opacity 0.2s ease-in-out; }
+        #notification { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s; }
+
+        .tab-btn {
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            border-radius: 0.5rem 0.5rem 0 0;
+            opacity: 0.7;
         }
-        #notification {
-             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
+        .tab-btn:hover { opacity: 1; background-color: rgba(255,255,255,0.03); }
         .tab-btn.active {
-            background-color: var(--accent-color);
-            color: white;
+            background-color: transparent;
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            opacity: 1;
         }
-        .tab-content { display: none; }
+        
+        .tab-content { display: none; animation: fade-in 0.3s ease-out; }
         .tab-content.active { display: block; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         .compact-mode .p-6 { padding: 1rem; }
-        .compact-mode .mb-6 { margin-bottom: 1rem; }
-        .compact-mode .gap-6 { gap: 1rem; }
         .compact-mode .text-3xl { font-size: 1.5rem; }
-        .compact-mode .text-4xl { font-size: 1.875rem; }
         
+        /* Colores Dinámicos */
         .bg-accent { background-color: var(--accent-color); }
         .bg-danger { background-color: var(--danger-color); }
         .bg-primary { background-color: var(--bg-primary); }
@@ -118,145 +155,144 @@
         .text-primary { color: var(--text-primary); }
         .text-secondary { color: var(--text-secondary); }
         .border-color { border-color: var(--border-color); }
-        .focus-accent:focus {
-            --tw-ring-color: var(--accent-color);
-            border-color: var(--accent-color);
-        }
+        
         .trend-up { color: var(--success-color); }
         .trend-down { color: var(--danger-color); }
         
-        @keyframes shrink-width {
-            from { width: 100%; }
-            to { width: 0%; }
-        }
-        .timer-animate {
-            animation: shrink-width 4s linear forwards;
-        }
+        @keyframes shrink-width { from { width: 100%; } to { width: 0%; } }
+        .timer-animate { animation: shrink-width 4s linear forwards; }
+        .table-row-highlight { background-color: rgba(var(--accent-color-rgb), 0.2); transition: background-color 0.5s; }
         
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Blur effect header */
+        .glass-header {
+            background-color: rgba(31, 41, 55, 0.7); /* Fallback bg-secondary with opacity */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
-        .fade-in-up {
-            animation: fade-in-up 0.5s ease-out forwards;
-            opacity: 0;
-        }
-        .table-row-highlight {
-            background-color: rgba(var(--accent-color-rgb), 0.2);
-            transition: background-color 0.3s;
+        .light-mode .glass-header {
+            background-color: rgba(255, 255, 255, 0.7);
         }
     </style>
 </head>
-<body class="p-4 sm:p-6">
+<body class="p-4 sm:p-6 pb-20 sm:pb-6">
 
-    <div id="loading-container" class="max-w-md mx-auto">
+    <div id="loading-container" class="max-w-md mx-auto mt-20">
         <div class="main-card p-8 text-center">
-            <h2 class="text-2xl font-bold mb-4">Conectando...</h2>
+            <h2 class="text-xl font-bold mb-4">Iniciando Dashboard</h2>
             <div class="spinner"></div>
-            <p class="text-secondary">Verificando sesión, por favor espera.</p>
         </div>
     </div>
 
-    <div id="auth-container" class="max-w-md mx-auto hidden">
-        <div id="login-card" class="main-card p-8">
-            <h2 id="auth-title" class="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
-            <div id="auth-error" class="text-red-400 text-center mb-4 hidden"></div>
-            <form id="auth-form">
-                <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-secondary">Correo Electrónico</label>
-                    <input type="email" id="email" required class="mt-1 block w-full bg-primary border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+    <div id="auth-container" class="max-w-md mx-auto hidden mt-10">
+        <div id="login-card" class="main-card p-8 shadow-xl">
+            <div class="text-center mb-8">
+                <img src="icono.png" class="w-16 h-16 mx-auto mb-4" alt="Logo">
+                <h2 id="auth-title" class="text-2xl font-extrabold">Bienvenido</h2>
+                <p class="text-secondary text-sm">Gestiona tus finanzas personales</p>
+            </div>
+            
+            <div id="auth-error" class="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-6 hidden text-center"></div>
+            
+            <form id="auth-form" class="space-y-5">
+                <div>
+                    <label for="email" class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Correo</label>
+                    <input type="email" id="email" required class="block w-full bg-primary border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors">
                 </div>
-                <div class="mb-4">
-                    <label for="password" class="block text-sm font-medium text-secondary">Contraseña</label>
-                    <input type="password" id="password" required class="mt-1 block w-full bg-primary border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+                <div>
+                    <label for="password" class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Contraseña</label>
+                    <input type="password" id="password" required class="block w-full bg-primary border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors">
                 </div>
-                <div class="text-right mb-6">
-                    <a href="#" id="forgot-password-link" class="text-sm text-accent hover:underline">¿Olvidaste tu contraseña?</a>
+                <div class="text-right">
+                    <a href="#" id="forgot-password-link" class="text-xs text-accent hover:text-emerald-400 font-medium">¿Olvidaste tu contraseña?</a>
                 </div>
-                <button type="submit" id="submit-btn" class="w-full bg-accent text-white py-2 px-4 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus-accent">Acceder</button>
+                <button type="submit" id="submit-btn" class="w-full bg-accent text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-emerald-500/20">Iniciar Sesión</button>
             </form>
         </div>
-        <div id="reset-password-card" class="main-card p-8 hidden">
-            <h2 class="text-2xl font-bold text-center mb-6">Restablecer Contraseña</h2>
-            <p class="text-center text-secondary mb-4">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</p>
-            <div id="reset-error" class="text-red-400 text-center mb-4 hidden"></div>
-            <form id="reset-password-form">
-                <div class="mb-4">
-                    <label for="reset-email" class="block text-sm font-medium text-secondary">Correo Electrónico</label>
-                    <input type="email" id="reset-email" required class="mt-1 block w-full bg-primary border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+        
+        <div id="reset-password-card" class="main-card p-8 hidden shadow-xl">
+            <h2 class="text-xl font-bold text-center mb-2">Recuperar Acceso</h2>
+            <p class="text-center text-secondary text-sm mb-6">Te enviaremos un enlace a tu correo.</p>
+            <div id="reset-error" class="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-6 hidden text-center"></div>
+            <form id="reset-password-form" class="space-y-5">
+                <div>
+                    <label for="reset-email" class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Correo</label>
+                    <input type="email" id="reset-email" required class="block w-full bg-primary border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500">
                 </div>
-                <button type="submit" id="reset-submit-btn" class="w-full bg-accent text-white py-2 px-4 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus-accent">Enviar Enlace</button>
+                <button type="submit" id="reset-submit-btn" class="w-full bg-accent text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 shadow-lg shadow-emerald-500/20">Enviar Enlace</button>
             </form>
-            <button id="back-to-login-btn" class="w-full mt-4 text-center text-sm text-accent hover:underline">Volver a Iniciar Sesión</button>
+            <button id="back-to-login-btn" class="w-full mt-6 text-center text-xs text-secondary hover:text-white transition-colors">← Volver al inicio</button>
         </div>
     </div>
 
     <div id="app-container" class="max-w-6xl mx-auto hidden">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
             <div class="flex items-center gap-4">
-                <img src="icono.png" alt="Logo de Bitcoin" class="h-10 w-10">
+                <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-2 rounded-xl border border-color shadow-sm">
+                    <img src="icono.png" alt="Logo" class="h-10 w-10">
+                </div>
                 <div>
-                    <h1 class="text-3xl font-extrabold">Dashboard Intercambio de Divisas</h1>
-                    <p class="text-secondary mt-1">Análisis de rendimiento financiero en tiempo real.</p>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Dashboard Divisas</h1>
+                    <p class="text-secondary text-xs sm:text-sm font-medium">Panel de control financiero</p>
                 </div>
             </div>
-            <div class="flex items-center justify-end flex-wrap gap-2 mt-4 sm:mt-0">
-                 <select id="year-selector" class="p-2 bg-secondary border border-color rounded-md shadow-sm"></select>
-                 <button id="add-year-btn" title="Añadir nuevo año" class="p-2 bg-accent text-white rounded-md shadow-sm hover:opacity-90">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                 </button>
-                 <button id="delete-year-btn" title="Borrar año seleccionado" class="p-2 bg-danger text-white rounded-md shadow-sm disabled:opacity-50 hover:opacity-90">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                 </button>
+            
+            <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto p-1 bg-secondary rounded-lg border border-color">
+                 <select id="year-selector" class="bg-primary text-sm font-semibold border-none rounded-md py-2 pl-3 pr-8 focus:ring-2 focus:ring-emerald-500/50 cursor-pointer outline-none"></select>
                  
-                 <button id="undo-btn" title="Deshacer último cambio" disabled class="p-2 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l4-4m-4 4l4 4" /></svg>
-                 </button>
-                 <button id="redo-btn" title="Rehacer último cambio" disabled class="p-2 bg-indigo-500 text-white rounded-md shadow-sm hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2m18-10l-4-4m4 4l-4 4" /></svg>
-                 </button>
+                 <div class="w-px h-6 bg-gray-700 mx-1"></div>
+
+                 <button id="add-year-btn" title="Nuevo Año" class="p-2 text-secondary hover:text-white hover:bg-white/5 rounded-md transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg></button>
+                 <button id="delete-year-btn" title="Borrar Año" class="p-2 text-secondary hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                  
-                 <button id="toggle-visibility-btn" title="Ocultar/Mostrar valores" class="p-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600"></button>
-                 <button id="logout-btn" title="Cerrar Sesión" class="p-2 bg-gray-600 text-white rounded-md shadow-sm hover:opacity-90">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                 </button>
+                 <div class="w-px h-6 bg-gray-700 mx-1"></div>
+
+                 <button id="undo-btn" title="Deshacer" disabled class="p-2 text-secondary hover:text-yellow-400 hover:bg-yellow-500/10 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l4-4m-4 4l4 4" /></svg></button>
+                 <button id="redo-btn" title="Rehacer" disabled class="p-2 text-secondary hover:text-blue-400 hover:bg-blue-500/10 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2m18-10l-4-4m4 4l-4 4" /></svg></button>
+                 
+                 <div class="w-px h-6 bg-gray-700 mx-1"></div>
+
+                 <button id="toggle-visibility-btn" title="Ocultar valores" class="p-2 text-secondary hover:text-white hover:bg-white/5 rounded-md transition-colors"></button>
+                 <button id="logout-btn" title="Salir" class="p-2 text-secondary hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors ml-auto"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
             </div>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-4 p-2 bg-secondary rounded-md border border-color">
-            <div class="flex gap-2">
-                <button class="tab-btn active px-4 py-2 rounded-md text-sm font-medium" data-tab="analysis">Análisis Anual</button>
-                <button class="tab-btn px-4 py-2 rounded-md text-sm font-medium" data-tab="tools">Herramientas</button>
+        <div class="glass-header rounded-xl border border-color mb-6 px-2 pt-2 flex flex-col sm:flex-row justify-between items-center sticky top-2 z-30 shadow-lg">
+            <div class="flex gap-1 w-full sm:w-auto">
+                <button class="tab-btn active px-6 py-3 text-sm font-semibold flex-1 sm:flex-none text-center" data-tab="analysis">Análisis</button>
+                <button class="tab-btn px-6 py-3 text-sm font-semibold flex-1 sm:flex-none text-center" data-tab="tools">Herramientas</button>
             </div>
-
-            <div class="flex items-center gap-3">
-                <button id="settings-btn" title="Configuración" class="p-2 rounded-md bg-primary">
+            <div class="p-2 sm:pr-4 w-full sm:w-auto flex justify-end">
+                <button id="settings-btn" title="Configuración" class="p-2 text-secondary hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </button>
             </div>
         </div>
 
         <div id="analysis-tab" class="tab-content active">
-            <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
+            <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
+            
             <div id="main-content-grid" class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                <div class="main-card lg:col-span-3">
-                    <div class="p-6">
+                <div class="main-card lg:col-span-3 order-2 lg:order-1">
+                    <div class="p-0 sm:p-2">
                         <div id="loader" class="spinner"></div>
-                        <table class="w-full border-collapse hidden" id="earnings-table">
-                            <thead></thead>
-                            <tbody></tbody>
-                            <tfoot></tfoot>
-                        </table>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left" id="earnings-table">
+                                <thead class="text-xs text-secondary uppercase bg-primary/50"></thead>
+                                <tbody class="divide-y divide-gray-700/50"></tbody>
+                                <tfoot class="bg-primary/30"></tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                <div class="main-card lg:col-span-2">
-                     <div class="p-6 border-b border-color">
-                         <h2 class="text-xl font-bold">Comparativa Anual</h2>
-                         <div class="relative mt-4 h-64"><canvas id="comparisonChart"></canvas></div>
+                
+                <div class="lg:col-span-2 space-y-6 order-1 lg:order-2">
+                     <div class="main-card p-6">
+                         <h2 class="text-sm font-bold uppercase text-secondary mb-4 tracking-wider">Tendencia Anual</h2>
+                         <div class="relative h-48"><canvas id="comparisonChart"></canvas></div>
                      </div>
-                     <div class="p-6">
-                         <h2 class="text-xl font-bold">Distribución Anual</h2>
-                         <div class="relative mt-4 h-64"><canvas id="doughnutChart"></canvas></div>
+                     <div class="main-card p-6">
+                         <h2 class="text-sm font-bold uppercase text-secondary mb-4 tracking-wider">Distribución</h2>
+                         <div class="relative h-48"><canvas id="doughnutChart"></canvas></div>
                      </div>
                 </div>
             </div>
@@ -265,131 +301,120 @@
         <div id="tools-tab" class="tab-content">
             <div id="tools-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 <div class="space-y-6">
-                    <div class="main-card">
-                        <div class="p-6">
-                            <h2 class="text-xl font-bold mb-4">Calculadora PayPal</h2>
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="paypal-receive" class="block text-sm font-medium">Para recibir:</label>
-                                    <input type="number" id="paypal-receive" placeholder="Monto a recibir" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
-                                    <p class="text-sm text-secondary mt-1">Debes solicitar: <span id="paypal-request-result" class="font-bold text-primary">$ 0,00</span></p>
+                    <div class="main-card p-6">
+                        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.946 5.05-3.691 6.247-6.21 6.247H10.1l-.964 6.165v.006c-.005.028-.01.056-.017.082a.644.644 0 0 1-.632.483c-.027 0-.053 0-.08-.002a.64.64 0 0 1-.41-.127.637.637 0 0 1-.19-.247l-1.006-6.353H5.91l-.974 6.212c-.006.038-.012.076-.017.114a.642.642 0 0 1-.632.532c-.027 0-.054 0-.08-.002a.644.644 0 0 1-.606-.745z"/></svg>
+                            Calculadora PayPal
+                        </h2>
+                        <div class="space-y-4">
+                            <div class="bg-primary/50 p-4 rounded-lg border border-color">
+                                <label class="block text-xs font-bold text-secondary uppercase mb-2">Para recibir (Neto)</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="number" id="paypal-receive" class="flex-1 bg-bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
+                                    <span class="text-gray-500">→</span>
+                                    <div class="text-right">
+                                        <p class="text-xs text-secondary">Pedir:</p>
+                                        <p id="paypal-request-result" class="text-lg font-bold text-white">$ 0,00</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label for="paypal-send" class="block text-sm font-medium">Si te envían:</label>
-                                    <input type="number" id="paypal-send" placeholder="Monto enviado" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
-                                    <p class="text-sm text-secondary mt-1">Recibirás: <span id="paypal-receive-result" class="font-bold text-primary">$ 0,00</span></p>
+                            </div>
+                            <div class="bg-primary/50 p-4 rounded-lg border border-color">
+                                <label class="block text-xs font-bold text-secondary uppercase mb-2">Si envías (Bruto)</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="number" id="paypal-send" class="flex-1 bg-bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
+                                    <span class="text-gray-500">→</span>
+                                    <div class="text-right">
+                                        <p class="text-xs text-secondary">Llega:</p>
+                                        <p id="paypal-receive-result" class="text-lg font-bold text-white">$ 0,00</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="main-card">
-                        <div class="p-6">
-                            <h2 class="text-xl font-bold mb-4">Conversor de Divisas</h2>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                                <div class="md:col-span-1">
-                                    <label for="usd-amount" class="block text-sm font-medium">Monto en USD</label>
-                                    <input type="number" id="usd-amount" placeholder="Ej: 1500.50" class="mt-1 block w-full bg-primary border border-color rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus-accent">
+                    
+                    <div class="main-card p-6">
+                        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Conversor USD
+                        </h2>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="bg-primary/50 p-4 rounded-lg border border-color">
+                                <label class="block text-xs font-bold text-secondary uppercase mb-2">Monto USD</label>
+                                <input type="number" id="usd-amount" placeholder="100.00" class="w-full bg-bg-secondary border border-color rounded py-2 px-3 focus:border-green-500 outline-none text-lg font-mono">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-primary/50 p-4 rounded-lg border border-color text-center">
+                                    <p class="text-xs text-secondary mb-1">EURO</p>
+                                    <p id="eur-result" class="text-xl font-bold text-white">€ 0,00</p>
                                 </div>
-                                <div class="md:col-span-2 grid grid-cols-2 gap-4">
-                                    <div>
-                                        <p class="text-sm text-secondary">Resultado en EUR</p>
-                                        <p id="eur-result" class="text-2xl font-bold mt-1">€ 0,00</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-secondary">Resultado en CLP</p>
-                                        <p id="clp-result" class="text-2xl font-bold mt-1">$ 0</p>
-                                    </div>
+                                <div class="bg-primary/50 p-4 rounded-lg border border-color text-center">
+                                    <p class="text-xs text-secondary mb-1">CLP (Chile)</p>
+                                    <p id="clp-result" class="text-xl font-bold text-white">$ 0</p>
                                 </div>
                             </div>
-                             <p id="converter-status" class="text-xs text-secondary mt-2 text-right"></p>
+                            <p id="converter-status" class="text-xs text-secondary text-right italic"></p>
                         </div>
                     </div>
                 </div>
-                <div class="main-card">
-                    <div class="p-6">
-                         <div class="flex justify-between items-center mb-4">
-                             <h2 class="text-xl font-bold">Historial de Cambios</h2>
-                             <button id="clear-history-btn" title="Limpiar historial" class="p-2 text-secondary hover:text-primary hover:bg-danger rounded-md">
-                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                             </button>
-                         </div>
-                         <div id="history-loader" class="spinner"></div>
-                         <div id="history-log-container" class="max-h-96 overflow-y-auto"></div>
+                
+                <div class="main-card flex flex-col h-full">
+                    <div class="p-6 border-b border-color flex justify-between items-center">
+                         <h2 class="text-lg font-bold">Historial de Cambios</h2>
+                         <button id="clear-history-btn" title="Limpiar" class="text-xs bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500 hover:text-white transition">Limpiar</button>
+                    </div>
+                    <div class="p-0 flex-1 relative min-h-[300px]">
+                         <div id="history-loader" class="spinner absolute inset-0 m-auto"></div>
+                         <div id="history-log-container" class="absolute inset-0 overflow-y-auto custom-scrollbar"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="user-info" class="mt-6 text-center text-xs text-secondary"></div>
+        <div id="user-info" class="mt-8 text-center text-xs font-mono text-gray-600"></div>
     </div>
 
-    <div id="confirmation-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="main-card p-6 w-full max-w-sm">
-            <h3 id="modal-title" class="text-lg font-bold"></h3>
-            <p id="modal-body" class="text-secondary mt-2"></p>
-            <div class="mt-6 flex justify-end gap-4">
-                <button id="modal-cancel-btn" class="px-4 py-2 bg-secondary rounded-md hover:opacity-80">Cancelar</button>
-                <button id="modal-confirm-btn" class="px-4 py-2 bg-danger text-white rounded-md hover:opacity-80">Confirmar</button>
+    <div id="confirmation-modal" class="modal fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div class="main-card p-6 w-full max-w-sm border border-color shadow-2xl transform scale-95 transition-transform duration-200">
+            <h3 id="modal-title" class="text-lg font-bold mb-2">Confirmación</h3>
+            <p id="modal-body" class="text-secondary mb-6 text-sm">¿Estás seguro?</p>
+            <div class="flex justify-end gap-3">
+                <button id="modal-cancel-btn" class="px-4 py-2 text-sm font-medium text-secondary hover:text-white transition-colors">Cancelar</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-md shadow-lg shadow-red-600/20 transition-all">Confirmar</button>
             </div>
         </div>
     </div>
 
-    <div id="timeout-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[60] opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="main-card p-6 w-full max-w-sm border-2 border-yellow-500 shadow-2xl relative animate-bounce-small">
-            <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
-                    <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                </div>
-                <h3 class="text-lg font-bold text-primary mb-2">Cierre de sesión inminente</h3>
-                <p class="text-secondary mb-6">Tu sesión expirará en menos de 60 segundos debido a inactividad.</p>
-                <div class="flex flex-col gap-3">
-                    <button id="timeout-stay-btn" class="w-full px-4 py-2 bg-accent text-white rounded-md hover:opacity-90 font-medium transition-colors">Mantener sesión activa</button>
-                    <button id="timeout-logout-btn" class="w-full px-4 py-2 bg-transparent border border-color text-secondary rounded-md hover:bg-white/5 transition-colors">Cerrar sesión ahora</button>
-                </div>
+    <div id="settings-modal" class="modal fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div class="main-card p-6 w-full max-w-xs border border-color shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">Ajustes</h3>
+                <button id="settings-close-btn" class="text-secondary hover:text-white text-2xl leading-none">&times;</button>
             </div>
-        </div>
-    </div>
-    
-    <div id="settings-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="main-card p-6 w-full max-w-sm">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold">Configuración</h3>
-                <button id="settings-close-btn" class="text-secondary hover:text-primary">&times;</button>
-            </div>
-            <div class="space-y-4">
+            <div class="space-y-6">
                 <div class="flex items-center justify-between">
-                    <label class="text-sm font-medium">Tema</label>
-                    <button id="theme-toggle-btn" title="Cambiar Tema" class="p-2 rounded-md bg-primary"></button>
+                    <span class="text-sm font-medium text-secondary">Modo Oscuro/Claro</span>
+                    <button id="theme-toggle-btn" class="p-2 bg-primary rounded-lg text-accent hover:bg-white/5 transition-colors"></button>
                 </div>
                 <div class="flex items-center justify-between">
-                    <label class="text-sm font-medium">Color de Acento</label>
-                    <div id="color-picker" class="flex gap-1">
-                        <button data-color="#34d399" class="h-6 w-6 bg-green-400 rounded-full border-2 border-transparent"></button>
-                        <button data-color="#60a5fa" class="h-6 w-6 bg-blue-400 rounded-full border-2 border-transparent"></button>
-                        <button data-color="#c084fc" class="h-6 w-6 bg-purple-400 rounded-full border-2 border-transparent"></button>
+                    <span class="text-sm font-medium text-secondary">Color Principal</span>
+                    <div id="color-picker" class="flex gap-2">
+                        <button data-color="#34d399" class="w-6 h-6 rounded-full bg-emerald-400 ring-2 ring-transparent ring-offset-2 ring-offset-[#1f2937] hover:scale-110 transition"></button>
+                        <button data-color="#60a5fa" class="w-6 h-6 rounded-full bg-blue-400 ring-2 ring-transparent ring-offset-2 ring-offset-[#1f2937] hover:scale-110 transition"></button>
+                        <button data-color="#c084fc" class="w-6 h-6 rounded-full bg-purple-400 ring-2 ring-transparent ring-offset-2 ring-offset-[#1f2937] hover:scale-110 transition"></button>
                     </div>
                 </div>
                 <div class="flex items-center justify-between">
-                    <label class="text-sm font-medium">Vista Compacta</label>
-                    <button id="compact-view-btn" title="Vista Compacta" class="p-2 rounded-md bg-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5" /></svg>
+                    <span class="text-sm font-medium text-secondary">Vista Compacta</span>
+                    <button id="compact-view-btn" class="p-2 bg-primary rounded-lg text-secondary hover:text-white hover:bg-white/5 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="notification" class="fixed bottom-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-20 opacity-0 z-[70]">
-         <div class="flex items-center justify-between">
-             <p id="notification-message"></p>
-             <button id="notification-close-btn" class="ml-4 text-xl leading-none">&times;</button>
-        </div>
-        <div class="absolute bottom-0 left-0 h-1 bg-white/50" id="notification-timer"></div>
-    </div>
-
     <script type="module">
         import { firebaseConfig } from './config.js'; 
-        // Se eliminaron funciones que no se usaban de las importaciones
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -403,12 +428,10 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- Constantes ---
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
         const FIRESTORE_HISTORY_COLLECTION = 'history';
         const LOCAL_HISTORY_LIMIT = 20;
         
-        // --- Estado Local ---
         let undoStack = []; 
         let redoStack = []; 
         let userId = null;
@@ -421,7 +444,6 @@
         let notificationTimeout;
         let lastHistoryLogs = [];
         
-        // Datos iniciales vacíos (solo estructura) por si se crea una cuenta nueva
         const initialUserData = {
             [new Date().getFullYear()]: { "Enero": 0, "Febrero": 0, "Marzo": 0, "Abril": 0, "Mayo": 0, "Junio": 0, "Julio": 0, "Agosto": 0, "Septiembre": 0, "Octubre": 0, "Noviembre": 0, "Diciembre": 0 }
         };
@@ -494,11 +516,10 @@
         };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-        // --- Notifications & Modal ---
         function showNotification(message, isError = true) {
             clearTimeout(notificationTimeout);
             ui.notificationMessage.textContent = message;
-            ui.notification.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 overflow-hidden z-[70] ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            ui.notification.className = `fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl transform translate-y-0 opacity-100 overflow-hidden z-[70] flex items-center gap-3 ${isError ? 'bg-red-600' : 'bg-emerald-600'}`;
             ui.notificationTimer.classList.remove('timer-animate');
             void ui.notificationTimer.offsetWidth; 
             ui.notificationTimer.classList.add('timer-animate');
@@ -544,7 +565,6 @@
             showModal(ui.confirmationModal, onOpen, onClose);
         }
 
-        // --- Auth & Inactivity ---
         const INACTIVITY_LIMIT = 30 * 60 * 1000;
         const WARNING_DURATION = 60 * 1000;
         let inactivityTimer;
@@ -577,7 +597,6 @@
             clearTimeout(warningTimer);
         }
 
-        // --- Auth State Change ---
         onAuthStateChanged(auth, user => {
             ui.loadingContainer.style.display = 'none';
             if (user) {
@@ -623,7 +642,6 @@
             catch (error) { ui.resetError.textContent = "Error: No se pudo enviar el correo."; ui.resetError.classList.remove('hidden'); }
         });
         
-        // --- App Initialization ---
         async function initApp() {
             loadPreferences();
             if (unsubscribeData) unsubscribeData();
@@ -653,14 +671,13 @@
             try {
                 const batch = writeBatch(db);
                 for (const year in initialUserData) {
-                    const yearData = initialUserData[year]; // Usamos la data limpia
+                    const yearData = initialUserData[year]; 
                     batch.set(doc(earningsCol, year), yearData);
                 }
                 await batch.commit();
             } catch (error) { console.error(error); }
         }
         
-        // --- Undo/Redo Logic ---
         function addToLocalUndo(year, month, oldValue, newValue) {
             const command = { year, month, oldValue, newValue };
             undoStack.push(command);
@@ -669,7 +686,6 @@
             updateUndoRedoUI();
         }
 
-        // Utilidad para redondeo seguro
         const roundMoney = (num) => Math.round(num * 100) / 100;
 
         async function undoLastChange() {
@@ -689,7 +705,6 @@
                 const docRef = doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, command.year);
                 batch.update(docRef, { [command.month]: command.oldValue });
                 
-                // Creamos referencia nueva para el historial
                 const historyRef = doc(collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`));
                 batch.set(historyRef, {
                     timestamp: serverTimestamp(),
@@ -777,11 +792,11 @@
 
         function updateUndoRedoUI() {
             ui.undoBtn.disabled = undoStack.length === 0;
-            ui.undoBtn.classList.toggle('opacity-50', undoStack.length === 0);
+            ui.undoBtn.classList.toggle('opacity-30', undoStack.length === 0);
             ui.undoBtn.classList.toggle('cursor-not-allowed', undoStack.length === 0);
             
             ui.redoBtn.disabled = redoStack.length === 0;
-            ui.redoBtn.classList.toggle('opacity-50', redoStack.length === 0);
+            ui.redoBtn.classList.toggle('opacity-30', redoStack.length === 0);
             ui.redoBtn.classList.toggle('cursor-not-allowed', redoStack.length === 0);
         }
 
@@ -793,7 +808,6 @@
              showConfirmationModal('Rehacer Cambio', '¿Estás seguro de que quieres rehacer la última acción?', redoLastChange);
         });
 
-        // --- Rendering ---
         function animateCountUp(element, end) {
             let start = parseFloat(element.dataset.currentValue) || 0;
             element.dataset.currentValue = end;
@@ -813,19 +827,19 @@
 
         function renderTable(year) {
             const yearData = allData[year] || {};
-            if (ui.tableHead.innerHTML === '') ui.tableHead.innerHTML = '<tr><th class="p-3 text-left font-semibold text-secondary border-b border-color">Mes</th><th class="p-3 text-right font-semibold text-secondary border-b border-color">Ganancias (USD)</th></tr>';
+            if (ui.tableHead.innerHTML === '') ui.tableHead.innerHTML = '<tr><th class="p-4 text-left font-semibold text-secondary tracking-wider">Mes</th><th class="p-4 text-right font-semibold text-secondary tracking-wider">Ganancias (USD)</th></tr>';
             months.forEach(month => {
                 let row = ui.tableBody.querySelector(`[data-month-row="${month}"]`);
                 if (!row) {
-                    row = document.createElement('tr'); row.className = "border-b border-color last:border-b-0"; row.dataset.monthRow = month;
-                    row.innerHTML = `<td class="p-3">${month}</td><td class="p-3 text-right data-cell" data-month="${month}"></td>`;
+                    row = document.createElement('tr'); row.className = "hover:bg-white/5 transition-colors group"; row.dataset.monthRow = month;
+                    row.innerHTML = `<td class="p-4 font-medium">${month}</td><td class="p-4 text-right data-cell text-base font-mono tracking-tight group-hover:text-accent transition-colors" data-month="${month}"></td>`;
                     ui.tableBody.appendChild(row);
                 }
                 const cell = row.querySelector(`[data-month="${month}"]`);
                 if (cell && !cell.classList.contains('editing')) cell.innerHTML = formatCurrency(yearData[month] || 0, '$');
             });
             const total = Object.values(yearData).reduce((sum, amount) => sum + parseFloat(amount), 0);
-            if (ui.tableFoot.innerHTML === '') ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-3 font-bold">Total Anual</td><td id="total-anual-cell" class="p-3 text-right text-lg font-bold"></td></tr>`;
+            if (ui.tableFoot.innerHTML === '') ui.tableFoot.innerHTML = `<tr class="total-row"><td class="p-4">Total Anual</td><td id="total-anual-cell" class="p-4 text-right text-lg font-mono tracking-tight"></td></tr>`;
             document.getElementById('total-anual-cell').innerHTML = formatCurrency(total, '$');
         }
         
@@ -846,7 +860,27 @@
             const avgTrend = avg > prevAvg ? 'up' : 'down';
             
             if (ui.summaryContainer.innerHTML === '') {
-                ui.summaryContainer.innerHTML = `<div class="summary-card"><p class="text-base font-medium text-secondary">Promedio Mensual</p><div class="flex items-baseline"><p id="avg-value" class="text-4xl font-bold mt-1"></p><span id="avg-trend" class="ml-2"></span></div></div><div class="summary-card"><p class="text-base font-medium text-secondary">Mejor Mes</p><p id="best-month-value" class="text-4xl font-bold mt-1"></p><p id="best-amount-value" class="text-lg text-accent"></p></div><div class="summary-card"><p class="text-base font-medium text-secondary">Ganancia Total</p><div class="flex items-baseline"><p id="total-value" class="text-4xl font-bold mt-1"></p><span id="total-trend" class="ml-2"></span></div></div>`;
+                ui.summaryContainer.innerHTML = `
+                    <div class="summary-card">
+                        <p class="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Promedio Mensual</p>
+                        <div class="flex items-end justify-between">
+                            <p id="avg-value" class="text-3xl sm:text-4xl font-extrabold tracking-tighter text-primary"></p>
+                            <span id="avg-trend" class="text-xl mb-1"></span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <p class="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Mejor Mes</p>
+                        <p id="best-month-value" class="text-3xl sm:text-4xl font-extrabold tracking-tighter text-primary truncate"></p>
+                        <p id="best-amount-value" class="text-sm font-bold text-accent mt-1 font-mono"></p>
+                    </div>
+                    <div class="summary-card highlight-card">
+                        <p class="text-xs font-bold text-accent uppercase tracking-widest mb-2">Ganancia Total</p>
+                        <div class="flex items-end justify-between">
+                            <p id="total-value" class="text-3xl sm:text-4xl font-extrabold tracking-tighter text-white"></p>
+                            <span id="total-trend" class="text-xl mb-1"></span>
+                        </div>
+                    </div>
+                `;
             }
             document.getElementById('avg-trend').className = `ml-2 trend-${avgTrend}`;
             document.getElementById('avg-trend').textContent = avg > 0 && prevAvg > 0 ? (avgTrend === 'up' ? '▲' : '▼') : '';
@@ -866,7 +900,6 @@
             const currentYearValues = months.map(month => currentYearData[month] || 0);
             const previousYearValues = months.map(month => previousYearData[month] || 0);
             
-            // Optimización: Actualizar en lugar de destruir
             if (comparisonChart) {
                 comparisonChart.data.datasets[0].label = previousYear;
                 comparisonChart.data.datasets[0].data = previousYearValues;
@@ -882,11 +915,11 @@
                     data: {
                         labels: months.map(m => m.substring(0,3)),
                         datasets: [
-                            { label: previousYear, data: previousYearValues, borderColor: style.getPropertyValue('--text-secondary').trim(), tension: 0.4 },
-                            { label: currentYear, data: currentYearValues, borderColor: style.getPropertyValue('--accent-color').trim(), backgroundColor: `rgba(${style.getPropertyValue('--accent-color-rgb').trim()}, 0.1)`, fill: true, tension: 0.4 }
+                            { label: previousYear, data: previousYearValues, borderColor: style.getPropertyValue('--text-secondary').trim(), tension: 0.4, pointRadius: 2 },
+                            { label: currentYear, data: currentYearValues, borderColor: style.getPropertyValue('--accent-color').trim(), backgroundColor: `rgba(${style.getPropertyValue('--accent-color-rgb').trim()}, 0.1)`, fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6 }
                         ]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: style.getPropertyValue('--text-secondary').trim() } }, x: { ticks: { color: style.getPropertyValue('--text-secondary').trim() } } }, plugins: { legend: { labels: { color: style.getPropertyValue('--text-primary').trim() } }, tooltip: { enabled: !areValuesHidden } } }
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true, ticks: { color: style.getPropertyValue('--text-secondary').trim(), font: {family: 'Inter'} } }, x: { grid: { display: false }, ticks: { color: style.getPropertyValue('--text-secondary').trim(), font: {family: 'Inter'} } } }, plugins: { legend: { labels: { color: style.getPropertyValue('--text-primary').trim(), font: {family: 'Inter'} } }, tooltip: { enabled: !areValuesHidden, backgroundColor: 'rgba(0,0,0,0.8)', titleFont: {family: 'Inter'}, bodyFont: {family: 'Inter', family: 'monospace'} } } }
                 });
             }
         }
@@ -905,15 +938,15 @@
             } else {
                 doughnutChart = new Chart(ui.doughnutChartCanvas, {
                     type: 'doughnut',
-                    data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#34d399', '#60a5fa', '#c084fc', '#f87171', '#fbbf24', '#a3e635', '#2dd4bf', '#818cf8', '#f472b6', '#fb923c', '#facc15', '#4ade80'], borderColor: style.getPropertyValue('--bg-secondary').trim(), }] },
-                    options: { responsive: true, maintainAspectRatio: false, onClick: (evt, elements) => { if (elements.length > 0) { const month = labels[elements[0].index]; highlightTableRow(month); } }, plugins: { legend: { position: 'top', labels: { color: style.getPropertyValue('--text-primary').trim() } }, tooltip: { enabled: !areValuesHidden } } }
+                    data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#34d399', '#60a5fa', '#c084fc', '#f87171', '#fbbf24', '#a3e635', '#2dd4bf', '#818cf8', '#f472b6', '#fb923c', '#facc15', '#4ade80'], borderColor: style.getPropertyValue('--bg-secondary').trim(), borderWidth: 2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', onClick: (evt, elements) => { if (elements.length > 0) { const month = labels[elements[0].index]; highlightTableRow(month); } }, plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 15, color: style.getPropertyValue('--text-primary').trim(), font: {family: 'Inter', size: 11} } }, tooltip: { enabled: !areValuesHidden } } }
                 });
             }
         }
         
         function renderHistory(logs) {
             ui.historyLoader.style.display = 'none';
-            if (!logs || logs.length === 0) { ui.historyLogContainer.innerHTML = '<p class="text-secondary text-center py-4">No hay historial de cambios.</p>'; return; }
+            if (!logs || logs.length === 0) { ui.historyLogContainer.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-secondary opacity-50"><p>Sin cambios recientes</p></div>'; return; }
             
             ui.historyLogContainer.innerHTML = logs.map(log => {
                 const data = log.data(); if (!data.timestamp) return '';
@@ -924,10 +957,27 @@
                 if (data.actionType === 'undo') {
                     badge = '<span class="ml-2 text-[10px] uppercase font-bold text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded border border-yellow-500/20">Deshacer</span>';
                 } else if (data.actionType === 'redo') {
-                    badge = '<span class="ml-2 text-[10px] uppercase font-bold text-indigo-500 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">Rehacer</span>';
+                    badge = '<span class="ml-2 text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20">Rehacer</span>';
                 }
                 
-                return `<div class="border-b border-color p-3 text-sm last:border-b-0"><div class="flex justify-between items-center"><div class="flex items-center"><p class="font-semibold"><span class="text-accent">${data.month} ${data.year}</span></p>${badge}</div><p class="font-semibold text-lg ${change >= 0 ? 'trend-up' : 'trend-down'}">${change >= 0 ? '+' : '-'} ${formatCurrency(Math.abs(change), '$', true)}</p></div><p class="text-xs text-secondary text-right mt-1">${date.toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}</p></div>`;
+                return `
+                    <div class="border-b border-gray-700/50 p-4 text-sm last:border-b-0 hover:bg-white/5 transition-colors">
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-accent mr-2"></span>
+                                <p class="font-semibold text-primary">${data.month} ${data.year}</p>
+                                ${badge}
+                            </div>
+                            <p class="font-bold text-base font-mono tracking-tight ${change >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+                                ${change >= 0 ? '+' : ''} ${formatCurrency(change, '$', true)}
+                            </p>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-secondary">
+                            <span>${date.toLocaleString('es-CL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                            <span class="opacity-50">Antes: ${formatCurrency(data.oldValue, '$', true)}</span>
+                        </div>
+                    </div>
+                `;
             }).join('');
         }
 
@@ -948,7 +998,6 @@
             return `${symbol} ${new Intl.NumberFormat('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value))}`;
         }
         
-        // --- Cell Editing Logic ---
         ui.tableBody.addEventListener('click', (e) => { if (e.target.classList.contains('data-cell')) makeCellEditable(e.target); });
 
         async function makeCellEditable(cell) {
@@ -959,7 +1008,7 @@
             let isSaving = false;
 
             cell.classList.add('editing');
-            cell.innerHTML = `<input type="text" value="" placeholder="${formatCurrency(currentValue, '$')}" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3">`;
+            cell.innerHTML = `<input type="text" value="" placeholder="${formatCurrency(currentValue, '$')}" class="w-full text-right p-0 m-0 bg-transparent border-0 outline-none rounded-md py-2 px-3 font-mono text-base">`;
             const input = cell.querySelector('input'); input.focus();
 
             const saveChanges = async () => {
@@ -969,7 +1018,6 @@
                 const rawValue = input.value.trim();
                 let cleanStr = rawValue.replace(/[^0-9.,-]/g, '');
                 
-                // Normalización de formato 1.000,50
                 const dots = (cleanStr.match(/\./g) || []).length;
                 const commas = (cleanStr.match(/,/g) || []).length;
                 if (dots > 0 && commas > 0) cleanStr = cleanStr.replace(/\./g, '').replace(',', '.');
@@ -1015,7 +1063,7 @@
                         cell.classList.add('saved-feedback'); setTimeout(() => cell.classList.remove('saved-feedback'), 700);
                     } catch (error) { 
                         console.error(error); 
-                        showNotification("No se pudo guardar."); 
+                        showNotification("No se pudo guardar.", true); 
                         allData[currentYear][month] = currentValue;
                         renderAllComponents(currentYear);
                     }
@@ -1037,7 +1085,6 @@
             });
         }
         
-        // --- Other Actions ---
         ui.yearSelector.addEventListener('change', (e) => { currentYear = e.target.value; renderAllComponents(currentYear); });
         
         ui.addYearBtn.addEventListener('click', async () => {
@@ -1049,7 +1096,7 @@
              currentYear = newYear;
              updateFullUI(); 
              try { await setDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, newYear), emptyYearData); } 
-             catch (e) { console.error(e); showNotification("Error guardando el año nuevo.", true); }
+             catch (e) { console.error(e); showNotification("Error guardando año.", true); }
         });
 
         ui.deleteYearBtn.addEventListener('click', () => {
@@ -1061,7 +1108,7 @@
                 currentYear = remainingYears[0];
                 updateFullUI();
                 try { await deleteDoc(doc(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/years`, yearToDelete)); showNotification("Año eliminado.", false); } 
-                catch (e) { console.error(e); showNotification("Error eliminando año en DB.", true); }
+                catch (e) { console.error(e); showNotification("Error eliminando año.", true); }
             });
         });
 
@@ -1069,7 +1116,6 @@
             try { const s = await getDocs(collection(db, `${FIRESTORE_EARNINGS_COLLECTION}/${userId}/${FIRESTORE_HISTORY_COLLECTION}`)); const b = writeBatch(db); s.docs.forEach(d => b.delete(d.ref)); await b.commit(); showNotification("Historial borrado.", false); } catch(e){ console.error(e); }
         }));
         
-        // --- Utils & Tools ---
         async function convertCurrency() {
             const amount = parseFloat(ui.usdAmountInput.value);
             if(isNaN(amount) || amount <= 0) { ui.eurResult.textContent = formatCurrency(0, '€', true); ui.clpResult.textContent = formatCurrency(0, '$', true); return; }
@@ -1085,7 +1131,6 @@
         ui.paypalReceiveInput.addEventListener('input', () => setTimeout(() => calculatePaypalFees('receive'), 300));
         ui.paypalSendInput.addEventListener('input', () => setTimeout(() => calculatePaypalFees('send'), 300));
 
-        // --- Preferences ---
         function applyTheme(theme) { document.body.classList.toggle('light-mode', theme === 'light'); ui.themeToggleBtn.innerHTML = theme === 'light' ? icons.moon : icons.sun; }
         function applyAccentColor(color) { document.documentElement.style.setProperty('--accent-color', color); document.documentElement.style.setProperty('--accent-color-rgb', color.match(/\w\w/g).map(x=>parseInt(x,16)).join(', ')); ui.colorPicker.querySelectorAll('button').forEach(b => b.style.borderColor = b.dataset.color === color ? color : 'transparent'); }
         function applyCompactView(c) { document.body.classList.toggle('compact-mode', c); }
