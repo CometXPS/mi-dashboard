@@ -42,13 +42,17 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* SKELETON LOADING */
-        .skeleton { /* Fallback para navegadores viejos */
-            background-color: var(--bg-secondary);
-            opacity: 0.7;
+        /* SKELETON */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+            opacity: 0.6;
         }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* CARDS & UI */
+        /* UI ELEMENTS */
         .main-card {
             background-color: var(--bg-secondary);
             border-radius: 1rem;
@@ -84,7 +88,7 @@
         }
 
         .data-cell { transition: background-color 0.15s; }
-        .data-cell:hover { background-color: rgba(156, 163, 175, 0.1); cursor: pointer; } 
+        .data-cell:hover { background-color: rgba(156, 163, 175, 0.1); cursor: pointer; }
         
         .total-row td {
             background-color: rgba(var(--accent-color-rgb), 0.08);
@@ -122,7 +126,7 @@
             border-radius: 0.5rem 0.5rem 0 0;
             opacity: 0.7;
         }
-        .tab-btn:hover { opacity: 1; background-color: rgba(156, 163, 175, 0.1); } 
+        .tab-btn:hover { opacity: 1; background-color: rgba(156, 163, 175, 0.1); }
         .tab-btn.active {
             background-color: transparent;
             color: var(--accent-color);
@@ -134,7 +138,6 @@
         .tab-content.active { display: block; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* UTILIDADES DE COLOR */
         .bg-accent { background-color: var(--accent-color); }
         .bg-danger { background-color: var(--danger-color); }
         .bg-primary { background-color: var(--bg-primary); }
@@ -482,13 +485,11 @@
             [new Date().getFullYear()]: { "Enero": 0, "Febrero": 0, "Marzo": 0, "Abril": 0, "Mayo": 0, "Junio": 0, "Julio": 0, "Agosto": 0, "Septiembre": 0, "Octubre": 0, "Noviembre": 0, "Diciembre": 0 }
         };
 
-        // --- SAFETY TIMEOUT PARA EL LOADER ---
-        // Si en 4 segundos Firebase no responde, forzamos a ocultar el loader para que la app no se vea bloqueada.
+        // --- SAFETY TIMEOUT ---
         setTimeout(() => {
             const loader = document.getElementById('loading-container');
             if (loader && loader.style.display !== 'none' && !userId) {
                console.warn("Forzando ocultar loader por tiempo de espera...");
-               // No ocultamos si no hay usuario, pero si ya hay usuario y la UI no ha cargado, esto ayuda.
             }
         }, 4000);
 
@@ -499,71 +500,6 @@
             eyeClosed: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
         };
 
-        const ui = {
-            loadingContainer: document.getElementById('loading-container'),
-            authContainer: document.getElementById('auth-container'),
-            appContainer: document.getElementById('app-container'),
-            authForm: document.getElementById('auth-form'),
-            authError: document.getElementById('auth-error'),
-            logoutBtn: document.getElementById('logout-btn'),
-            tableBody: document.querySelector('#earnings-table tbody'),
-            tableHead: document.querySelector('#earnings-table thead'),
-            tableFoot: document.querySelector('#earnings-table tfoot'),
-            loader: document.getElementById('loader'),
-            earningsTable: document.getElementById('earnings-table'),
-            yearSelector: document.getElementById('year-selector'),
-            addYearBtn: document.getElementById('add-year-btn'),
-            deleteYearBtn: document.getElementById('delete-year-btn'),
-            undoBtn: document.getElementById('undo-btn'),
-            redoBtn: document.getElementById('redo-btn'),
-            toggleVisibilityBtn: document.getElementById('toggle-visibility-btn'),
-            chartCanvas: document.getElementById('comparisonChart').getContext('2d'),
-            doughnutChartCanvas: document.getElementById('doughnutChart').getContext('2d'),
-            summaryContainer: document.getElementById('summary-container'),
-            userInfo: document.getElementById('user-info'),
-            usdAmountInput: document.getElementById('usd-amount'),
-            eurResult: document.getElementById('eur-result'),
-            clpResult: document.getElementById('clp-result'),
-            converterStatus: document.getElementById('converter-status'),
-            confirmationModal: document.getElementById('confirmation-modal'),
-            modalTitle: document.getElementById('modal-title'),
-            modalBody: document.getElementById('modal-body'),
-            modalConfirmBtn: document.getElementById('modal-confirm-btn'),
-            modalCancelBtn: document.getElementById('modal-cancel-btn'),
-            timeoutModal: document.getElementById('timeout-modal'),
-            timeoutStayBtn: document.getElementById('timeout-stay-btn'),
-            timeoutLogoutBtn: document.getElementById('timeout-logout-btn'),
-            settingsModal: document.getElementById('settings-modal'),
-            settingsBtn: document.getElementById('settings-btn'),
-            settingsCloseBtn: document.getElementById('settings-close-btn'),
-            notification: document.getElementById('notification'),
-            notificationMessage: document.getElementById('notification-message'),
-            notificationCloseBtn: document.getElementById('notification-close-btn'),
-            notificationTimer: document.getElementById('notification-timer'),
-            historyLoader: document.getElementById('history-loader'),
-            historyLogContainer: document.getElementById('history-log-container'),
-            clearHistoryBtn: document.getElementById('clear-history-btn'),
-            themeToggleBtn: document.getElementById('theme-toggle-btn'),
-            compactViewBtn: document.getElementById('compact-view-btn'),
-            colorPicker: document.getElementById('color-picker'),
-            tabs: document.querySelectorAll('.tab-btn'),
-            paypalReceiveInput: document.getElementById('paypal-receive'),
-            paypalSendInput: document.getElementById('paypal-send'),
-            paypalRequestResult: document.getElementById('paypal-request-result'),
-            paypalReceiveResult: document.getElementById('paypal-receive-result'),
-            loginCard: document.getElementById('login-card'),
-            resetPasswordCard: document.getElementById('reset-password-card'),
-            forgotPasswordLink: document.getElementById('forgot-password-link'),
-            backToLoginBtn: document.getElementById('back-to-login-btn'),
-            resetPasswordForm: document.getElementById('reset-password-form'),
-            resetError: document.getElementById('reset-error'),
-        };
-        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
-        // ... [RESTO DEL CÓDIGO JS IDÉNTICO AL ANTERIOR: Funciones de Auth, Render, etc.] ...
-        // Para ahorrar espacio y asegurar que funcione, copia las funciones de JS del bloque anterior
-        // O usa el bloque completo si prefieres copiar y pegar todo de una vez.
-        
         function showNotification(message, isError = true) {
             clearTimeout(notificationTimeout);
             ui.notificationMessage.textContent = message;
@@ -1149,7 +1085,6 @@
         ui.colorPicker.addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON') { const c = e.target.dataset.color; localStorage.setItem('dashboardAccentColor', c); applyAccentColor(c); renderAllComponents(currentYear); } });
         ui.settingsBtn.addEventListener('click', () => showModal(ui.settingsModal, () => ui.settingsCloseBtn.addEventListener('click', () => ui.settingsModal.classList.add('opacity-0', 'pointer-events-none'), {once:true})));
         ui.tabs.forEach(t => t.addEventListener('click', () => { ui.tabs.forEach(x => x.classList.remove('active')); t.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.getElementById(`${t.dataset.tab}-tab`).classList.add('active'); }));
-        function highlightTableRow(month) { const r = ui.tableBody.querySelector(`[data-month-row="${month}"]`); if (r) { r.classList.add('table-row-highlight'); r.scrollIntoView({behavior:'smooth', block:'center'}); setTimeout(() => r.classList.remove('table-row-highlight'), 2000); } }
     </script>
 </body>
 </html>
