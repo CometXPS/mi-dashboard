@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* MODO OSCURO (Default) */
             --bg-primary: #111827;
             --bg-secondary: #1f2937;
             --border-color: #374151;
@@ -23,14 +24,25 @@
             --accent-color-rgb: 52, 211, 153;
             --danger-color: #ef4444;
             --success-color: #10b981; 
+            
+            /* Color de hover para tablas (Blanco con baja opacidad) */
+            --hover-row-bg: rgba(255, 255, 255, 0.05);
+            /* Color de inputs */
+            --input-bg: #111827;
         }
 
         .light-mode {
-            --bg-primary: #f3f4f6;
+            /* MODO CLARO (Ajustado) */
+            --bg-primary: #f8fafc; /* Un gris azulado muy sutil (Slate-50), más elegante que el gris plano */
             --bg-secondary: #ffffff;
-            --border-color: #e5e7eb;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
+            --border-color: #e2e8f0; /* Slate-200, más suave */
+            --text-primary: #0f172a; /* Slate-900, casi negro pero con tono */
+            --text-secondary: #64748b; /* Slate-500 */
+            
+            /* Hover oscuro suave para que contraste sobre blanco */
+            --hover-row-bg: rgba(0, 0, 0, 0.03); 
+            /* Inputs sutilmente grises para diferenciarlos del blanco puro de la tarjeta */
+            --input-bg: #f1f5f9; 
         }
 
         body {
@@ -57,9 +69,15 @@
             background-color: var(--bg-secondary);
             border-radius: 1rem;
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            /* Sombra más suave y difusa en general */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             overflow: hidden;
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        /* En modo claro, damos un poco más de sombra al hover para "levantar" la tarjeta */
+        .light-mode .main-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
         }
 
         .summary-card {
@@ -88,8 +106,13 @@
         }
 
         .data-cell { transition: background-color 0.15s; }
-        .data-cell:hover { background-color: rgba(156, 163, 175, 0.1); cursor: pointer; } 
+        .data-cell:hover { background-color: var(--hover-row-bg); cursor: pointer; } 
         
+        /* Nueva clase para el hover de filas usando la variable CSS */
+        .row-hover:hover {
+            background-color: var(--hover-row-bg);
+        }
+
         .total-row td {
             background-color: rgba(var(--accent-color-rgb), 0.08);
             font-weight: 800;
@@ -102,6 +125,12 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
+        }
+        
+        /* Estilos generales para inputs */
+        input, select {
+            background-color: var(--input-bg) !important;
+            color: var(--text-primary) !important;
         }
 
         .spinner {
@@ -126,7 +155,7 @@
             border-radius: 0.5rem 0.5rem 0 0;
             opacity: 0.7;
         }
-        .tab-btn:hover { opacity: 1; background-color: rgba(156, 163, 175, 0.1); } 
+        .tab-btn:hover { opacity: 1; background-color: var(--hover-row-bg); } 
         .tab-btn.active {
             background-color: transparent;
             color: var(--accent-color);
@@ -151,10 +180,13 @@
         .trend-down { color: var(--danger-color); }
         
         .glass-header {
-            background-color: rgba(31, 41, 55, 0.7);
+            background-color: rgba(31, 41, 55, 0.85); /* Más oscuro en dark mode para legibilidad */
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
-        .light-mode .glass-header { background-color: rgba(255, 255, 255, 0.7); }
+        .light-mode .glass-header { 
+            background-color: rgba(255, 255, 255, 0.85); 
+            border-bottom: 1px solid var(--border-color); /* Borde sutil en modo claro para separar del fondo */
+        }
         
         .error-box { background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 1rem; border-radius: 0.5rem; text-align: left; font-size: 0.875rem; margin-top: 1rem; }
     </style>
@@ -200,11 +232,11 @@
             <form id="auth-form" class="space-y-5">
                 <div>
                     <label for="email" class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Correo</label>
-                    <input type="email" id="email" required class="block w-full bg-primary border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors">
+                    <input type="email" id="email" required class="block w-full border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors">
                 </div>
                 <div>
                     <label for="password" class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Contraseña</label>
-                    <input type="password" id="password" required class="block w-full bg-primary border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors">
+                    <input type="password" id="password" required class="block w-full border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors">
                 </div>
                 <div class="text-right"><a href="#" id="forgot-password-link" class="text-xs text-accent hover:text-emerald-400 font-medium">¿Olvidaste tu contraseña?</a></div>
                 <button type="submit" id="submit-btn" class="w-full bg-accent text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-emerald-500/20">Iniciar Sesión</button>
@@ -217,7 +249,7 @@
             <form id="reset-password-form" class="space-y-5">
                 <div>
                     <label for="reset-email" class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Correo</label>
-                    <input type="email" id="reset-email" required class="block w-full bg-primary border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500">
+                    <input type="email" id="reset-email" required class="block w-full border border-color rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500">
                 </div>
                 <button type="submit" id="reset-submit-btn" class="w-full bg-accent text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 shadow-lg shadow-emerald-500/20">Enviar Enlace</button>
             </form>
@@ -238,15 +270,15 @@
             </div>
             
             <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto p-1 bg-secondary rounded-lg border border-color">
-                 <select id="year-selector" class="bg-primary text-sm font-semibold border-none rounded-md py-2 pl-3 pr-8 focus:ring-2 focus:ring-emerald-500/50 cursor-pointer outline-none"></select>
+                 <select id="year-selector" class="text-sm font-semibold border-none rounded-md py-2 pl-3 pr-8 focus:ring-2 focus:ring-emerald-500/50 cursor-pointer outline-none"></select>
                  <div class="w-px h-6 bg-gray-600/50 mx-1"></div>
-                 <button id="add-year-btn" title="Nuevo Año" class="p-2 text-secondary hover:text-primary hover:bg-gray-500/10 rounded-md transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg></button>
+                 <button id="add-year-btn" title="Nuevo Año" class="p-2 text-secondary hover:text-primary rounded-md transition-colors row-hover"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg></button>
                  <button id="delete-year-btn" title="Borrar Año" class="p-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                  <div class="w-px h-6 bg-gray-600/50 mx-1"></div>
                  <button id="undo-btn" title="Deshacer" disabled class="p-2 text-secondary hover:text-yellow-500 hover:bg-yellow-500/10 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l4-4m-4 4l4 4" /></svg></button>
                  <button id="redo-btn" title="Rehacer" disabled class="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2m18-10l-4-4m4 4l-4 4" /></svg></button>
                  <div class="w-px h-6 bg-gray-600/50 mx-1"></div>
-                 <button id="toggle-visibility-btn" title="Ocultar valores" class="p-2 text-secondary hover:text-primary hover:bg-gray-500/10 rounded-md transition-colors"></button>
+                 <button id="toggle-visibility-btn" title="Ocultar valores" class="p-2 text-secondary hover:text-primary rounded-md transition-colors row-hover"></button>
                  <button id="logout-btn" title="Salir" class="p-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors ml-auto"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
             </div>
         </div>
@@ -303,7 +335,7 @@
                             <div class="bg-primary/50 p-4 rounded-lg border border-color">
                                 <label class="block text-xs font-bold text-secondary uppercase mb-2">Para recibir (Neto)</label>
                                 <div class="flex flex-col sm:flex-row items-center gap-3">
-                                    <input type="number" id="paypal-receive" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
+                                    <input type="number" id="paypal-receive" class="w-full sm:flex-1 border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
                                     <span class="text-gray-500 hidden sm:block">→</span>
                                     <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
                                         <p class="text-xs text-secondary">Pedir:</p>
@@ -314,7 +346,7 @@
                             <div class="bg-primary/50 p-4 rounded-lg border border-color">
                                 <label class="block text-xs font-bold text-secondary uppercase mb-2">Si envías (Bruto)</label>
                                 <div class="flex flex-col sm:flex-row items-center gap-3">
-                                    <input type="number" id="paypal-send" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
+                                    <input type="number" id="paypal-send" class="w-full sm:flex-1 border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
                                     <span class="text-gray-500 hidden sm:block">→</span>
                                     <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
                                         <p class="text-xs text-secondary">Llega:</p>
@@ -330,7 +362,7 @@
                         <div class="grid grid-cols-1 gap-4">
                             <div class="bg-primary/50 p-4 rounded-lg border border-color">
                                 <label class="block text-xs font-bold text-secondary uppercase mb-2">Monto USD</label>
-                                <input type="number" id="usd-amount" placeholder="100.00" class="w-full bg-secondary border border-color rounded py-2 px-3 focus:border-green-500 outline-none text-lg font-mono">
+                                <input type="number" id="usd-amount" placeholder="100.00" class="w-full border border-color rounded py-2 px-3 focus:border-green-500 outline-none text-lg font-mono">
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="bg-primary/50 p-4 rounded-lg border border-color text-center">
@@ -881,7 +913,7 @@
             months.forEach(month => {
                 let row = ui.tableBody.querySelector(`[data-month-row="${month}"]`);
                 if (!row) {
-                    row = document.createElement('tr'); row.className = "hover:bg-white/5 transition-colors group"; row.dataset.monthRow = month;
+                    row = document.createElement('tr'); row.className = "row-hover transition-colors group"; row.dataset.monthRow = month;
                     row.innerHTML = `<td class="p-4 font-medium">${month}</td><td class="p-4 text-right data-cell text-base font-mono tracking-tight group-hover:text-accent transition-colors" data-month="${month}"></td>`;
                     ui.tableBody.appendChild(row);
                 }
@@ -1011,7 +1043,7 @@
                 }
                 
                 return `
-                    <div class="border-b border-gray-700/50 p-4 text-sm last:border-b-0 hover:bg-white/5 transition-colors">
+                    <div class="border-b border-gray-700/50 p-4 text-sm last:border-b-0 row-hover transition-colors">
                         <div class="flex justify-between items-center mb-1">
                             <div class="flex items-center">
                                 <span class="w-2 h-2 rounded-full bg-accent mr-2"></span>
