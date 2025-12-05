@@ -265,21 +265,8 @@
 
         <div id="analysis-tab" class="tab-content active">
             <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
-            
-            <div id="main-content-grid" class="flex flex-col lg:grid lg:grid-cols-5 gap-6">
-                
-                <div class="main-card flex flex-col h-full lg:col-span-2 order-1 lg:order-2 max-h-[500px]">
-                    <div class="p-6 border-b border-color flex justify-between items-center">
-                         <h2 class="text-lg font-bold">Historial de Cambios</h2>
-                         <button id="clear-history-btn" title="Limpiar" class="text-xs bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500 hover:text-white transition">Limpiar</button>
-                    </div>
-                    <div class="p-0 flex-1 relative min-h-[300px]">
-                         <div id="history-loader" class="spinner absolute inset-0 m-auto"></div>
-                         <div id="history-log-container" class="absolute inset-0 overflow-y-auto custom-scrollbar"></div>
-                    </div>
-                </div>
-
-                <div class="main-card lg:col-span-3 order-2 lg:order-1">
+            <div id="main-content-grid" class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div class="main-card lg:col-span-3">
                     <div class="p-0 sm:p-2">
                         <div id="loader" class="spinner hidden"></div>
                         <div class="overflow-x-auto">
@@ -291,68 +278,80 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="lg:col-span-2 space-y-6 order-3 lg:order-3">
-                     <div class="main-card p-6">
-                         <h2 class="text-sm font-bold uppercase text-secondary mb-4 tracking-wider">Tendencia Anual</h2>
-                         <div class="relative h-48"><canvas id="comparisonChart"></canvas></div>
-                     </div>
-                     <div class="main-card p-6">
-                         <h2 class="text-sm font-bold uppercase text-secondary mb-4 tracking-wider">Distribución</h2>
-                         <div class="relative h-48"><canvas id="doughnutChart"></canvas></div>
-                     </div>
+                <div class="lg:col-span-2 space-y-6">
+                      <div class="main-card p-6">
+                          <h2 class="text-sm font-bold uppercase text-secondary mb-4 tracking-wider">Tendencia Anual</h2>
+                          <div class="relative h-48"><canvas id="comparisonChart"></canvas></div>
+                      </div>
+                      <div class="main-card p-6">
+                          <h2 class="text-sm font-bold uppercase text-secondary mb-4 tracking-wider">Distribución</h2>
+                          <div class="relative h-48"><canvas id="doughnutChart"></canvas></div>
+                      </div>
                 </div>
             </div>
         </div>
 
         <div id="tools-tab" class="tab-content">
-            <div id="tools-grid" class="max-w-2xl mx-auto space-y-6">
-                <div class="main-card p-6">
-                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">Calculadora PayPal</h2>
-                    <div class="space-y-4">
-                        <div class="bg-primary/50 p-4 rounded-lg border border-color">
-                            <label class="block text-xs font-bold text-secondary uppercase mb-2">Para recibir (Neto)</label>
-                            <div class="flex flex-col sm:flex-row items-center gap-3">
-                                <input type="number" id="paypal-receive" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
-                                <span class="text-gray-500 hidden sm:block">→</span>
-                                <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
-                                    <p class="text-xs text-secondary">Pedir:</p>
-                                    <p id="paypal-request-result" class="text-lg font-bold text-primary">$ 0,00</p>
+            <div id="tools-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                <div class="space-y-6 order-last lg:order-none">
+                    <div class="main-card p-6">
+                        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">Calculadora PayPal</h2>
+                        <div class="space-y-4">
+                            <div class="bg-primary/50 p-4 rounded-lg border border-color">
+                                <label class="block text-xs font-bold text-secondary uppercase mb-2">Para recibir (Neto)</label>
+                                <div class="flex flex-col sm:flex-row items-center gap-3">
+                                    <input type="number" id="paypal-receive" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
+                                    <span class="text-gray-500 hidden sm:block">→</span>
+                                    <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
+                                        <p class="text-xs text-secondary">Pedir:</p>
+                                        <p id="paypal-request-result" class="text-lg font-bold text-primary">$ 0,00</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="bg-primary/50 p-4 rounded-lg border border-color">
-                            <label class="block text-xs font-bold text-secondary uppercase mb-2">Si envías (Bruto)</label>
-                            <div class="flex flex-col sm:flex-row items-center gap-3">
-                                <input type="number" id="paypal-send" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
-                                <span class="text-gray-500 hidden sm:block">→</span>
-                                <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
-                                    <p class="text-xs text-secondary">Llega:</p>
-                                    <p id="paypal-receive-result" class="text-lg font-bold text-primary">$ 0,00</p>
+                            <div class="bg-primary/50 p-4 rounded-lg border border-color">
+                                <label class="block text-xs font-bold text-secondary uppercase mb-2">Si envías (Bruto)</label>
+                                <div class="flex flex-col sm:flex-row items-center gap-3">
+                                    <input type="number" id="paypal-send" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
+                                    <span class="text-gray-500 hidden sm:block">→</span>
+                                    <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
+                                        <p class="text-xs text-secondary">Llega:</p>
+                                        <p id="paypal-receive-result" class="text-lg font-bold text-primary">$ 0,00</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="main-card p-6">
+                        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">Conversor USD</h2>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="bg-primary/50 p-4 rounded-lg border border-color">
+                                <label class="block text-xs font-bold text-secondary uppercase mb-2">Monto USD</label>
+                                <input type="number" id="usd-amount" placeholder="100.00" class="w-full bg-secondary border border-color rounded py-2 px-3 focus:border-green-500 outline-none text-lg font-mono">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-primary/50 p-4 rounded-lg border border-color text-center">
+                                    <p class="text-xs text-secondary mb-1">EURO</p>
+                                    <p id="eur-result" class="text-xl font-bold text-primary">€ 0,00</p>
+                                </div>
+                                <div class="bg-primary/50 p-4 rounded-lg border border-color text-center">
+                                    <p class="text-xs text-secondary mb-1">CLP (Chile)</p>
+                                    <p id="clp-result" class="text-xl font-bold text-primary">$ 0</p>
+                                </div>
+                            </div>
+                            <p id="converter-status" class="text-xs text-secondary text-right italic"></p>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="main-card p-6">
-                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">Conversor USD</h2>
-                    <div class="grid grid-cols-1 gap-4">
-                        <div class="bg-primary/50 p-4 rounded-lg border border-color">
-                            <label class="block text-xs font-bold text-secondary uppercase mb-2">Monto USD</label>
-                            <input type="number" id="usd-amount" placeholder="100.00" class="w-full bg-secondary border border-color rounded py-2 px-3 focus:border-green-500 outline-none text-lg font-mono">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-primary/50 p-4 rounded-lg border border-color text-center">
-                                <p class="text-xs text-secondary mb-1">EURO</p>
-                                <p id="eur-result" class="text-xl font-bold text-primary">€ 0,00</p>
-                            </div>
-                            <div class="bg-primary/50 p-4 rounded-lg border border-color text-center">
-                                <p class="text-xs text-secondary mb-1">CLP (Chile)</p>
-                                <p id="clp-result" class="text-xl font-bold text-primary">$ 0</p>
-                            </div>
-                        </div>
-                        <p id="converter-status" class="text-xs text-secondary text-right italic"></p>
+                <div class="main-card flex flex-col h-full order-first lg:order-none">
+                    <div class="p-6 border-b border-color flex justify-between items-center">
+                         <h2 class="text-lg font-bold">Historial de Cambios</h2>
+                         <button id="clear-history-btn" title="Limpiar" class="text-xs bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500 hover:text-white transition">Limpiar</button>
+                    </div>
+                    <div class="p-0 flex-1 relative min-h-[300px]">
+                         <div id="history-loader" class="spinner absolute inset-0 m-auto"></div>
+                         <div id="history-log-container" class="absolute inset-0 overflow-y-auto custom-scrollbar"></div>
                     </div>
                 </div>
             </div>
