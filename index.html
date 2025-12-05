@@ -42,7 +42,17 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* --- CARDS & UI --- */
+        /* SKELETON */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+            opacity: 0.6;
+        }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* CARDS & UI */
         .main-card {
             background-color: var(--bg-secondary);
             border-radius: 1rem;
@@ -248,7 +258,7 @@
             </div>
             <div class="p-2 sm:pr-4 w-full sm:w-auto flex justify-end">
                 <button id="settings-btn" title="Configuración" class="p-2 text-secondary hover:text-primary transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </button>
             </div>
         </div>
@@ -256,7 +266,7 @@
         <div id="analysis-tab" class="tab-content active">
             <div id="summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
             <div id="main-content-grid" class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                <div class="main-card lg:col-span-3 order-2 lg:order-1">
+                <div class="main-card lg:col-span-3">
                     <div class="p-0 sm:p-2">
                         <div id="loader" class="spinner hidden"></div>
                         <div class="overflow-x-auto">
@@ -268,7 +278,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="lg:col-span-2 space-y-6 order-1 lg:order-2">
+                <div class="lg:col-span-2 space-y-6">
                      <div class="main-card p-6">
                          <h2 class="text-sm font-bold uppercase text-secondary mb-4 tracking-wider">Tendencia Anual</h2>
                          <div class="relative h-48"><canvas id="comparisonChart"></canvas></div>
@@ -289,10 +299,10 @@
                         <div class="space-y-4">
                             <div class="bg-primary/50 p-4 rounded-lg border border-color">
                                 <label class="block text-xs font-bold text-secondary uppercase mb-2">Para recibir (Neto)</label>
-                                <div class="flex items-center gap-3">
-                                    <input type="number" id="paypal-receive" class="flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
-                                    <span class="text-gray-500">→</span>
-                                    <div class="text-right">
+                                <div class="flex flex-col sm:flex-row items-center gap-3">
+                                    <input type="number" id="paypal-receive" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
+                                    <span class="text-gray-500 hidden sm:block">→</span>
+                                    <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
                                         <p class="text-xs text-secondary">Pedir:</p>
                                         <p id="paypal-request-result" class="text-lg font-bold text-primary">$ 0,00</p>
                                     </div>
@@ -300,10 +310,10 @@
                             </div>
                             <div class="bg-primary/50 p-4 rounded-lg border border-color">
                                 <label class="block text-xs font-bold text-secondary uppercase mb-2">Si envías (Bruto)</label>
-                                <div class="flex items-center gap-3">
-                                    <input type="number" id="paypal-send" class="flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
-                                    <span class="text-gray-500">→</span>
-                                    <div class="text-right">
+                                <div class="flex flex-col sm:flex-row items-center gap-3">
+                                    <input type="number" id="paypal-send" class="w-full sm:flex-1 bg-secondary border border-color rounded py-2 px-3 focus:border-blue-500 outline-none">
+                                    <span class="text-gray-500 hidden sm:block">→</span>
+                                    <div class="w-full sm:w-auto flex justify-between sm:block text-right items-center">
                                         <p class="text-xs text-secondary">Llega:</p>
                                         <p id="paypal-receive-result" class="text-lg font-bold text-primary">$ 0,00</p>
                                     </div>
@@ -684,8 +694,6 @@
                 allData = {};
                 snapshot.forEach(doc => { allData[doc.id] = doc.data(); });
 
-                // --- RESTAURADO: AUTO-CREACIÓN DE AÑO ---
-                // Si la base de datos devuelve vacío, creamos el año actual
                 const systemYear = new Date().getFullYear().toString();
                 if (Object.keys(allData).length === 0 || !allData[systemYear]) {
                     const emptyYearData = months.reduce((acc, m) => ({...acc, [m]: 0}), {});
@@ -694,7 +702,6 @@
                         await setDoc(doc(db, earningsCollectionPath, systemYear), emptyYearData);
                     } catch (error) { console.error("Auto-create error", error); }
                 }
-                // ----------------------------------------
 
                 updateFullUI();
             }, error => { console.error(error); showNotification("Error al cargar datos."); });
