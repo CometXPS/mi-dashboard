@@ -42,6 +42,20 @@
             font-variant-numeric: tabular-nums;
         }
 
+        /* --- SKELETON LOADING (NUEVO) --- */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, #374151 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+            opacity: 0.6;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        /* ------------------------------- */
+
         .main-card {
             background-color: var(--bg-secondary);
             border-radius: 1rem;
@@ -151,18 +165,38 @@
         }
         .light-mode .glass-header { background-color: rgba(255, 255, 255, 0.7); }
         
-        /* Utility for error display */
         .error-box { background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 1rem; border-radius: 0.5rem; text-align: left; font-size: 0.875rem; margin-top: 1rem; }
     </style>
 </head>
 <body class="p-4 sm:p-6 pb-20 sm:pb-6">
 
-    <div id="loading-container" class="max-w-md mx-auto mt-20">
-        <div class="main-card p-8 text-center">
-            <h2 class="text-xl font-bold mb-4">Iniciando Dashboard</h2>
-            <div id="loading-spinner" class="spinner"></div>
-            <div id="loading-error" class="hidden"></div>
+    <div id="loading-container" class="max-w-6xl mx-auto mt-8 animate-pulse p-2">
+        <div class="flex justify-between items-center mb-8 gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gray-800 rounded-xl skeleton"></div>
+                <div class="space-y-2">
+                    <div class="h-6 w-48 bg-gray-800 skeleton"></div>
+                    <div class="h-4 w-32 bg-gray-800 skeleton"></div>
+                </div>
+            </div>
+            <div class="h-10 w-64 bg-gray-800 rounded-lg skeleton hidden sm:block"></div>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="h-32 bg-gray-800 rounded-2xl skeleton"></div>
+            <div class="h-32 bg-gray-800 rounded-2xl skeleton"></div>
+            <div class="h-32 bg-gray-800 rounded-2xl skeleton"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div class="lg:col-span-3 h-96 bg-gray-800 rounded-2xl skeleton"></div>
+            <div class="lg:col-span-2 space-y-6">
+                <div class="h-48 bg-gray-800 rounded-2xl skeleton"></div>
+                <div class="h-48 bg-gray-800 rounded-2xl skeleton"></div>
+            </div>
+        </div>
+        
+        <div id="loading-error" class="hidden mx-auto max-w-md mt-4"></div>
     </div>
 
     <div id="auth-container" class="max-w-md mx-auto hidden mt-10">
@@ -406,14 +440,13 @@
     </div>
 
     <script>
-        // Este script captura errores globales que bloquean la carga
         window.addEventListener('error', function(event) {
-            const loader = document.getElementById('loading-spinner');
+            const loader = document.getElementById('loading-container');
             const errorBox = document.getElementById('loading-error');
-            const container = document.getElementById('loading-container');
             
             if (loader && errorBox) {
-                loader.style.display = 'none';
+                // Quitamos la animación de pulso para que se lea el error
+                loader.classList.remove('animate-pulse');
                 errorBox.classList.remove('hidden');
                 errorBox.className = 'error-box';
                 errorBox.innerHTML = `
@@ -433,9 +466,8 @@
         import { firebaseConfig } from './config.js'; 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, query, writeBatch, deleteDoc, serverTimestamp, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-        // Verificación explicita de configuración
         if (!firebaseConfig) {
             throw new Error("No se encontró la variable firebaseConfig. Verifica tu archivo config.js");
         }
@@ -443,6 +475,17 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // --- HABILITAR PERSISTENCIA OFFLINE ---
+        enableIndexedDbPersistence(db)
+            .catch((err) => {
+                if (err.code == 'failed-precondition') {
+                    console.warn('La persistencia falló: Múltiples pestañas abiertas.');
+                } else if (err.code == 'unimplemented') {
+                    console.warn('El navegador no soporta persistencia.');
+                }
+            });
+        // --------------------------------------
 
         // --- Constantes ---
         const FIRESTORE_EARNINGS_COLLECTION = 'earnings_modern';
@@ -466,22 +509,7 @@
             [new Date().getFullYear()]: { "Enero": 0, "Febrero": 0, "Marzo": 0, "Abril": 0, "Mayo": 0, "Junio": 0, "Julio": 0, "Agosto": 0, "Septiembre": 0, "Octubre": 0, "Noviembre": 0, "Diciembre": 0 }
         };
 
-        // --- Funciones UI y Lógica (Sin cambios mayores, solo integración) ---
-        // (El resto del código JS es idéntico a la versión optimizada anterior)
-        
-        // ... [Código JS de formateo, preferencias, modals igual al anterior] ...
-        
-        // PARA AHORRAR ESPACIO EN LA RESPUESTA Y NO REPETIR TODO EL JS:
-        // COPIA EL JS DE LA VERSIÓN ANTERIOR (OPTIMIZADA) DESDE "const icons = {..." 
-        // HASTA EL FINAL DEL SCRIPT.
-        // PERO ASEGÚRATE DE USAR LOS NUEVOS IDS DE CSS SI CAMBIARON (En este caso, solo corregimos bg-bg-secondary).
-        
-        // Para que te funcione YA MISMO, aquí está el bloque completo de JS de nuevo para evitar confusiones al copiar/pegar:
-
-        // ... (JS COMPLETO REPETIDO PARA FACILIDAD) ...
-        
-        // --- CONTINUACIÓN DEL SCRIPT (Copia y pega esto debajo de los imports) ---
-
+        // ... (resto del código JS UI y lógica idéntico al anterior) ...
         const icons = {
             sun: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`,
             moon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`,
@@ -635,6 +663,7 @@
 
         // --- Auth State Change ---
         onAuthStateChanged(auth, user => {
+            // El loading-container ahora es un esqueleto, pero igual lo ocultamos al cargar
             ui.loadingContainer.style.display = 'none';
             if (user) {
                 userId = user.uid;
@@ -716,7 +745,7 @@
             } catch (error) { console.error(error); }
         }
         
-        // --- Undo/Redo Logic ---
+        // --- Undo/Redo Logic with History & Context Switching ---
         function addToLocalUndo(year, month, oldValue, newValue) {
             const command = { year, month, oldValue, newValue };
             undoStack.push(command);
@@ -725,7 +754,6 @@
             updateUndoRedoUI();
         }
 
-        // Utilidad para redondeo seguro
         const roundMoney = (num) => Math.round(num * 100) / 100;
 
         async function undoLastChange() {
