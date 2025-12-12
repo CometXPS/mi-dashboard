@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Intercambio de Divisas</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#111827">
+    <meta name="theme-color" content="#111827" id="meta-theme-color">
     <link rel="icon" type="image/svg+xml" href="icono.svg">
     <link rel="apple-touch-icon" href="icono.png">
     
@@ -27,18 +27,20 @@
             
             --hover-row-bg: rgba(255, 255, 255, 0.05);
             --input-bg: #111827;
+            --chart-grid: rgba(255, 255, 255, 0.05);
         }
 
         .light-mode {
             /* MODO CLARO */
-            --bg-primary: #f8fafc;
+            --bg-primary: #f1f5f9;
             --bg-secondary: #ffffff;
-            --border-color: #e2e8f0;
+            --border-color: #cbd5e1;
             --text-primary: #0f172a;
             --text-secondary: #64748b;
             
-            --hover-row-bg: rgba(0, 0, 0, 0.03); 
-            --input-bg: #f1f5f9; 
+            --hover-row-bg: rgba(0, 0, 0, 0.05); 
+            --input-bg: #f8fafc;
+            --chart-grid: rgba(0, 0, 0, 0.05);
         }
 
         body {
@@ -51,16 +53,13 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        /* --- VISTA COMPACTA AGRESIVA (Optimizado para Móvil) --- */
-        body.compact-mode .main-card, 
-        body.compact-mode .summary-card { padding: 0.75rem !important; }
+        /* VISTA COMPACTA AGRESIVA (Móvil) */
+        body.compact-mode .main-card, body.compact-mode .summary-card { padding: 0.75rem !important; }
         body.compact-mode .p-4 { padding: 0.5rem !important; }
         body.compact-mode .p-6 { padding: 0.75rem !important; }
         body.compact-mode .p-8 { padding: 1rem !important; }
-        body.compact-mode td, 
-        body.compact-mode th { padding: 0.35rem 0.5rem !important; font-size: 0.8rem !important; }
-        body.compact-mode .text-3xl,
-        body.compact-mode .text-4xl { font-size: 1.25rem !important; line-height: 1.5rem !important; } 
+        body.compact-mode td, body.compact-mode th { padding: 0.35rem 0.5rem !important; font-size: 0.8rem !important; }
+        body.compact-mode .text-3xl, body.compact-mode .text-4xl { font-size: 1.25rem !important; line-height: 1.5rem !important; } 
         body.compact-mode .gap-6 { gap: 0.75rem !important; } 
         body.compact-mode .gap-4 { gap: 0.5rem !important; }
         body.compact-mode .mb-8 { margin-bottom: 1rem !important; }
@@ -70,17 +69,15 @@
         body.compact-mode .py-3 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
         body.compact-mode .px-6 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
 
-        /* SKELETON */
+        /* SKELETON & UI */
         .skeleton {
             background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
             background-size: 200% 100%;
             animation: loading 1.5s infinite;
-            border-radius: 8px;
-            opacity: 0.6;
+            border-radius: 8px; opacity: 0.6;
         }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* CARDS & UI */
         .main-card {
             background-color: var(--bg-secondary);
             border-radius: 1rem;
@@ -89,18 +86,13 @@
             overflow: hidden;
             transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
-        .light-mode .main-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-        }
+        .light-mode .main-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
 
         .summary-card {
             background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            transition: all 0.2s ease-in-out;
-            position: relative;
-            overflow: hidden;
+            border-radius: 1rem; padding: 1.5rem;
+            transition: all 0.2s ease-in-out; position: relative; overflow: hidden;
         }
         .summary-card.highlight-card {
             background: linear-gradient(145deg, var(--bg-secondary) 0%, rgba(var(--accent-color-rgb), 0.05) 100%);
@@ -110,11 +102,7 @@
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
             background: var(--accent-color); opacity: 0.7;
         }
-        .summary-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent-color);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
+        .summary-card:hover { transform: translateY(-2px); border-color: var(--accent-color); }
 
         .data-cell { transition: background-color 0.15s; }
         .data-cell:hover { background-color: var(--hover-row-bg); cursor: pointer; } 
@@ -122,29 +110,25 @@
 
         .total-row td {
             background-color: rgba(var(--accent-color-rgb), 0.08);
-            font-weight: 800;
-            color: var(--accent-color);
+            font-weight: 800; color: var(--accent-color);
             border-top: 2px solid var(--border-color);
         }
         
         .editing input {
             border: 2px solid var(--accent-color);
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
+            background-color: var(--bg-primary); color: var(--text-primary);
             box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
         }
         input, select {
             background-color: var(--input-bg) !important;
             color: var(--text-primary) !important;
+            border-color: var(--border-color);
         }
 
         .spinner {
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--accent-color);
-            border-radius: 50%;
-            width: 32px; height: 32px;
-            animation: spin 0.8s linear infinite;
-            margin: 20px auto;
+            border: 3px solid var(--border-color); border-top: 3px solid var(--accent-color);
+            border-radius: 50%; width: 32px; height: 32px;
+            animation: spin 0.8s linear infinite; margin: 20px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -154,47 +138,41 @@
         #notification, .modal { transition: opacity 0.2s ease-in-out; }
         #notification { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s; }
 
-        .tab-btn {
-            transition: all 0.2s;
-            border-bottom: 2px solid transparent;
-            border-radius: 0.5rem 0.5rem 0 0;
-            opacity: 0.7;
-        }
+        .tab-btn { transition: all 0.2s; border-bottom: 2px solid transparent; border-radius: 0.5rem 0.5rem 0 0; opacity: 0.7; }
         .tab-btn:hover { opacity: 1; background-color: var(--hover-row-bg); } 
-        .tab-btn.active {
-            background-color: transparent;
-            color: var(--accent-color);
-            border-bottom: 2px solid var(--accent-color);
-            opacity: 1;
-        }
+        .tab-btn.active { background-color: transparent; color: var(--accent-color); border-bottom: 2px solid var(--accent-color); opacity: 1; }
+        
         .tab-content { display: none; animation: fade-in 0.3s ease-out; }
         .tab-content.active { display: block; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* UTILIDADES DE COLOR */
         .bg-accent { background-color: var(--accent-color); }
-        .bg-danger { background-color: var(--danger-color); }
-        .bg-primary { background-color: var(--bg-primary); }
-        .bg-secondary { background-color: var(--bg-secondary); }
         .text-accent { color: var(--accent-color); }
         .text-primary { color: var(--text-primary); }
         .text-secondary { color: var(--text-secondary); }
-        .border-color { border-color: var(--border-color); }
-        .trend-up { color: var(--success-color); }
-        .trend-down { color: var(--danger-color); }
-        
-        .glass-header {
-            background-color: rgba(31, 41, 55, 0.85); 
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        }
-        .light-mode .glass-header { 
-            background-color: rgba(255, 255, 255, 0.85); 
-            border-bottom: 1px solid var(--border-color);
-        }
-        .error-box { background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 1rem; border-radius: 0.5rem; text-align: left; font-size: 0.875rem; margin-top: 1rem; }
+        .glass-header { background-color: rgba(31, 41, 55, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .light-mode .glass-header { background-color: rgba(255, 255, 255, 0.85); border-bottom: 1px solid var(--border-color); }
+        .error-box { background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 1rem; border-radius: 0.5rem; font-size: 0.875rem; margin-top: 1rem; }
     </style>
 </head>
 <body class="p-4 sm:p-6 pb-20 sm:pb-6">
+
+    <script>
+        (function() {
+            try {
+                const hour = new Date().getHours();
+                const isDayTime = hour >= 7 && hour < 20;
+                const savedTheme = localStorage.getItem('dashboardTheme');
+                if (savedTheme === 'light' || (!savedTheme && isDayTime) || (savedTheme === 'auto' && isDayTime)) {
+                    document.body.classList.add('light-mode');
+                    document.getElementById('meta-theme-color').setAttribute('content', '#f1f5f9');
+                } else {
+                    document.body.classList.remove('light-mode');
+                    document.getElementById('meta-theme-color').setAttribute('content', '#111827');
+                }
+            } catch (e) {}
+        })();
+    </script>
 
     <div id="loading-container" class="max-w-6xl mx-auto mt-8 animate-pulse p-2">
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
@@ -949,9 +927,12 @@
             animateCountUp(document.getElementById('avg-value'), avg); animateCountUp(document.getElementById('total-value'), total);
         }
 
+        // Función renderChart CORREGIDA: Detecta el color del grid según el tema
         function renderChart(year) {
             if (!year) return;
             const style = getComputedStyle(document.body);
+            // Leer la variable CSS corregida --chart-grid
+            const gridColor = style.getPropertyValue('--chart-grid').trim(); 
             const previousYear = (parseInt(year) - 1).toString();
             const currentYearData = allData[year] || {};
             const previousYearData = allData[previousYear] || {};
@@ -966,6 +947,10 @@
                 comparisonChart.data.datasets[0].borderColor = style.getPropertyValue('--text-secondary').trim();
                 comparisonChart.data.datasets[1].borderColor = style.getPropertyValue('--accent-color').trim();
                 comparisonChart.data.datasets[1].backgroundColor = `rgba(${style.getPropertyValue('--accent-color-rgb').trim()}, 0.1)`;
+                
+                // Actualizar dinámicamente el color del grid
+                comparisonChart.options.scales.y.grid.color = gridColor;
+                
                 comparisonChart.update('none');
             } else {
                 comparisonChart = new Chart(ui.chartCanvas, {
@@ -977,7 +962,25 @@
                             { label: currentYear, data: currentYearValues, borderColor: style.getPropertyValue('--accent-color').trim(), backgroundColor: `rgba(${style.getPropertyValue('--accent-color-rgb').trim()}, 0.1)`, fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6 }
                         ]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true, ticks: { color: style.getPropertyValue('--text-secondary').trim(), font: {family: 'Inter'} } }, x: { grid: { display: false }, ticks: { color: style.getPropertyValue('--text-secondary').trim(), font: {family: 'Inter'} } } }, plugins: { legend: { labels: { color: style.getPropertyValue('--text-primary').trim(), font: {family: 'Inter'} } }, tooltip: { enabled: !areValuesHidden, backgroundColor: 'rgba(0,0,0,0.8)', titleFont: {family: 'Inter'}, bodyFont: {family: 'Inter', family: 'monospace'} } } }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        scales: { 
+                            y: { 
+                                grid: { color: gridColor }, // Usar variable dinámica
+                                beginAtZero: true, 
+                                ticks: { color: style.getPropertyValue('--text-secondary').trim(), font: {family: 'Inter'} } 
+                            }, 
+                            x: { 
+                                grid: { display: false }, 
+                                ticks: { color: style.getPropertyValue('--text-secondary').trim(), font: {family: 'Inter'} } 
+                            } 
+                        }, 
+                        plugins: { 
+                            legend: { labels: { color: style.getPropertyValue('--text-primary').trim(), font: {family: 'Inter'} } }, 
+                            tooltip: { enabled: !areValuesHidden, backgroundColor: 'rgba(0,0,0,0.8)', titleFont: {family: 'Inter'}, bodyFont: {family: 'Inter', family: 'monospace'} } 
+                        } 
+                    }
                 });
             }
         }
@@ -1193,7 +1196,6 @@
         
         function getAutoTheme() {
             const hour = new Date().getHours();
-            // De 7 AM a 8 PM (20:00) es día (light), el resto noche (dark)
             return (hour >= 7 && hour < 20) ? 'light' : 'dark';
         }
 
@@ -1213,9 +1215,13 @@
             
             document.body.classList.toggle('light-mode', actualTheme === 'light');
             
-            // Si estamos en modo auto, guardamos 'auto', si no, guardamos el modo manual
+            // Actualizar Meta Tag
+            const metaColor = actualTheme === 'light' ? '#f1f5f9' : '#111827';
+            const metaTag = document.getElementById('meta-theme-color');
+            if(metaTag) metaTag.setAttribute('content', metaColor);
+
             if (mode === 'auto') {
-                localStorage.removeItem('dashboardTheme'); // Borrar para que cargue auto por defecto
+                localStorage.removeItem('dashboardTheme'); 
             } else {
                 localStorage.setItem('dashboardTheme', mode);
             }
@@ -1238,13 +1244,8 @@
         function updateVisibilityButton() { ui.toggleVisibilityBtn.innerHTML = areValuesHidden ? icons.eyeClosed : icons.eyeOpen; }
         
         function loadPreferences() {
-            // Verifica si el usuario guardó manualmente una preferencia
             const savedTheme = localStorage.getItem('dashboardTheme');
-            
-            // Si existe preferencia guardada, úsala. Si no, usa la automática basada en la hora.
-            const themeToApply = savedTheme || 'auto';
-            
-            applyTheme(themeToApply);
+            applyTheme(savedTheme || 'auto'); 
             
             applyAccentColor(localStorage.getItem('dashboardAccentColor') || '#34d399');
             applyCompactView(localStorage.getItem('dashboardCompactView') === 'true');
